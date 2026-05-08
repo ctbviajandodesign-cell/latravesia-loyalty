@@ -18,12 +18,7 @@ export default function Ruleta({ premios, onResult }: RuletaProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isSpinning, setIsSpinning] = useState(false);
 
-  useEffect(() => {
-    if (!canvasRef.current || premios.length === 0) return;
-    drawRuleta();
-  }, [premios]);
-
-  const drawRuleta = () => {
+  const drawRuleta = React.useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -63,7 +58,12 @@ export default function Ruleta({ premios, onResult }: RuletaProps) {
       ctx.fillText(`${premio.emoji} ${premio.nombre}`, radius - 20, 5);
       ctx.restore();
     });
-  };
+  }, [premios]);
+
+  useEffect(() => {
+    if (!canvasRef.current || premios.length === 0) return;
+    drawRuleta();
+  }, [premios, drawRuleta]);
 
   const spin = () => {
     if (isSpinning) return;
