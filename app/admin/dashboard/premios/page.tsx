@@ -95,7 +95,11 @@ export default function PremiosPage() {
       setShowForm(false);
       fetchPremios();
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.message });
+      console.error('Error guardando premio:', error);
+      setMessage({ 
+        type: 'error', 
+        text: `Error: ${error.message || 'No se pudo guardar el premio. Revisa los permisos (RLS) en Supabase.'}` 
+      });
     } finally {
       setActionLoading(false);
     }
