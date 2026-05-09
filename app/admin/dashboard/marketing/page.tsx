@@ -201,7 +201,8 @@ export default function MarketingPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-black text-gray-400 uppercase tracking-widest">URL Imagen</label>
-                  <input type="text" value={config.email_foto_url} onChange={(e) => setConfig({...config, email_foto_url: e.target.value})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl outline-none font-mono text-xs" />
+                  <input type="text" value={config.email_foto_url} onChange={(e) => setConfig({...config, email_foto_url: e.target.value})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl outline-none font-mono text-xs" placeholder="https://images.unsplash.com/..." />
+                  <p className="text-[10px] text-gray-400 ml-2">Pega el "Link directo" de la imagen.</p>
                 </div>
                 <div className="md:col-span-2 space-y-2">
                   <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Mensaje</label>
@@ -249,7 +250,8 @@ export default function MarketingPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-black text-gray-400 uppercase tracking-widest">URL Imagen del Premio</label>
-                  <input type="text" value={config.email_premio_foto_url} onChange={(e) => setConfig({...config, email_premio_foto_url: e.target.value})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl outline-none font-mono text-xs" />
+                  <input type="text" value={config.email_premio_foto_url} onChange={(e) => setConfig({...config, email_premio_foto_url: e.target.value})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl outline-none font-mono text-xs" placeholder="https://images.unsplash.com/..." />
+                  <p className="text-[10px] text-gray-400 ml-2">Tip: Clic derecho en la foto > "Copiar dirección de imagen".</p>
                 </div>
                 <div className="md:col-span-2 space-y-2">
                   <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Mensaje de Felicitación</label>
