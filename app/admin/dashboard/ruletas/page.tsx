@@ -274,14 +274,14 @@ export default function RuletasPage() {
             <div className="bg-gray-50 rounded-xl p-4 mb-6">
               <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Premios incluidos:</h4>
               <div className="flex flex-wrap gap-2">
-                {ruleta.configuracion.premiosIds.map(id => {
+                {ruleta.configuracion?.premiosIds?.map(id => {
                   const p = premiosDisponibles.find(pr => pr.id === id);
                   return (
                     <span key={id} className="bg-white border border-gray-200 px-3 py-1.5 rounded-lg text-sm text-gray-700 flex items-center gap-2">
                       <Gift className="w-3 h-3 text-[#4A5D4E]" /> {p?.nombre || 'Premio'}
                     </span>
                   );
-                })}
+                }) || <p className="text-xs text-gray-400 italic">No hay premios seleccionados</p>}
               </div>
             </div>
 
