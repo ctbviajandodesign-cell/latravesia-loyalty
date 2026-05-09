@@ -102,7 +102,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-4xl font-bold text-travesia-green-deep tracking-tight">Inicio <span className="text-sm font-normal opacity-30">v2.4</span></h1>
+        <h1 className="text-4xl font-bold text-travesia-green-deep tracking-tight">Inicio <span className="text-sm font-normal opacity-30">v7.0</span></h1>
         <p className="text-travesia-green-dark/60 font-medium">Resumen general de actividad</p>
       </div>
 
