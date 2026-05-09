@@ -1,3 +1,5 @@
+import { Resend } from 'resend';
+import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
 const formatImageUrl = (url: string) => {
