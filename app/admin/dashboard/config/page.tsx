@@ -33,7 +33,9 @@ export default function ConfigPage() {
     email_asunto: '¡Feliz Semana de tu Cumpleaños! 🎂 La Travesía',
     email_mensaje: 'Hola {nombre}, queremos invitarte a celebrar tu semana especial con nosotros. ¡Ven este sábado o domingo y reclama una sorpresa!',
     admin_email: '',
-    resend_api_key: ''
+    resend_api_key: '',
+    email_premio_asunto: '¡Felicidades! Has completado tus visitas 🏆',
+    email_premio_mensaje: 'Hola {nombre}, has llegado a la meta de visitas. ¡Tu fidelidad tiene premio! Reclámalo en tu próxima visita.'
   });
 
   // const supabase = createClientComponentClient();
