@@ -1,7 +1,6 @@
 'use client';
-
 import { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { supabase } from '@/lib/supabase';
 import { 
   Gift, 
   Plus, 
@@ -11,7 +10,9 @@ import {
   CheckCircle2, 
   Loader2,
   Package,
-  Percent
+  Percent,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 
 interface Premio {
@@ -27,6 +28,7 @@ interface Premio {
 export default function PremiosPage() {
   const [premios, setPremios] = useState<Premio[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dbStatus, setDbStatus] = useState<'checking' | 'connected' | 'error'>('checking');
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   
@@ -38,11 +40,23 @@ export default function PremiosPage() {
   const [probabilidad, setProbabilidad] = useState('10');
   const [stock, setStock] = useState('100');
 
-  const supabase = createClientComponentClient();
+  // const supabase = createClientComponentClient();
 
   useEffect(() => {
+    checkConnection();
     fetchPremios();
   }, []);
+
+  async function checkConnection() {
+    try {
+      const { error } = await supabase.from('premios').select('id', { count: 'exact', head: true });
+      if (error) throw error;
+      setDbStatus('connected');
+    } catch (e) {
+      console.error('Connection error:', e);
+      setDbStatus('error');
+    }
+  }
 
   async function fetchPremios() {
     try {
@@ -115,6 +129,16 @@ export default function PremiosPage() {
 
   return (
     <div className="space-y-6">
+      {/* Barra de Diagnóstico */}
+      <div className={`text-[10px] uppercase font-black px-4 py-1 rounded-full w-fit flex items-center gap-2 ${
+        dbStatus === 'connected' ? 'bg-green-100 text-green-700' : 
+        dbStatus === 'error' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'
+      }`}>
+        {dbStatus === 'connected' ? <><Wifi size={12} /> Supabase Conectado</> : 
+         dbStatus === 'error' ? <><WifiOff size={12} /> Error de Conexión</> : 
+         'Verificando conexión...'}
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-serif text-[#4A5D4E] flex items-center gap-2">
