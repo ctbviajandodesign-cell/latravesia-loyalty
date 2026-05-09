@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { 
   Users, 
@@ -21,6 +22,7 @@ interface Cliente {
   telefono: string;
   email: string;
   total_visitas: number;
+  fecha_nacimiento: string;
   fecha_ultima_visita: string;
   created_at: string;
 }
@@ -52,9 +54,10 @@ export default function ClientesPage() {
     }
   }
 
-  const filteredClientes = clientes.filter(cliente => 
-    `${cliente.nombre} ${cliente.apellido} ${cliente.telefono}`.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredClientes = clientes.filter(cliente => {
+    const searchStr = `${cliente.nombre} ${cliente.apellido} ${cliente.telefono} ${cliente.email || ''} ${cliente.fecha_nacimiento || ''}`.toLowerCase();
+    return searchStr.includes(searchTerm.toLowerCase());
+  });
 
   return (
     <div className="space-y-6">
@@ -109,6 +112,7 @@ export default function ClientesPage() {
                 <tr>
                   <th className="px-6 py-4">Cliente</th>
                   <th className="px-6 py-4">Contacto</th>
+                  <th className="px-6 py-4">Cumpleaños</th>
                   <th className="px-6 py-4">Fidelidad</th>
                   <th className="px-6 py-4">Última Visita</th>
                   <th className="px-6 py-4"></th>
@@ -134,6 +138,12 @@ export default function ClientesPage() {
                           <Phone className="w-3 h-3" /> {cliente.telefono}
                         </div>
                         <div className="text-xs text-gray-500 lowercase">{cliente.email || 'Sin email'}</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-700">
+                        <Cake className="w-3 h-3 text-pink-500" />
+                        {cliente.fecha_nacimiento ? new Date(cliente.fecha_nacimiento).toLocaleDateString() : 'No reg.'}
                       </div>
                     </td>
                     <td className="px-6 py-4">

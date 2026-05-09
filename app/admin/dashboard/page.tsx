@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { 
   Users, 
@@ -90,12 +91,12 @@ export default async function DashboardPage() {
   const metrics = await getMetrics();
 
   const cards = [
-    { title: 'Clientes Totales', value: metrics.totalClientes, icon: Users, color: 'text-blue-600' },
-    { title: 'Nuevos (7d)', value: metrics.nuevosSemana, icon: UserPlus, color: 'text-green-600' },
-    { title: 'Visitas Hoy', value: metrics.visitasHoy, icon: Calendar, color: 'text-purple-600' },
-    { title: 'Premios del Mes', value: metrics.premiosMes, icon: Trophy, color: 'text-amber-600' },
-    { title: 'Clientes VIP', value: metrics.clientesVip, icon: Star, color: 'text-travesia-gold-dark' },
-    { title: 'Cumpleaños (7d)', value: metrics.cumpleaniosProximos, icon: Cake, color: 'text-pink-600', alert: metrics.cumpleaniosProximos > 0 },
+    { title: 'Clientes Totales', value: metrics.totalClientes, icon: Users, color: 'text-blue-600', href: '/admin/dashboard/clientes' },
+    { title: 'Nuevos (7d)', value: metrics.nuevosSemana, icon: UserPlus, color: 'text-green-600', href: '/admin/dashboard/clientes' },
+    { title: 'Visitas Hoy', value: metrics.visitasHoy, icon: Calendar, color: 'text-purple-600', href: '/admin/dashboard/analytics' },
+    { title: 'Premios del Mes', value: metrics.premiosMes, icon: Trophy, color: 'text-amber-600', href: '/admin/dashboard/analytics' },
+    { title: 'Clientes VIP', value: metrics.clientesVip, icon: Star, color: 'text-travesia-gold-dark', href: '/admin/dashboard/clientes' },
+    { title: 'Cumpleaños (7d)', value: metrics.cumpleaniosProximos, icon: Cake, color: 'text-pink-600', alert: metrics.cumpleaniosProximos > 0, href: '/admin/dashboard/cumpleanos' },
   ];
 
   return (
@@ -109,9 +110,10 @@ export default async function DashboardPage() {
         {cards.map((card) => {
           const Icon = card.icon;
           return (
-            <div 
+            <Link 
               key={card.title}
-              className="bg-white p-6 rounded-3xl shadow-sm border border-travesia-gold/10 hover:shadow-md transition-shadow relative overflow-hidden group"
+              href={card.href}
+              className="bg-white p-6 rounded-3xl shadow-sm border border-travesia-gold/10 hover:shadow-md hover:border-travesia-gold/30 transition-all relative overflow-hidden group block"
             >
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
@@ -134,7 +136,7 @@ export default async function DashboardPage() {
               <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <Icon size={120} />
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
