@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import FlujoPaso from '@/components/FlujoPaso';
 import Ruleta from '@/components/Ruleta';
-import { Instagram, Facebook, Phone as TikTok, Send, CheckCircle2, MessageCircle } from 'lucide-react';
+import { Instagram, Facebook, Music as TikTok, Send, CheckCircle2, MessageCircle } from 'lucide-react';
 
 export default function Home() {
   const [paso, setPaso] = useState(1);
@@ -53,7 +53,7 @@ export default function Home() {
         .contains('dias', [nombreDia])
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (ruleta) {
         setRuletaActiva(ruleta);
@@ -147,13 +147,22 @@ export default function Home() {
 
     if (!error) {
       // Actualizar contador visitas cliente
+      const nuevaVisita = (cliente.total_visitas || 0) + 1;
+      const nuevaFecha = new Date().toISOString().split('T')[0];
+      
       await supabase
         .from('clientes')
         .update({ 
-          total_visitas: (cliente.total_visitas || 0) + 1,
-          fecha_ultima_visita: new Date().toISOString().split('T')[0]
+          total_visitas: nuevaVisita,
+          fecha_ultima_visita: nuevaFecha
         })
         .eq('id', cliente.id);
+        
+      setCliente({
+        ...cliente,
+        total_visitas: nuevaVisita,
+        fecha_ultima_visita: nuevaFecha
+      });
     }
   };
 

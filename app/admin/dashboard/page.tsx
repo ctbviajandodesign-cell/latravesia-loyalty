@@ -9,6 +9,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 async function getMetrics() {
   const hoy = new Date().toISOString().split('T')[0];
   const hace7Dias = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -47,20 +49,31 @@ async function getMetrics() {
   // 6. Cumpleaños próximos 7 días
   // Lógica simple: clientes con mes/día de nacimiento cerca
   // Nota: Esto es aproximado en SQL, pero para el dashboard lo manejamos aquí
-  const { data: todosClientes } = await supabase
+  const { data: todosClientes, error: clientesError } = await supabase
     .from('clientes')
     .select('nombre, apellido, fecha_nacimiento');
   
+  if (clientesError) console.error('Error fetching clientes:', clientesError);
+  
   const cumpleaniosProximos = todosClientes?.filter(c => {
     if (!c.fecha_nacimiento) return false;
-    const f = new Date(c.fecha_nacimiento);
-    const m = f.getMonth();
-    const d = f.getDate();
-    const hoyM = new Date().getMonth();
-    const hoyD = new Date().getDate();
     
-    // Simplificado: si el mes es igual y el día está entre hoy y hoy+7
-    return m === hoyM && d >= hoyD && d <= hoyD + 7;
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    
+    const fechaNac = new Date(c.fecha_nacimiento);
+    // Crear fecha de cumpleaños este año
+    const cumpleEsteAnio = new Date(hoy.getFullYear(), fechaNac.getMonth(), fechaNac.getDate());
+    
+    // Si ya pasó este año, probar el próximo (para el caso de fin de año)
+    if (cumpleEsteAnio < hoy) {
+      cumpleEsteAnio.setFullYear(hoy.getFullYear() + 1);
+    }
+    
+    const unDia = 24 * 60 * 60 * 1000;
+    const diferenciaDias = Math.ceil((cumpleEsteAnio.getTime() - hoy.getTime()) / unDia);
+    
+    return diferenciaDias >= 0 && diferenciaDias <= 7;
   }).length || 0;
 
   return {

@@ -18,7 +18,7 @@ create table visitas (
   id uuid default gen_random_uuid() primary key,
   cliente_id uuid references clientes(id),
   fecha date default current_date,
-  ruleta_id uuid,
+  ruleta_id uuid references ruletas(id),
   premio_ganado text,
   created_at timestamp default now(),
   unique(cliente_id, fecha)

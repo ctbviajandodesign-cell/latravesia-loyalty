@@ -12,8 +12,8 @@
   --color-travesia-gold-light: #e8d4a0;
   --color-travesia-cream: #f5f0e8;
 
-  --font-cormorant: var(--font-cormorant);
-  --font-jost: var(--font-jost);
+  --font-serif: var(--font-cormorant);
+  --font-sans: var(--font-jost);
 }
 
 :root {
