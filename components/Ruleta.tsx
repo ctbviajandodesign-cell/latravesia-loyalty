@@ -19,6 +19,30 @@ export default function Ruleta({ premios, onResult }: RuletaProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const rotationRef = useRef(0);
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  // Función para generar sonido de "click" mecánico
+  const playClickSound = () => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    const ctx = audioContextRef.current;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(150, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.1);
+
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.1);
+  };
 
   const drawRuleta = React.useCallback(() => {
     const canvas = canvasRef.current;
@@ -28,7 +52,7 @@ export default function Ruleta({ premios, onResult }: RuletaProps) {
 
     const size = canvas.width;
     const center = size / 2;
-    const radius = size / 2 - 10;
+    const radius = size / 2 - 15;
     const segmentAngle = (2 * Math.PI) / premios.length;
 
     ctx.clearRect(0, 0, size, size);
@@ -36,55 +60,54 @@ export default function Ruleta({ premios, onResult }: RuletaProps) {
     premios.forEach((premio, i) => {
       const angle = i * segmentAngle;
       
-      // Sombreado y gradientes para efecto 3D
-      const gradient = ctx.createRadialGradient(center, center, 0, center, center, radius);
-      const colors = ['#2c4a2e', '#1e3320', '#3d6b4f', '#dac88c', '#c5a96e'];
-      const baseColor = colors[i % colors.length];
-      
-      gradient.addColorStop(0, baseColor);
-      gradient.addColorStop(1, baseColor);
-
-      // Dibujar segmento
+      // Diseño de segmentos premium
+      const colors = ['#1e3320', '#2c4a2e', '#1e3320', '#2c4a2e', '#dac88c'];
       ctx.beginPath();
       ctx.moveTo(center, center);
       ctx.arc(center, center, radius, angle, angle + segmentAngle);
       ctx.closePath();
       
-      ctx.fillStyle = gradient;
+      ctx.fillStyle = colors[i % colors.length];
       ctx.fill();
       
-      // Borde de segmento
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-      ctx.lineWidth = 1;
+      // Borde dorado fino
+      ctx.strokeStyle = 'rgba(218, 200, 140, 0.4)';
+      ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Texto y Emoji
+      // Texto
       ctx.save();
       ctx.translate(center, center);
       ctx.rotate(angle + segmentAngle / 2);
       ctx.textAlign = 'right';
-      
-      // Color de texto contrastado
-      ctx.fillStyle = i % 5 < 3 ? '#dac88c' : '#1e3320';
-      ctx.font = 'bold 14px "Jost", sans-serif';
-      
-      const displayText = `${premio.emoji || '🎁'} ${premio.nombre}`;
-      ctx.fillText(displayText.substring(0, 20), radius - 30, 5);
+      ctx.fillStyle = (i % 5 === 4) ? '#1e3320' : '#dac88c';
+      ctx.font = 'bold 12px "Jost", sans-serif';
+      ctx.fillText(`${premio.emoji || '🎁'} ${premio.nombre.substring(0, 15)}`, radius - 30, 5);
       ctx.restore();
     });
 
-    // Círculo central decorativo
+    // Círculo central "Gold Bezel"
     ctx.beginPath();
-    ctx.arc(center, center, 15, 0, 2 * Math.PI);
-    ctx.fillStyle = '#dac88c';
+    ctx.arc(center, center, 25, 0, 2 * Math.PI);
+    const goldGrad = ctx.createLinearGradient(center-25, center-25, center+25, center+25);
+    goldGrad.addColorStop(0, '#c5a96e');
+    goldGrad.addColorStop(0.5, '#dac88c');
+    goldGrad.addColorStop(1, '#c5a96e');
+    ctx.fillStyle = goldGrad;
     ctx.fill();
     ctx.strokeStyle = '#1e3320';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3;
     ctx.stroke();
+    
+    // Punto central
+    ctx.beginPath();
+    ctx.arc(center, center, 5, 0, 2 * Math.PI);
+    ctx.fillStyle = '#1e3320';
+    ctx.fill();
+
   }, [premios]);
 
   useEffect(() => {
-    if (!canvasRef.current || premios.length === 0) return;
     drawRuleta();
   }, [premios, drawRuleta]);
 
@@ -95,59 +118,40 @@ export default function Ruleta({ premios, onResult }: RuletaProps) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // 1. Calcular ganador por probabilidad real
-    const totalProb = premios.reduce((acc, p) => acc + Number(p.probabilidad), 0);
-    let random = Math.random() * totalProb;
-    let winningIndex = 0;
-    
-    for (let i = 0; i < premios.length; i++) {
-      random -= Number(premios[i].probabilidad);
-      if (random <= 0) {
-        winningIndex = i;
-        break;
-      }
-    }
-
+    const winningIndex = Math.floor(Math.random() * premios.length);
     const winner = premios[winningIndex];
 
-    // 2. Configurar animación
-    const spinDuration = 5000;
+    const spinDuration = 6000;
     const segmentAngle = (2 * Math.PI) / premios.length;
-    
-    // Calcular el ángulo necesario para que el puntero (arriba, -PI/2) coincida con el segmento ganador
-    // El puntero está en -90deg (3*PI/2). Queremos que el centro del segmento winningIndex termine ahí.
-    const extraSpins = 8 * 2 * Math.PI; // 8 vueltas completas
+    const extraSpins = 10 * 2 * Math.PI;
     const targetAngle = (2 * Math.PI) - (winningIndex * segmentAngle + segmentAngle / 2);
-    const finalRotation = extraSpins + targetAngle + (Math.PI * 1.5); // Ajuste para el puntero arriba
+    const finalRotation = extraSpins + targetAngle + (Math.PI * 1.5);
     
     const startTime = performance.now();
-    const startRotation = rotationRef.current % (2 * Math.PI);
+    let lastSegmentHit = -1;
 
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / spinDuration, 1);
       
-      // Ease Out Cubic para un frenado suave y elegante
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      const currentRotation = startRotation + (finalRotation * easeOut);
+      // Ease Out Quint para frenado de lujo
+      const easeOut = 1 - Math.pow(1 - progress, 5);
+      const currentRotation = finalRotation * easeOut;
       
-      rotationRef.current = currentRotation;
       canvas.style.transform = `rotate(${currentRotation}rad)`;
+
+      // Calcular si pasamos por un nuevo segmento para el sonido
+      const currentSegment = Math.floor((currentRotation % (2 * Math.PI)) / segmentAngle);
+      if (currentSegment !== lastSegmentHit) {
+        playClickSound();
+        lastSegmentHit = currentSegment;
+      }
 
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
         setIsSpinning(false);
-        
-        // Efecto visual de victoria
-        confetti({
-          particleCount: 150,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#dac88c', '#2c4a2e', '#f5f0e8']
-        });
-
-        // Notificar resultado
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#dac88c', '#2c4a2e'] });
         setTimeout(() => onResult(winner), 500);
       }
     };
@@ -156,37 +160,45 @@ export default function Ruleta({ premios, onResult }: RuletaProps) {
   };
 
   return (
-    <div className="flex flex-col items-center gap-8 py-10 relative">
-      <div className="relative group">
-        {/* Glow effect background */}
-        <div className={`absolute inset-0 bg-travesia-gold/20 rounded-full blur-3xl transition-opacity duration-1000 ${isSpinning ? 'opacity-100' : 'opacity-0'}`} />
+    <div className="flex flex-col items-center gap-10 py-10 relative">
+      <div className="relative p-4 bg-travesia-green-dark rounded-full shadow-[0_0_80px_rgba(0,0,0,0.5)] border-4 border-travesia-gold/30">
         
-        {/* Pointer (Premium Gold) */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 z-20">
-          <div className="w-8 h-10 bg-travesia-gold clip-path-pointer shadow-xl border-2 border-travesia-green-deep flex items-center justify-center">
-            <div className="w-1 h-4 bg-travesia-green-deep/30 rounded-full" />
+        {/* Luces LED Perimetrales */}
+        {[...Array(12)].map((_, i) => (
+          <div 
+            key={i}
+            className={`absolute w-3 h-3 rounded-full bg-travesia-gold shadow-[0_0_10px_#dac88c] transition-opacity duration-300 z-20`}
+            style={{
+              top: '50%',
+              left: '50%',
+              transform: `rotate(${i * 30}deg) translate(0, -185px)`,
+              opacity: isSpinning ? (Math.random() > 0.5 ? 1 : 0.3) : 1
+            }}
+          />
+        ))}
+
+        {/* Puntero Premium */}
+        <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 z-30 filter drop-shadow-xl">
+          <div className="w-10 h-12 bg-travesia-gold clip-path-pointer border-2 border-travesia-green-deep flex items-center justify-center">
+             <div className="w-1 h-5 bg-white/40 rounded-full blur-[1px]" />
           </div>
         </div>
 
-        {/* Canvas de la Ruleta */}
+        {/* Canvas */}
         <canvas
           ref={canvasRef}
-          width={340}
-          height={340}
-          className="rounded-full shadow-[0_0_50px_rgba(0,0,0,0.3)] border-8 border-travesia-green-dark relative z-10 transition-transform duration-75"
+          width={380}
+          height={380}
+          className="rounded-full relative z-10 transition-transform duration-75"
         />
-        
-        {/* Marco decorativo externo */}
-        <div className="absolute inset-[-12px] border-2 border-travesia-gold/20 rounded-full z-0" />
       </div>
       
       <button
         onClick={spin}
         disabled={isSpinning || premios.length === 0}
-        className="relative group px-12 py-5 bg-travesia-gold text-travesia-green-deep font-black text-xl rounded-2xl transition-all shadow-[0_10px_20px_rgba(218,200,140,0.3)] hover:shadow-[0_15px_30px_rgba(218,200,140,0.4)] hover:-translate-y-1 active:translate-y-0 disabled:opacity-30 disabled:scale-100 overflow-hidden"
+        className="px-16 py-6 bg-travesia-gold text-travesia-green-deep font-black text-2xl rounded-[24px] shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-30 tracking-widest uppercase"
       >
-        <span className="relative z-10">{isSpinning ? '¡SUERTE! ✨' : 'GIRAR AHORA'}</span>
-        <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+        {isSpinning ? '¡GIRANDO! ✨' : 'PROBAR MI SUERTE'}
       </button>
 
       <style jsx>{`
