@@ -150,6 +150,36 @@ export default function MarketingPage() {
         </div>
       </div>
 
+      <div className="bg-travesia-green-deep/5 p-4 rounded-2xl border border-travesia-green-deep/10 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="bg-travesia-green-deep p-2 rounded-lg">
+            <Calendar className="w-5 h-5 text-travesia-gold" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-travesia-green-deep">Automatización de los Lunes</p>
+            <p className="text-xs text-gray-600">El sistema enviará los correos automáticamente cada lunes a las 9:00 AM.</p>
+          </div>
+        </div>
+        <button 
+          onClick={async () => {
+            if(!confirm('¿Seguro que quieres ejecutar el envío semanal a todos los cumpleañeros ahora mismo?')) return;
+            setLoading(true);
+            try {
+              const res = await fetch('/api/cron/birthdays');
+              const data = await res.json();
+              alert(data.message || `Éxito: Se enviaron ${data.sent_to} correos.`);
+            } catch (e) {
+              alert('Error al ejecutar');
+            } finally {
+              setLoading(false);
+            }
+          }}
+          className="px-4 py-2 bg-white text-travesia-green-deep border border-travesia-green-deep/20 rounded-xl text-xs font-bold hover:bg-travesia-green-deep hover:text-white transition-all shadow-sm"
+        >
+          Ejecutar Envío Semanal Manualmente
+        </button>
+      </div>
+
       {message && (
         <div className={`p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 ${
           message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'
