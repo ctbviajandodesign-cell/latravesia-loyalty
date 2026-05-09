@@ -9,7 +9,8 @@ import {
   Loader2, 
   MapPin, 
   Sparkles,
-  Trophy
+  Trophy,
+  Star
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -17,6 +18,7 @@ export default function CheckInPage() {
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState<'identify' | 'pin' | 'success'>('identify');
   const [cliente, setCliente] = useState<any>(null);
+  const [googleLink, setGoogleLink] = useState('');
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -30,7 +32,13 @@ export default function CheckInPage() {
     } else {
       setLoading(false);
     }
+    fetchGoogleLink();
   }, []);
+
+  async function fetchGoogleLink() {
+    const { data } = await supabase.from('config').select('*').eq('clave', 'google_maps_link').single();
+    if (data) setGoogleLink(data.valor);
+  }
 
   async function fetchCliente(id: string) {
     const { data } = await supabase.from('clientes').select('*').eq('id', id).single();
@@ -162,6 +170,28 @@ export default function CheckInPage() {
               <p className="text-5xl font-black text-travesia-green-deep">{cliente.visitas} / 10</p>
               <p className="text-xs text-travesia-gold font-bold mt-2 tracking-widest">¡Sigue así para tu premio!</p>
             </div>
+
+            {/* CTA GOOGLE REVIEWS (A partir de la visita 2) */}
+            {cliente.visitas >= 2 && googleLink && (
+              <div className="bg-travesia-gold/10 p-6 rounded-[32px] border border-travesia-gold/20 space-y-4 animate-in fade-in slide-in-from-bottom-2 delay-300">
+                <div className="flex items-center justify-center gap-1 text-travesia-gold">
+                  <Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" />
+                </div>
+                <p className="text-sm font-bold text-travesia-green-deep leading-tight">
+                  ¡Gracias por ser cliente fiel! <br/>
+                  <span className="text-xs font-normal text-gray-600">¿Nos regalas 1 minuto para dejar tu reseña en Google?</span>
+                </p>
+                <a 
+                  href={googleLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block w-full bg-travesia-gold text-travesia-green-deep py-3 rounded-xl font-black text-xs tracking-widest uppercase shadow-md hover:bg-travesia-gold/80 transition-all"
+                >
+                  DEJAR MI RESEÑA ⭐
+                </a>
+              </div>
+            )}
+
             <button 
               onClick={() => router.push('/')}
               className="text-travesia-green-deep font-bold text-sm underline underline-offset-8 decoration-travesia-gold"

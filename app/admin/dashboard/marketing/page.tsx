@@ -58,6 +58,7 @@ export default function MarketingPage() {
     broadcast_mensaje: '',
     broadcast_foto_url: '',
     admin_email: '',
+    google_maps_link: '',
     filtro_genero: 'Todos'
   });
 
@@ -88,6 +89,7 @@ export default function MarketingPage() {
         broadcast_mensaje: configObj?.broadcast_mensaje || 'Hola {nombre}, tenemos algo especial...',
         broadcast_foto_url: configObj?.broadcast_foto_url || 'https://images.unsplash.com/photo-1559339352-11d035aa65de',
         admin_email: configObj?.admin_email || '',
+        google_maps_link: configObj?.google_maps_link || '',
         filtro_genero: 'Todos'
       });
 
@@ -253,6 +255,16 @@ export default function MarketingPage() {
                 <textarea rows={4} value={activeTab === 'birthdays' ? config.email_mensaje : activeTab === 'loyalty' ? config.email_premio_mensaje : config.broadcast_mensaje} onChange={(e) => setConfig({...config, [activeTab === 'birthdays' ? 'email_mensaje' : activeTab === 'loyalty' ? 'email_premio_mensaje' : 'broadcast_mensaje']: e.target.value})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl outline-none" />
               </div>
             </div>
+
+            {activeTab === 'loyalty' && (
+              <div className="pt-8 border-t space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Link de Reseña en Google Maps</label>
+                  <input type="text" value={config.google_maps_link} onChange={(e) => setConfig({...config, google_maps_link: e.target.value})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl outline-none" placeholder="https://g.page/r/..." />
+                  <p className="text-[10px] text-gray-400 ml-2">Este link aparecerá a los clientes fieles (2+ visitas) para pedirles una reseña.</p>
+                </div>
+              </div>
+            )}
 
             {activeTab === 'birthdays' && (
               <div className="pt-8 border-t space-y-8">
