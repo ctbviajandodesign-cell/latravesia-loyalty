@@ -119,6 +119,25 @@ export default function Home() {
 
       if (data) {
         setCliente(data);
+        
+        // --- NUEVO: Chequeo de Cumpleaños Inmediato ---
+        const today = new Date();
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        
+        const [, m, d] = formData.fecha_nacimiento.split('-').map(Number);
+        const bday = new Date(today.getFullYear(), m - 1, d);
+        
+        if (bday >= startOfWeek && bday <= endOfWeek) {
+          fetch('/api/marketing/notifications', {
+            method: 'POST',
+            body: JSON.stringify({ type: 'BIRTHDAY_WELCOME', cliente: data })
+          });
+        }
+        // -------------------------------------------
+
         setPaso(3);
       }
     } catch (err) {
@@ -168,6 +187,18 @@ export default function Home() {
         })
         .eq('id', cliente.id);
         
+      // --- NUEVO: Alerta de Premio (Visita 10) ---
+      if (nuevaVisita === Number(config.visitas_para_premio)) {
+        fetch('/api/marketing/notifications', {
+          method: 'POST',
+          body: JSON.stringify({ 
+            type: 'LOYALTY_REWARD', 
+            cliente: { ...cliente, total_visitas: nuevaVisita }
+          })
+        });
+      }
+      // -------------------------------------------
+
       setCliente({
         ...cliente,
         total_visitas: nuevaVisita,
