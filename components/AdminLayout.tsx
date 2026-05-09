@@ -13,7 +13,8 @@ import {
   Settings, 
   LogOut,
   Menu,
-  X
+  X,
+  Sparkles
 } from 'lucide-react';
 import { logout } from '@/app/admin/actions';
 
@@ -28,6 +29,7 @@ const menuItems = [
   { name: 'Premios', href: '/admin/dashboard/premios', icon: Gift },
   { name: 'Cumpleaños', href: '/admin/dashboard/cumpleanos', icon: Cake },
   { name: 'Analytics', href: '/admin/dashboard/analytics', icon: BarChart3 },
+  { name: 'Marketing', href: '/admin/dashboard/marketing', icon: Sparkles },
   { name: 'Configuración', href: '/admin/dashboard/config', icon: Settings },
 ];
 
