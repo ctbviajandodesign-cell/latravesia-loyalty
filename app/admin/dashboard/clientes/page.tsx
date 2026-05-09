@@ -136,7 +136,8 @@ export default function ClientesPage() {
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2 text-sm text-gray-700">
-                          <Phone className="w-3 h-3" /> {cliente.telefono}
+                          <Phone className="w-3 h-3" /> 
+                          <span className="font-mono">+{cliente.telefono}</span>
                         </div>
                         <div className="text-xs text-gray-500 lowercase">{cliente.email || 'Sin email'}</div>
                       </div>

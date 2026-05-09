@@ -9,6 +9,7 @@ import { Instagram, Facebook, Music as TikTok, Send, CheckCircle2, MessageCircle
 export default function Home() {
   const [paso, setPaso] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [codigoPais, setCodigoPais] = useState('593');
   const [telefono, setTelefono] = useState('');
   const [formData, setFormData] = useState({
     nombre: '',
@@ -75,7 +76,7 @@ export default function Home() {
       const { data, error } = await supabase
         .from('clientes')
         .select('*')
-        .eq('telefono', telefono)
+        .eq('telefono', codigoPais + telefono)
         .maybeSingle();
 
       if (data) {
@@ -108,7 +109,7 @@ export default function Home() {
         .from('clientes')
         .insert([{
           ...formData,
-          telefono,
+          telefono: codigoPais + telefono,
           total_visitas: 0,
           fecha_ultima_visita: new Date().toISOString().split('T')[0]
         }])
@@ -227,17 +228,30 @@ export default function Home() {
               <p className="text-travesia-gold/60">Ingresa tu número para comenzar</p>
             </div>
             <form onSubmit={handleIdentificacion} className="space-y-4">
-              <input
-                type="tel"
-                placeholder="Ej: 0998765432"
-                value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
-                required
-                className="w-full bg-travesia-green-dark/40 border-2 border-travesia-gold/20 rounded-2xl px-6 py-5 text-2xl text-center focus:border-travesia-gold focus:bg-travesia-green-dark/60 outline-none transition-all placeholder:text-travesia-gold/20"
-              />
+              <div className="flex gap-2">
+                <select 
+                  value={codigoPais}
+                  onChange={(e) => setCodigoPais(e.target.value)}
+                  className="bg-travesia-green-dark/40 border-2 border-travesia-gold/20 rounded-2xl px-3 py-5 text-xl outline-none focus:border-travesia-gold appearance-none"
+                >
+                  <option value="593">🇪🇨 +593</option>
+                  <option value="57">🇨🇴 +57</option>
+                  <option value="51">🇵🇪 +51</option>
+                  <option value="1">🇺🇸 +1</option>
+                  <option value="34">🇪🇸 +34</option>
+                </select>
+                <input
+                  type="tel"
+                  placeholder="998765432"
+                  value={telefono}
+                  onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ''))}
+                  required
+                  className="flex-1 bg-travesia-green-dark/40 border-2 border-travesia-gold/20 rounded-2xl px-6 py-5 text-2xl text-center focus:border-travesia-gold focus:bg-travesia-green-dark/60 outline-none transition-all placeholder:text-travesia-gold/20"
+                />
+              </div>
               <button
                 type="submit"
-                disabled={loading || telefono.length < 9}
+                disabled={loading || telefono.length < 8}
                 className="w-full bg-travesia-gold text-travesia-green-deep font-black py-5 rounded-2xl hover:bg-travesia-gold-light hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 shadow-xl"
               >
                 {loading ? 'VERIFICANDO...' : 'ENTRAR'}
