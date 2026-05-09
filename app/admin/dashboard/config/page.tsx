@@ -13,7 +13,8 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
-  Trophy
+  Trophy,
+  Mail
 } from 'lucide-react';
 
 export default function ConfigPage() {
