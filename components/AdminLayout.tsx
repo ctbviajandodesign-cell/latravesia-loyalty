@@ -25,7 +25,7 @@ const menuItems = [
   { name: 'Inicio', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Clientes', href: '/admin/dashboard/clientes', icon: Users },
   { name: 'Ruletas', href: '/admin/dashboard/ruletas', icon: RotateCw },
-  { name: 'Premios', href: '/admin/dashboard/gestion-premios', icon: Gift },
+  { name: 'Premios', href: '/admin/dashboard/premios', icon: Gift },
   { name: 'Cumpleaños', href: '/admin/dashboard/cumpleanos', icon: Cake },
   { name: 'Analytics', href: '/admin/dashboard/analytics', icon: BarChart3 },
   { name: 'Configuración', href: '/admin/dashboard/config', icon: Settings },
