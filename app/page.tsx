@@ -212,7 +212,7 @@ export default function Home() {
       <div className="z-10 w-full px-4 max-w-md">
         <header className="text-center mb-12">
           <h1 className="text-5xl font-bold tracking-tighter text-travesia-gold mb-2">
-            LA TRAVESÍA <span className="text-xs opacity-30">v2.1</span>
+            LA TRAVESÍA <span className="text-xs opacity-30">v2.4</span>
           </h1>
           <div className="h-px w-24 bg-travesia-gold/30 mx-auto mb-2" />
           <p className="text-travesia-gold-dark font-medium tracking-[0.3em] text-xs uppercase">
