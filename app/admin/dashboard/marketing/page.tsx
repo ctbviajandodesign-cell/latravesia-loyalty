@@ -306,8 +306,13 @@ export default function MarketingPage() {
             <div className="absolute top-0 w-full h-8 bg-black flex justify-center items-end"><div className="w-24 h-5 bg-gray-900 rounded-b-2xl" /></div>
             <div className="h-full bg-[#f8f5f0] overflow-y-auto pt-10">
               <div className="bg-white m-3 rounded-[24px] shadow-sm overflow-hidden border border-gray-200/50">
-                <div className="aspect-square relative">
-                  <img src={activeTab === 'birthdays' ? config.email_foto_url : activeTab === 'loyalty' ? config.email_premio_foto_url : config.broadcast_foto_url} className="w-full h-full object-cover" alt="Preview" onError={(e: any) => e.target.src = 'https://images.unsplash.com/photo-1513151233558-d860c5398176'} />
+                <div className="aspect-square relative bg-gray-100">
+                  <img 
+                    key={activeTab === 'birthdays' ? config.email_foto_url : activeTab === 'loyalty' ? config.email_premio_foto_url : config.broadcast_foto_url}
+                    src={activeTab === 'birthdays' ? config.email_foto_url : activeTab === 'loyalty' ? config.email_premio_foto_url : config.broadcast_foto_url} 
+                    className="w-full h-full object-cover" 
+                    alt="Preview" 
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
                     <h4 className="text-white font-serif text-xl leading-tight">{activeTab === 'birthdays' ? config.email_asunto : activeTab === 'loyalty' ? config.email_premio_asunto : config.broadcast_asunto}</h4>
                   </div>
