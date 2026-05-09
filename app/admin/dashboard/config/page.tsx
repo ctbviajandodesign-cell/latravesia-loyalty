@@ -27,7 +27,8 @@ export default function ConfigPage() {
     link_tiktok: '',
     link_whatsapp: '',
     visitas_para_premio: '10',
-    admin_password: ''
+    admin_password: '',
+    pin_validacion: '0000'
   });
 
   // const supabase = createClientComponentClient();
@@ -201,6 +202,21 @@ export default function ConfigPage() {
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
             />
             <p className="text-xs text-gray-500 italic">Ten cuidado al cambiarla, asegúrate de recordarla.</p>
+          </div>
+
+          <div className="space-y-2 max-w-sm">
+            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Lock className="w-4 h-4 text-amber-600" /> PIN de Validación (Ruleta)
+            </label>
+            <input 
+              type="text"
+              maxLength={4}
+              value={config.pin_validacion}
+              onChange={(e) => setConfig({...config, pin_validacion: e.target.value})}
+              placeholder="Ej: 1234"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none font-mono text-xl tracking-widest"
+            />
+            <p className="text-xs text-gray-500">Este es el código que el cliente debe ingresar en su celular para poder girar la ruleta.</p>
           </div>
         </div>
 

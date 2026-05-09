@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import FlujoPaso from '@/components/FlujoPaso';
 import Ruleta from '@/components/Ruleta';
-import { Instagram, Facebook, Music as TikTok, Send, CheckCircle2, MessageCircle } from 'lucide-react';
+import { Instagram, Facebook, Music as TikTok, Send, CheckCircle2, MessageCircle, Lock } from 'lucide-react';
 
 export default function Home() {
   const [paso, setPaso] = useState(1);
@@ -29,6 +29,8 @@ export default function Home() {
     tiktok: false,
     whatsapp: false
   });
+  const [userPin, setUserPin] = useState('');
+  const [pinCorrecto, setPinCorrecto] = useState(false);
 
   // Cargar configuración inicial y ruleta del día
   useEffect(() => {
@@ -389,16 +391,47 @@ export default function Home() {
           </div>
         </FlujoPaso>
 
-        {/* PASO 4: RULETA */}
+        {/* PASO 4: RULETA CON PIN */}
         <FlujoPaso active={paso === 4}>
           <div className="space-y-6 text-center">
-            <h2 className="text-3xl font-semibold">Gira y Gana</h2>
-            <p className="text-travesia-gold/60 italic">¡La suerte está de tu lado!</p>
-            {premios.length > 0 ? (
-              <Ruleta premios={premios} onResult={handleResultadoRuleta} />
+            {!pinCorrecto ? (
+              <div className="space-y-8 py-4">
+                <div className="space-y-2">
+                  <Lock className="w-12 h-12 mx-auto text-travesia-gold animate-pulse" />
+                  <h2 className="text-3xl font-semibold">Código de Seguridad</h2>
+                  <p className="text-travesia-gold/60">Ingresa el PIN que te dio tu mesero para girar la ruleta</p>
+                </div>
+                <div className="flex flex-col gap-4">
+                  <input
+                    type="tel"
+                    maxLength={4}
+                    placeholder="XXXX"
+                    value={userPin}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setUserPin(val);
+                      if (val === config.pin_validacion) {
+                        setPinCorrecto(true);
+                      }
+                    }}
+                    className="w-full bg-travesia-green-dark/40 border-2 border-travesia-gold/40 rounded-2xl px-6 py-5 text-4xl text-center tracking-[0.5em] font-mono focus:border-travesia-gold outline-none transition-all"
+                  />
+                  {userPin.length === 4 && userPin !== config.pin_validacion && (
+                    <p className="text-red-400 font-bold animate-shake">Código incorrecto. Inténtalo de nuevo.</p>
+                  )}
+                </div>
+              </div>
             ) : (
-              <div className="py-10">
-                <p>Cargando premios...</p>
+              <div className="space-y-6">
+                <h2 className="text-3xl font-semibold">Gira y Gana</h2>
+                <p className="text-travesia-gold/60 italic">¡La suerte está de tu lado!</p>
+                {premios.length > 0 ? (
+                  <Ruleta premios={premios} onResult={handleResultadoRuleta} />
+                ) : (
+                  <div className="py-10">
+                    <p>Cargando premios...</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
