@@ -107,6 +107,7 @@ export default function Home() {
         .insert([{
           ...formData,
           telefono,
+          total_visitas: 0,
           fecha_ultima_visita: new Date().toISOString().split('T')[0]
         }])
         .select()
@@ -208,7 +209,7 @@ export default function Home() {
       <div className="z-10 w-full px-4 max-w-md">
         <header className="text-center mb-12">
           <h1 className="text-5xl font-bold tracking-tighter text-travesia-gold mb-2">
-            LA TRAVESÍA
+            LA TRAVESÍA <span className="text-xs opacity-30">v2.1</span>
           </h1>
           <div className="h-px w-24 bg-travesia-gold/30 mx-auto mb-2" />
           <p className="text-travesia-gold-dark font-medium tracking-[0.3em] text-xs uppercase">
