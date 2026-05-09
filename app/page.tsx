@@ -144,6 +144,11 @@ export default function Home() {
         ruleta_id: ruletaActiva?.id || null,
         premio_ganado: premioGanado || null
       }]);
+    
+    if (error) {
+      console.error('Error al registrar visita:', error);
+      return;
+    }
 
     if (!error) {
       // Actualizar contador visitas cliente
@@ -257,6 +262,14 @@ export default function Home() {
                 required
                 value={formData.apellido}
                 onChange={(e) => setFormData({...formData, apellido: e.target.value})}
+                className="w-full bg-travesia-green-dark/40 border border-travesia-gold/20 rounded-xl px-5 py-4 outline-none focus:border-travesia-gold transition-all"
+              />
+              <input
+                type="email"
+                placeholder="Correo Electrónico"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
                 className="w-full bg-travesia-green-dark/40 border border-travesia-gold/20 rounded-xl px-5 py-4 outline-none focus:border-travesia-gold transition-all"
               />
               <div className="space-y-1">
@@ -413,6 +426,13 @@ export default function Home() {
             <p className="text-travesia-gold/40 text-sm">
               Muestra esta pantalla al personal del restaurante para reclamar tu premio si ganaste.
             </p>
+
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full bg-travesia-green-dark/40 border-2 border-travesia-gold text-travesia-gold font-bold py-5 rounded-2xl hover:bg-travesia-gold hover:text-travesia-green-deep transition-all mt-6"
+            >
+              SALIR / PREMIO ENTREGADO
+            </button>
           </div>
         </FlujoPaso>
       </div>
