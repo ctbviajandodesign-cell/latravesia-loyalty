@@ -231,6 +231,70 @@ export default function MarketingPage() {
                 </div>
               </div>
 
+              {/* Botón de Disparo Manual Reinstalado */}
+              <div className="bg-travesia-green-deep/5 p-5 rounded-[24px] border border-travesia-green-deep/10 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-travesia-green-deep p-2 rounded-lg">
+                    <Calendar className="w-5 h-5 text-travesia-gold" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-travesia-green-deep">Control de Automatización</p>
+                    <p className="text-[10px] text-gray-500">¿Quieres enviar los correos de esta semana ahora mismo?</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={async () => {
+                    if(!confirm('¿Seguro que quieres ejecutar el envío semanal a todos los cumpleañeros ahora mismo?')) return;
+                    setSaving(true);
+                    try {
+                      const res = await fetch('/api/cron/birthdays');
+                      const data = await res.json();
+                      alert(data.message || `Éxito: Se enviaron ${data.sent_to} correos.`);
+                    } catch (e) {
+                      alert('Error al ejecutar');
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                  className="px-4 py-2 bg-white text-travesia-green-deep border border-travesia-green-deep/20 rounded-xl text-xs font-bold hover:bg-travesia-green-deep hover:text-white transition-all shadow-sm"
+                >
+                  Ejecutar Envío Semanal YA
+                </button>
+              </div>
+
+              {/* Tabla de Cumpleañeros Reinstalada */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                  <Users className="w-4 h-4" /> Destinatarios de esta semana
+                </h3>
+                {cumpleañerosSemana.length === 0 ? (
+                  <p className="text-sm text-gray-400 italic px-2">No hay cumpleaños esta semana.</p>
+                ) : (
+                  <div className="overflow-hidden border border-gray-50 rounded-2xl">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-gray-50 text-gray-400 uppercase">
+                        <tr>
+                          <th className="px-4 py-3">Cliente</th>
+                          <th className="px-4 py-3">Fecha</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {cumpleañerosSemana.map((c, i) => (
+                          <tr key={i} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 font-bold text-gray-700">{c.nombre} {c.apellido}</td>
+                            <td className="px-4 py-3">
+                              <span className="bg-pink-50 text-pink-600 px-2 py-1 rounded-md font-bold">
+                                {new Date(c.fecha_nacimiento + 'T00:00:00').toLocaleDateString('es', { day: 'numeric', month: 'short' })}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
               <div className="bg-amber-50 p-6 rounded-3xl border border-amber-100">
                 <div className="flex items-center gap-4">
                   <div className="bg-amber-500 text-white p-3 rounded-2xl shadow-lg">
