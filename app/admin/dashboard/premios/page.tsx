@@ -114,6 +114,9 @@ export default function PremiosPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="bg-red-600 text-white text-center p-2 font-bold rounded-xl">
+        🚀 ESTÁS VIENDO LA VERSIÓN ACTUALIZADA (2.0)
+      </div>
       <div className={`text-[10px] uppercase font-black px-4 py-1 rounded-full w-fit flex items-center gap-2 ${
         dbStatus === 'connected' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
       }`}>
