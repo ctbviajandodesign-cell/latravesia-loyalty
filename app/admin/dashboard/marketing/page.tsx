@@ -15,8 +15,24 @@ import {
   AlertCircle,
   Megaphone,
   Trophy,
-  Save
+  Save,
+  Wand2
 } from 'lucide-react';
+
+// Función mágica para arreglar links de Unsplash y otros
+const formatImageUrl = (url: string) => {
+  if (!url) return '';
+  
+  // Si es un link de página de Unsplash: unsplash.com/photos/ID o unsplash.com/es/fotos/ID
+  const unsplashRegex = /unsplash\.com\/(?:[a-z]{2}\/fotos\/|photos\/)([a-zA-Z0-9_-]+)/;
+  const match = url.match(unsplashRegex);
+  
+  if (match && match[1]) {
+    return `https://images.unsplash.com/photo-${match[1]}?auto=format&fit=crop&q=80&w=1000`;
+  }
+  
+  return url;
+};
 
 export default function MarketingPage() {
   const [activeTab, setActiveTab] = useState<'birthdays' | 'broadcast' | 'loyalty'>('birthdays');
@@ -135,7 +151,7 @@ export default function MarketingPage() {
         body: JSON.stringify({
           subject: config.broadcast_asunto,
           message: config.broadcast_mensaje,
-          imageUrl: config.broadcast_foto_url,
+          imageUrl: formatImageUrl(config.broadcast_foto_url), // CORREGIDO AQUÍ
           to: 'BROADCAST',
           recipients: recips.map(c => c.email)
         })
@@ -152,7 +168,7 @@ export default function MarketingPage() {
 
   if (loading) return <div className="p-12 text-center"><Loader2 className="animate-spin mx-auto w-8 h-8 text-travesia-green-deep" /></div>;
 
-  const currentPreviewImg = activeTab === 'birthdays' ? config.email_foto_url : activeTab === 'loyalty' ? config.email_premio_foto_url : config.broadcast_foto_url;
+  const currentPreviewImg = formatImageUrl(activeTab === 'birthdays' ? config.email_foto_url : activeTab === 'loyalty' ? config.email_premio_foto_url : config.broadcast_foto_url);
   const currentPreviewSubject = activeTab === 'birthdays' ? config.email_asunto : activeTab === 'loyalty' ? config.email_premio_asunto : config.broadcast_asunto;
   const currentPreviewMsg = activeTab === 'birthdays' ? config.email_mensaje : activeTab === 'loyalty' ? config.email_premio_mensaje : config.broadcast_mensaje;
 
