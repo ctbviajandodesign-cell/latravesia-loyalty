@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 
 export async function POST(request: Request) {
   try {
-    const { subject, message, imageUrl, to } = await request.json();
+    const { subject, message, imageUrl, to, recipients } = await request.json();
 
     // 1. Obtener la API Key de Supabase
     const { data: configData } = await supabase
@@ -19,14 +19,27 @@ export async function POST(request: Request) {
 
     const resend = new Resend(configData.valor);
 
-    // 2. Enviar el correo
+    // 2. Determinar destinatarios
+    let targetEmails: string[] = [];
+    if (to === 'BROADCAST' && Array.isArray(recipients)) {
+      targetEmails = recipients;
+    } else {
+      targetEmails = [to];
+    }
+
+    if (targetEmails.length === 0) {
+      return NextResponse.json({ error: 'No hay destinatarios' }, { status: 400 });
+    }
+
+    // 3. Enviar correos (Resend permite enviar a varios en un solo llamado si es el mismo mensaje)
+    // Nota: Para grandes volúmenes se recomienda usar lotes o una cola de tareas.
     const { data, error } = await resend.emails.send({
-      from: 'La Travesía <onboarding@resend.dev>', // Por ahora usamos el dominio de prueba de Resend
-      to: [to],
+      from: 'La Travesía <onboarding@resend.dev>',
+      to: targetEmails,
       subject: subject,
       html: `
         <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden;">
-          <img src="${imageUrl}" style="width: 100%; height: auto; display: block;" alt="Cumpleaños" />
+          <img src="${imageUrl}" style="width: 100%; height: auto; display: block;" alt="Campaña" />
           <div style="padding: 40px; text-align: center; background-color: #ffffff;">
             <h1 style="color: #4A5D4E; margin-bottom: 20px;">¡Hola!</h1>
             <p style="color: #666; font-size: 18px; line-height: 1.6;">${message.replace('{nombre}', 'Amigo/a')}</p>

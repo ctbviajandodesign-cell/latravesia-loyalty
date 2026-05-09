@@ -16,6 +16,7 @@ export default function Home() {
     apellido: '',
     email: '',
     fecha_nacimiento: '',
+    genero: '',
     como_conocio: '',
     acepta_marketing: true,
   });
@@ -298,6 +299,19 @@ export default function Home() {
                   onChange={(e) => setFormData({...formData, fecha_nacimiento: e.target.value})}
                   className="w-full bg-travesia-green-dark/40 border border-travesia-gold/20 rounded-xl px-5 py-4 outline-none focus:border-travesia-gold transition-all"
                 />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-travesia-gold/50 ml-2 uppercase tracking-widest">Género</label>
+                <select
+                  required
+                  value={formData.genero}
+                  onChange={(e) => setFormData({...formData, genero: e.target.value})}
+                  className="w-full bg-travesia-green-dark/40 border border-travesia-gold/20 rounded-xl px-5 py-4 outline-none focus:border-travesia-gold transition-all text-travesia-gold"
+                >
+                  <option value="" disabled className="bg-travesia-green-deep text-travesia-gold/30">Seleccionar Género</option>
+                  <option value="Femenino" className="bg-travesia-green-deep">Mujer 👩</option>
+                  <option value="Masculino" className="bg-travesia-green-deep">Hombre 👨</option>
+                </select>
               </div>
               <select
                 required
