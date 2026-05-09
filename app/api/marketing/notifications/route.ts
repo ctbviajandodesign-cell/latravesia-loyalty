@@ -4,8 +4,8 @@ import { supabase } from '@/lib/supabase';
 
 const formatImageUrl = (url: string) => {
   if (!url) return '';
-  const unsplashRegex = /unsplash\.com\/(?:[a-z]{2}\/fotos\/|photos\/)([a-zA-Z0-9_-]+)/;
-  const match = url.match(unsplashRegex);
+  const unsplashPageRegex = /unsplash\.com\/.*?(?:fotos|photos)\/([a-zA-Z0-9_-]+)/;
+  const match = url.match(unsplashPageRegex);
   if (match && match[1]) {
     return `https://images.unsplash.com/photo-${match[1]}?auto=format&fit=crop&q=80&w=1000`;
   }
