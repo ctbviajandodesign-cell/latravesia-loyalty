@@ -230,8 +230,23 @@ export default function MarketingPage() {
                 <input type="text" value={activeTab === 'birthdays' ? config.email_asunto : activeTab === 'loyalty' ? config.email_premio_asunto : config.broadcast_asunto} onChange={(e) => setConfig({...config, [activeTab === 'birthdays' ? 'email_asunto' : activeTab === 'loyalty' ? 'email_premio_asunto' : 'broadcast_asunto']: e.target.value})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl outline-none" />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-black text-gray-400 uppercase tracking-widest">URL Imagen</label>
+                <label className="text-xs font-black text-gray-400 uppercase tracking-widest flex justify-between">
+                  URL Imagen
+                  <button 
+                    onClick={() => {
+                      const key = activeTab === 'birthdays' ? 'email_foto_url' : activeTab === 'loyalty' ? 'email_premio_foto_url' : 'broadcast_foto_url';
+                      const currentVal = config[key];
+                      // Forzar actualización disparando el formateador
+                      setConfig({...config, [key]: formatImageUrl(currentVal)});
+                      alert('¡Link procesado! Si era un link de Unsplash, ahora debería verse en el preview.');
+                    }}
+                    className="text-travesia-gold hover:text-travesia-gold/80 flex items-center gap-1 text-[10px] uppercase tracking-tighter"
+                  >
+                    <Wand2 className="w-3 h-3" /> Arreglo Mágico
+                  </button>
+                </label>
                 <input type="text" value={activeTab === 'birthdays' ? config.email_foto_url : activeTab === 'loyalty' ? config.email_premio_foto_url : config.broadcast_foto_url} onChange={(e) => setConfig({...config, [activeTab === 'birthdays' ? 'email_foto_url' : activeTab === 'loyalty' ? 'email_premio_foto_url' : 'broadcast_foto_url']: e.target.value})} className="w-full bg-gray-50 border border-gray-100 p-4 rounded-2xl outline-none font-mono text-xs" placeholder="https://..." />
+                <p className="text-[10px] text-gray-400 ml-2 italic">Cualquier link de Unsplash se arreglará solo.</p>
               </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Mensaje</label>
