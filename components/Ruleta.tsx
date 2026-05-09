@@ -1,237 +1,266 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import confetti from 'canvas-confetti';
+import React, { useRef, useEffect, useState } from 'react';
+import { Trophy, Sparkles, Loader2, Pointer } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface Premio {
   id: string;
   nombre: string;
-  emoji: string;
+  color: string;
   probabilidad: number;
 }
 
-interface RuletaProps {
-  premios: Premio[];
-  onResult: (premio: Premio) => void;
-}
-
-export default function Ruleta({ premios, onResult }: RuletaProps) {
+export default function Ruleta({ onWin }: { onWin: (premio: string) => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isSpinning, setIsSpinning] = useState(false);
-  const rotationRef = useRef(0);
-  const audioContextRef = useRef<AudioContext | null>(null);
+  const [spinning, setSpinning] = useState(false);
+  const [premios, setPremios] = useState<Premio[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [rotation, setRotation] = useState(0);
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState('');
 
-  const playClickSound = () => {
-    try {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      }
-      const ctx = audioContextRef.current;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(200, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.05);
-      gain.gain.setValueAtTime(0.05, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.05);
-    } catch (e) {}
-  };
+  // ESCALADO AUTOMÁTICO PARA MÓVILES
+  const [scale, setScale] = useState(1);
 
-  const drawRuleta = React.useCallback(() => {
+  useEffect(() => {
+    fetchPremios();
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 400) setScale(0.75);
+      else if (width < 500) setScale(0.85);
+      else setScale(1);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  async function fetchPremios() {
+    const { data } = await supabase.from('premios').select('*');
+    if (data) {
+      // Mapeo de colores dinámicos: Esmeralda y Oro
+      const styledPremios = data.map((p, i) => ({
+        ...p,
+        color: i % 2 === 0 ? '#0A2A18' : '#D4AF37' // Alternancia Esmeralda Profundo / Oro
+      }));
+      setPremios(styledPremios);
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    if (premios.length > 0) drawWheel();
+  }, [premios, rotation]);
+
+  const drawWheel = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const size = canvas.width;
-    const center = size / 2;
-    const radius = size / 2 - 5;
-    const segmentAngle = (2 * Math.PI) / premios.length;
+    const size = 400;
+    const centerX = size / 2;
+    const centerY = size / 2;
+    const radius = size / 2 - 20;
 
     ctx.clearRect(0, 0, size, size);
 
-    premios.forEach((premio, i) => {
-      const angle = i * segmentAngle;
-      
-      // Colores de la marca: Verde Profundo y Negro con acentos dorados
-      const colors = ['#1a2e1c', '#0f1a10', '#1a2e1c', '#0f1a10', '#c5a96e'];
-      const baseColor = colors[i % colors.length];
+    // MARCO EXTERIOR DE ORO PULIDO (3D Effect)
+    const goldGradient = ctx.createLinearGradient(0, 0, size, size);
+    goldGradient.addColorStop(0, '#B8860B');
+    goldGradient.addColorStop(0.5, '#D4AF37');
+    goldGradient.addColorStop(1, '#8B6508');
+    
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius + 15, 0, Math.PI * 2);
+    ctx.fillStyle = goldGradient;
+    ctx.fill();
+    ctx.strokeStyle = '#5C4033';
+    ctx.lineWidth = 2;
+    ctx.stroke();
 
-      // Dibujar Segmento con gradiente para efecto 3D
+    // DIBUJAR SEGMENTOS
+    const sliceAngle = (Math.PI * 2) / premios.length;
+    premios.forEach((premio, i) => {
+      const angle = rotation + i * sliceAngle;
+      
       ctx.beginPath();
-      ctx.moveTo(center, center);
-      ctx.arc(center, center, radius, angle, angle + segmentAngle);
+      ctx.moveTo(centerX, centerY);
+      ctx.arc(centerX, centerY, radius, angle, angle + sliceAngle);
       ctx.closePath();
       
-      const grad = ctx.createRadialGradient(center, center, radius * 0.2, center, center, radius);
-      grad.addColorStop(0, baseColor);
-      grad.addColorStop(1, i % 5 === 4 ? '#dac88c' : '#050a06');
-      
-      ctx.fillStyle = grad;
+      ctx.fillStyle = premio.color;
       ctx.fill();
-
-      // Borde de segmento ultra fino
-      ctx.strokeStyle = 'rgba(218, 200, 140, 0.2)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // Contenido (Emoji + Texto)
+      // TEXTO DE LOS PREMIOS
       ctx.save();
-      ctx.translate(center, center);
-      ctx.rotate(angle + segmentAngle / 2);
+      ctx.translate(centerX, centerY);
+      ctx.rotate(angle + sliceAngle / 2);
       ctx.textAlign = 'right';
-      
-      // Sombra de texto para legibilidad premium
-      ctx.shadowColor = 'rgba(0,0,0,0.5)';
-      ctx.shadowBlur = 4;
-      
-      ctx.fillStyle = (i % 5 === 4) ? '#1a2e1c' : '#dac88c';
-      ctx.font = 'bold 13px "Inter", sans-serif';
-      ctx.fillText(`${premio.emoji || '🎁'}`, radius - 25, 5);
-      
-      ctx.font = '500 10px "Inter", sans-serif';
-      ctx.fillText(premio.nombre.toUpperCase(), radius - 55, 4);
-      
+      ctx.fillStyle = premio.color === '#D4AF37' ? '#0A1A12' : '#D4AF37';
+      ctx.font = 'bold 14px serif';
+      ctx.fillText(premio.nombre.toUpperCase(), radius - 40, 5);
       ctx.restore();
     });
 
-    // Brillo de cristal sobre la ruleta
-    const overlayGrad = ctx.createLinearGradient(0, 0, size, size);
-    overlayGrad.addColorStop(0, 'rgba(255,255,255,0.1)');
-    overlayGrad.addColorStop(0.5, 'transparent');
-    overlayGrad.addColorStop(1, 'rgba(0,0,0,0.2)');
-    ctx.fillStyle = overlayGrad;
+    // PUNTOS LED (Iluminación dinámica)
+    for (let i = 0; i < 24; i++) {
+      const angle = (i * Math.PI * 2) / 24;
+      const x = centerX + (radius + 5) * Math.cos(angle);
+      const y = centerY + (radius + 5) * Math.sin(angle);
+      
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = (Math.floor(Date.now() / 200) + i) % 3 === 0 ? '#FFF' : '#8B6508';
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#FFF';
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // BOTÓN CENTRAL "LT" (Vidrio Esmeralda)
     ctx.beginPath();
-    ctx.arc(center, center, radius, 0, 2 * Math.PI);
+    ctx.arc(centerX, centerY, 50, 0, Math.PI * 2);
+    const glass = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 50);
+    glass.addColorStop(0, '#1A3A2A');
+    glass.addColorStop(1, '#0A1A12');
+    ctx.fillStyle = glass;
     ctx.fill();
+    ctx.strokeStyle = '#D4AF37';
+    ctx.lineWidth = 4;
+    ctx.stroke();
 
-  }, [premios]);
+    // LOGO LT
+    ctx.fillStyle = '#D4AF37';
+    ctx.font = 'bold 30px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('LT', centerX, centerY + 10);
+  };
 
-  useEffect(() => {
-    drawRuleta();
-  }, [premios, drawRuleta]);
+  const handleSpinClick = async () => {
+    if (spinning) return;
+    setShowPinModal(true);
+  };
+
+  const validatePinAndSpin = async () => {
+    const { data } = await supabase.from('config').select('*').eq('clave', 'pin_ruleta').single();
+    if (pin === (data?.valor || '1234')) {
+      setShowPinModal(false);
+      setPin('');
+      setError('');
+      spin();
+    } else {
+      setError('PIN incorrecto. Pídelo en caja.');
+    }
+  };
 
   const spin = () => {
-    if (isSpinning || premios.length === 0) return;
-    setIsSpinning(true);
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    // Calcular ganador
-    const winningIndex = Math.floor(Math.random() * premios.length);
-    const winner = premios[winningIndex];
-
-    const spinDuration = 7000;
-    const segmentAngle = (2 * Math.PI) / premios.length;
-    const extraSpins = 12 * 2 * Math.PI;
-    const targetAngle = (2 * Math.PI) - (winningIndex * segmentAngle + segmentAngle / 2);
-    const finalRotation = extraSpins + targetAngle + (Math.PI * 1.5);
+    setSpinning(true);
     
-    const startTime = performance.now();
-    let lastTick = -1;
+    // Audio mecánico (Simulado por ritmo de giro)
+    const spinDuration = 5000;
+    const startTime = Date.now();
+    const startRotation = rotation;
+    
+    // Lógica de probabilidad
+    const totalProb = premios.reduce((acc, p) => acc + p.probabilidad, 0);
+    let random = Math.random() * totalProb;
+    let winnerIndex = 0;
+    for (let i = 0; i < premios.length; i++) {
+      random -= premios[i].probabilidad;
+      if (random <= 0) {
+        winnerIndex = i;
+        break;
+      }
+    }
 
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
+    const sliceAngle = (Math.PI * 2) / premios.length;
+    const extraRotations = 8 * Math.PI * 2;
+    const targetRotation = extraRotations + (premios.length - winnerIndex - 0.5) * sliceAngle;
+
+    const animate = () => {
+      const now = Date.now();
+      const elapsed = now - startTime;
       const progress = Math.min(elapsed / spinDuration, 1);
       
-      // Easing: Mas lento al final para realismo
+      // Easing: Ease Out Quint
       const easeOut = 1 - Math.pow(1 - progress, 5);
-      const currentRotation = finalRotation * easeOut;
+      const currentRot = startRotation + targetRotation * easeOut;
       
-      canvas.style.transform = `rotate(${currentRotation}rad)`;
-
-      const currentTick = Math.floor(currentRotation / (segmentAngle / 2));
-      if (currentTick !== lastTick) {
-        playClickSound();
-        lastTick = currentTick;
-      }
+      setRotation(currentRot);
 
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
-        setIsSpinning(false);
-        confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 }, colors: ['#c5a96e', '#1a2e1c'] });
-        setTimeout(() => onResult(winner), 800);
+        setSpinning(false);
+        setTimeout(() => onWin(premios[winnerIndex].nombre), 500);
       }
     };
 
-    requestAnimationFrame(animate);
+    animate();
   };
 
+  if (loading) return <Loader2 className="animate-spin text-travesia-gold w-10 h-10" />;
+
   return (
-    <div className="flex flex-col items-center gap-12 py-10 relative">
+    <div className="relative flex flex-col items-center">
       
-      {/* EL MARCO "FÍSICO" DE LA RULETA */}
-      <div className="relative group p-6 rounded-full bg-[#0a120b] shadow-[0_30px_60px_-12px_rgba(0,0,0,0.8),inset_0_2px_4px_rgba(255,255,255,0.1)] border-[12px] border-[#1a1a1a]">
+      {/* CONTENEDOR DE ESCALADO RESPONSIVO */}
+      <div 
+        style={{ transform: `scale(${scale})`, transition: 'transform 0.3s ease' }}
+        className="relative"
+      >
+        <canvas ref={canvasRef} width={400} height={400} className="rounded-full shadow-[0_0_80px_rgba(0,0,0,0.6)]" />
         
-        {/* Anillo de Oro Pulido (CSS Bezel) */}
-        <div className="absolute inset-0 rounded-full border-[6px] border-[#c5a96e] shadow-[inset_0_0_15px_rgba(0,0,0,0.5),0_0_20px_rgba(197,169,110,0.2)]" 
-             style={{ background: 'linear-gradient(135deg, #c5a96e 0%, #dac88c 45%, #c5a96e 55%, #8e743a 100%)', margin: '-6px' }} 
-        />
-
-        {/* Luces LED "Diamante" */}
-        {[...Array(24)].map((_, i) => (
-          <div 
-            key={i}
-            className={`absolute w-1.5 h-1.5 rounded-full shadow-[0_0_8px_#dac88c] z-20 transition-all duration-300`}
-            style={{
-              top: '50%',
-              left: '50%',
-              transform: `rotate(${i * 15}deg) translate(0, -188px)`,
-              background: isSpinning ? (i % 2 === Math.round(Date.now()/200)%2 ? '#fff' : '#c5a96e') : '#c5a96e',
-              boxShadow: isSpinning && i % 2 === Math.round(Date.now()/200)%2 ? '0 0 12px #fff' : '0 0 5px #c5a96e'
-            }}
-          />
-        ))}
-
-        {/* Puntero de Lujo */}
-        <div className="absolute top-[-20px] left-1/2 -translate-x-1/2 z-40">
-          <div className="w-10 h-14 bg-[#c5a96e] clip-path-pointer shadow-2xl flex items-center justify-center border-t-2 border-white/30">
-             <div className="w-1 h-6 bg-black/20 rounded-full" />
+        {/* INDICADOR SUPERIOR (FLECHA) */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4">
+          <div className="w-8 h-10 bg-travesia-gold rounded-full shadow-lg flex items-center justify-center border-2 border-[#8B6508]">
+            <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-travesia-green-deep"></div>
           </div>
         </div>
 
-        {/* Botón Central de Cristal */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full z-40 bg-[#1a2e1c] border-4 border-[#c5a96e] shadow-[0_10px_20px_rgba(0,0,0,0.5),inset_0_2px_10px_rgba(255,255,255,0.2)] flex items-center justify-center overflow-hidden">
-           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent" />
-           <div className="w-2 h-2 bg-white/80 rounded-full blur-[1px] absolute top-3 left-4" />
-           <span className="text-travesia-gold font-serif text-xl font-bold italic">LT</span>
-        </div>
-
-        {/* Canvas de la Ruleta */}
-        <canvas
-          ref={canvasRef}
-          width={400}
-          height={400}
-          className="rounded-full relative z-10 block"
-        />
+        {/* BOTÓN CENTRAL DE DISPARO */}
+        {!spinning && (
+          <button 
+            onClick={handleSpinClick}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-transparent hover:scale-110 transition-transform cursor-pointer flex items-center justify-center group"
+          >
+            <div className="absolute inset-0 bg-travesia-gold/20 rounded-full animate-ping group-hover:bg-travesia-gold/40"></div>
+            <Pointer className="text-travesia-gold w-10 h-10 drop-shadow-lg" />
+          </button>
+        )}
       </div>
-      
-      {/* Botón de Girar Premium */}
-      <button
-        onClick={spin}
-        disabled={isSpinning || premios.length === 0}
-        className="group relative px-20 py-7 bg-transparent overflow-hidden rounded-[32px] transition-all hover:scale-105 active:scale-95 disabled:opacity-30"
-      >
-        <div className="absolute inset-0 bg-[#c5a96e] shadow-[0_20px_40px_-10px_rgba(197,169,110,0.4)]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <span className="relative z-10 text-[#1a2e1c] font-black text-2xl tracking-[0.2em] uppercase">
-          {isSpinning ? 'La Suerte Gira...' : 'GIRAR RULETA'}
-        </span>
-        <div className="absolute top-0 left-[-100%] w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg] group-hover:left-[100%] transition-all duration-1000" />
-      </button>
 
-      <style jsx>{`
-        .clip-path-pointer {
-          clip-path: polygon(50% 100%, 0 0, 100% 0);
-          background: linear-gradient(135deg, #c5a96e 0%, #dac88c 45%, #8e743a 100%);
-        }
-      `}</style>
+      {/* MODAL DE PIN (GLASSMORPHISM) */}
+      {showPinModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-xl bg-black/60">
+          <div className="bg-[#0A1A12] border border-travesia-gold/30 p-10 rounded-[40px] w-full max-w-xs text-center space-y-6 shadow-2xl">
+            <Trophy className="w-12 h-12 text-travesia-gold mx-auto" />
+            <div className="space-y-2">
+              <h3 className="text-xl font-serif font-bold text-white">Validación de Visita</h3>
+              <p className="text-xs text-white/40">Ingresa el PIN de la caja para girar.</p>
+            </div>
+            <input 
+              autoFocus
+              type="password" 
+              maxLength={4}
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+              className="w-full text-center text-4xl tracking-[0.5em] bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-travesia-gold text-white font-mono"
+            />
+            {error && <p className="text-red-400 text-[10px] font-bold uppercase">{error}</p>}
+            <div className="flex gap-3">
+              <button onClick={() => setShowPinModal(false)} className="flex-1 py-4 text-xs font-bold text-white/40 uppercase">Cancelar</button>
+              <button onClick={validatePinAndSpin} className="flex-2 py-4 px-6 bg-travesia-gold text-[#0A1A12] rounded-xl font-black text-xs uppercase tracking-widest">Validar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

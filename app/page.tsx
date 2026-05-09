@@ -2,532 +2,233 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import FlujoPaso from '@/components/FlujoPaso';
+import { 
+  CheckCircle2, 
+  Sparkles, 
+  Gift, 
+  ChevronRight, 
+  Star, 
+  User, 
+  Mail, 
+  Calendar,
+  Loader2,
+  ArrowRight,
+  ShieldCheck,
+  Smartphone
+} from 'lucide-react';
 import Ruleta from '@/components/Ruleta';
-import { Instagram, Facebook, Music as TikTok, Send, CheckCircle2, MessageCircle, Lock } from 'lucide-react';
 
 export default function Home() {
-  const [paso, setPaso] = useState(1);
+  const [step, setStep] = useState<'welcome' | 'form' | 'game' | 'success'>('welcome');
   const [loading, setLoading] = useState(false);
-  const [codigoPais, setCodigoPais] = useState('593');
-  const [telefono, setTelefono] = useState('');
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
     email: '',
+    telefono: '',
     fecha_nacimiento: '',
-    genero: '',
-    como_conocio: '',
-    acepta_marketing: true,
+    genero: 'Otro'
   });
-  const [cliente, setCliente] = useState<any>(null);
-  const [ruletaActiva, setRuletaActiva] = useState<any>(null);
-  const [premios, setPremios] = useState<any[]>([]);
-  const [mensaje, setMensaje] = useState('');
-  const [config, setConfig] = useState<any>({});
-  const [socialCheck, setSocialCheck] = useState({
-    instagram: false,
-    facebook: false,
-    tiktok: false,
-    whatsapp: false
-  });
-  const [userPin, setUserPin] = useState('');
-  const [pinCorrecto, setPinCorrecto] = useState(false);
+  const [clienteId, setClienteId] = useState<string | null>(null);
+  const [premioFinal, setPremioFinal] = useState<string | null>(null);
 
-  // Cargar configuración inicial y ruleta del día
   useEffect(() => {
-    const fetchInitialData = async () => {
-      // Config
-      const { data: configData } = await supabase.from('config').select('*');
-      const configObj = configData?.reduce((acc: any, item: any) => {
-        acc[item.clave] = item.valor;
-        return acc;
-      }, {});
-      setConfig(configObj || {});
-
-      // Ruleta activa hoy
-      const { data: ruleta } = await supabase
-        .from('ruletas')
-        .select('*')
-        .eq('activa', true)
-        .maybeSingle();
-
-      if (ruleta && ruleta.configuracion?.premiosIds) {
-        setRuletaActiva(ruleta);
-        // Obtener los detalles de los premios seleccionados
-        const { data: premiosData } = await supabase
-          .from('premios')
-          .select('*')
-          .in('id', ruleta.configuracion.premiosIds)
-          .gt('stock', 0);
-        
-        setPremios(premiosData || []);
-      }
-    };
-
-    fetchInitialData();
+    const savedId = localStorage.getItem('travesia_cliente_id');
+    if (savedId) {
+      setClienteId(savedId);
+      setStep('game');
+    }
   }, []);
 
-  // Paso 1: Identificación
-  const handleIdentificacion = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
     try {
       const { data, error } = await supabase
         .from('clientes')
-        .select('*')
-        .eq('telefono', codigoPais + telefono)
-        .maybeSingle();
-
-      if (data) {
-        setCliente(data);
-        const yaRegistrado = await verificarVisitaHoy(data.id);
-        if (yaRegistrado) {
-          setMensaje(`¡Hola de nuevo, ${data.nombre}! 👋 Ya registraste tu visita hoy. ¡Gracias por venir!`);
-          setPaso(5); // Pantalla final directa
-        } else {
-          // Si ya existe, saltamos registro pero vamos a redes para fidelizar
-          setPaso(3);
-        }
-      } else {
-        setPaso(2);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Paso 2: Registro
-  const handleRegistro = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { data, error } = await supabase
-        .from('clientes')
-        .insert([{
-          ...formData,
-          telefono: codigoPais + telefono,
-          total_visitas: 0,
-          fecha_ultima_visita: new Date().toISOString().split('T')[0]
-        }])
+        .insert([{ ...formData, visitas: 1 }])
         .select()
         .single();
 
-      if (data) {
-        setCliente(data);
-        
-        // --- NUEVO: Chequeo de Cumpleaños Inmediato ---
-        const today = new Date();
-        const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay() + 1);
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6);
-        
-        const [, m, d] = formData.fecha_nacimiento.split('-').map(Number);
-        const bday = new Date(today.getFullYear(), m - 1, d);
-        
-        if (bday >= startOfWeek && bday <= endOfWeek) {
-          fetch('/api/marketing/notifications', {
-            method: 'POST',
-            body: JSON.stringify({ type: 'BIRTHDAY_WELCOME', cliente: data })
-          });
-        }
-        // -------------------------------------------
+      if (error) throw error;
+      
+      localStorage.setItem('travesia_cliente_id', data.id);
+      setClienteId(data.id);
+      setStep('game');
+      
+      // Notificación de bienvenida
+      await fetch('/api/marketing/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'BIRTHDAY_WELCOME', cliente: data })
+      });
 
-        setPaso(3);
-      }
-    } catch (err) {
-      console.error(err);
+    } catch (error: any) {
+      alert('Error: ' + error.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const verificarVisitaHoy = async (clienteId: string) => {
-    const hoy = new Date().toISOString().split('T')[0];
-    const { data } = await supabase
-      .from('visitas')
-      .select('*')
-      .eq('cliente_id', clienteId)
-      .eq('fecha', hoy)
-      .maybeSingle();
-    return !!data;
-  };
-
-  const registrarVisita = async (premioGanado?: string) => {
-    if (!cliente) return;
-    
-    const { error } = await supabase
-      .from('visitas')
-      .insert([{
-        cliente_id: cliente.id,
-        ruleta_id: ruletaActiva?.id || null,
-        premio_ganado: premioGanado || null
-      }]);
-    
-    if (error) {
-      console.error('Error al registrar visita:', error);
-      return;
-    }
-
-    if (!error) {
-      // Actualizar contador visitas cliente
-      const nuevaVisita = (cliente.total_visitas || 0) + 1;
-      const nuevaFecha = new Date().toISOString().split('T')[0];
-      
-      await supabase
-        .from('clientes')
-        .update({ 
-          total_visitas: nuevaVisita,
-          fecha_ultima_visita: nuevaFecha
-        })
-        .eq('id', cliente.id);
-        
-      // --- NUEVO: Alerta de Premio (Visita 10) ---
-      if (nuevaVisita === Number(config.visitas_para_premio)) {
-        fetch('/api/marketing/notifications', {
-          method: 'POST',
-          body: JSON.stringify({ 
-            type: 'LOYALTY_REWARD', 
-            cliente: { ...cliente, total_visitas: nuevaVisita }
-          })
-        });
-      }
-      // -------------------------------------------
-
-      setCliente({
-        ...cliente,
-        total_visitas: nuevaVisita,
-        fecha_ultima_visita: nuevaFecha
-      });
-    }
-  };
-
-  const handleResultadoRuleta = async (premio: any) => {
-    // 1. Restar stock del premio
-    const { error: stockError } = await supabase
-      .from('premios')
-      .update({ stock: Math.max(0, premio.stock - 1) })
-      .eq('id', premio.id);
-
-    if (stockError) console.error('Error actualizando stock:', stockError);
-
-    // 2. Registrar la visita y el premio
-    await registrarVisita(premio.nombre);
-    
-    setMensaje(`¡FELICIDADES! 🎉 Ganaste: ${premio.nombre}`);
-    setTimeout(() => setPaso(5), 2000); // Ir a final después de ver confetti
-  };
-
-  const handleFinalizarRedes = async () => {
-    // Si es un cliente antiguo que ya visitó hoy, esto no debería pasar por la lógica del paso 1
-    // Si es nuevo o cliente antiguo en su primera visita de hoy:
-    if (ruletaActiva) {
-      setPaso(4);
-    } else {
-      await registrarVisita();
-      setMensaje(`¡Gracias por visitarnos, ${cliente?.nombre}!`);
-      setPaso(5);
     }
   };
 
   return (
-    <main className="min-h-screen dark-theme text-travesia-gold flex flex-col items-center justify-start relative overflow-x-hidden pt-10 pb-20">
-      {/* Fondo decorativo */}
-      <div className="fixed inset-0 bg-travesia-green-deep pointer-events-none opacity-50 z-0" />
-      <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,_var(--color-travesia-green-dark)_0%,_transparent_70%)] opacity-30 z-0" />
+    <main className="min-h-screen bg-[#0A1A12] text-white selection:bg-travesia-gold selection:text-travesia-green-deep">
+      
+      {/* BACKGROUND DECORATION */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-travesia-green-deep/20 blur-[120px] rounded-full"></div>
+        <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-travesia-gold/10 blur-[120px] rounded-full"></div>
+      </div>
 
-      <div className="z-10 w-full px-4 max-w-md">
-        <header className="text-center mb-12">
-          <h1 className="text-5xl font-bold tracking-tighter text-travesia-gold mb-2">
-            LA TRAVESÍA <span className="text-xs opacity-30">v2.4</span>
-          </h1>
-          <div className="h-px w-24 bg-travesia-gold/30 mx-auto mb-2" />
-          <p className="text-travesia-gold-dark font-medium tracking-[0.3em] text-xs uppercase">
-            Hostería Campiña
-          </p>
-        </header>
-
-        {/* PASO 1: IDENTIFICACIÓN */}
-        <FlujoPaso active={paso === 1}>
-          <div className="space-y-8">
-            <div className="text-center space-y-2">
-              <h2 className="text-3xl font-semibold">Bienvenido</h2>
-              <p className="text-travesia-gold/60">Ingresa tu número para comenzar</p>
-            </div>
-            <form onSubmit={handleIdentificacion} className="space-y-4">
-              <div className="flex gap-2">
-                <select 
-                  value={codigoPais}
-                  onChange={(e) => setCodigoPais(e.target.value)}
-                  className="bg-travesia-green-dark/40 border-2 border-travesia-gold/20 rounded-2xl px-3 py-5 text-xl outline-none focus:border-travesia-gold appearance-none"
-                >
-                  <option value="593">🇪🇨 +593</option>
-                  <option value="57">🇨🇴 +57</option>
-                  <option value="51">🇵🇪 +51</option>
-                  <option value="1">🇺🇸 +1</option>
-                  <option value="34">🇪🇸 +34</option>
-                </select>
-                <input
-                  type="tel"
-                  placeholder="998765432"
-                  value={telefono}
-                  onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ''))}
-                  required
-                  className="flex-1 bg-travesia-green-dark/40 border-2 border-travesia-gold/20 rounded-2xl px-6 py-5 text-2xl text-center focus:border-travesia-gold focus:bg-travesia-green-dark/60 outline-none transition-all placeholder:text-travesia-gold/20"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading || telefono.length < 8}
-                className="w-full bg-travesia-gold text-travesia-green-deep font-black py-5 rounded-2xl hover:bg-travesia-gold-light hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 shadow-xl"
-              >
-                {loading ? 'VERIFICANDO...' : 'ENTRAR'}
-              </button>
-            </form>
+      <div className="relative max-w-lg mx-auto min-h-screen flex flex-col px-6 py-12">
+        
+        {/* LOGO AREA */}
+        <div className="flex flex-col items-center mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
+          <div className="w-20 h-20 bg-gradient-to-br from-travesia-gold to-[#B8860B] rounded-3xl rotate-12 flex items-center justify-center shadow-[0_0_50px_rgba(212,175,55,0.3)] border border-white/20">
+            <Sparkles className="w-10 h-10 text-[#0A1A12] -rotate-12" />
           </div>
-        </FlujoPaso>
+          <h1 className="mt-6 text-4xl font-serif font-bold tracking-tighter text-travesia-gold">La Travesía</h1>
+          <p className="text-xs uppercase tracking-[0.4em] font-bold text-white/40 mt-1">Loyalty Experience</p>
+        </div>
 
-        {/* PASO 2: REGISTRO */}
-        <FlujoPaso active={paso === 2}>
-          <div className="space-y-6">
-            <h2 className="text-3xl font-semibold text-center">Tus Datos</h2>
-            <form onSubmit={handleRegistro} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Nombre"
-                required
-                value={formData.nombre}
-                onChange={(e) => setFormData({...formData, nombre: e.target.value})}
-                className="w-full bg-travesia-green-dark/40 border border-travesia-gold/20 rounded-xl px-5 py-4 outline-none focus:border-travesia-gold transition-all"
-              />
-              <input
-                type="text"
-                placeholder="Apellido"
-                required
-                value={formData.apellido}
-                onChange={(e) => setFormData({...formData, apellido: e.target.value})}
-                className="w-full bg-travesia-green-dark/40 border border-travesia-gold/20 rounded-xl px-5 py-4 outline-none focus:border-travesia-gold transition-all"
-              />
-              <input
-                type="email"
-                placeholder="Correo Electrónico"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className="w-full bg-travesia-green-dark/40 border border-travesia-gold/20 rounded-xl px-5 py-4 outline-none focus:border-travesia-gold transition-all"
-              />
-              <div className="space-y-1">
-                <label className="text-xs text-travesia-gold/50 ml-2 uppercase tracking-widest">Fecha de Nacimiento</label>
-                <input
-                  type="date"
-                  required
-                  value={formData.fecha_nacimiento}
-                  onChange={(e) => setFormData({...formData, fecha_nacimiento: e.target.value})}
-                  className="w-full bg-travesia-green-dark/40 border border-travesia-gold/20 rounded-xl px-5 py-4 outline-none focus:border-travesia-gold transition-all"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs text-travesia-gold/50 ml-2 uppercase tracking-widest">Género</label>
-                <select
-                  required
-                  value={formData.genero}
-                  onChange={(e) => setFormData({...formData, genero: e.target.value})}
-                  className="w-full bg-travesia-green-dark/40 border border-travesia-gold/20 rounded-xl px-5 py-4 outline-none focus:border-travesia-gold transition-all text-travesia-gold"
-                >
-                  <option value="" disabled className="bg-travesia-green-deep text-travesia-gold/30">Seleccionar Género</option>
-                  <option value="Femenino" className="bg-travesia-green-deep">Mujer 👩</option>
-                  <option value="Masculino" className="bg-travesia-green-deep">Hombre 👨</option>
-                </select>
-              </div>
-              <select
-                required
-                value={formData.como_conocio}
-                onChange={(e) => setFormData({...formData, como_conocio: e.target.value})}
-                className="w-full bg-travesia-green-dark/40 border border-travesia-gold/20 rounded-xl px-5 py-4 outline-none focus:border-travesia-gold transition-all"
-              >
-                <option value="" disabled className="bg-travesia-green-deep">¿Cómo nos conociste?</option>
-                <option value="Instagram" className="bg-travesia-green-deep">Instagram</option>
-                <option value="Facebook" className="bg-travesia-green-deep">Facebook</option>
-                <option value="TikTok" className="bg-travesia-green-deep">TikTok</option>
-                <option value="Recomendación" className="bg-travesia-green-deep">Recomendación</option>
-                <option value="Pasé por aquí" className="bg-travesia-green-deep">Pasé por aquí</option>
-              </select>
-              
-              <label className="flex items-center gap-3 px-2 py-4">
-                <input 
-                  type="checkbox" 
-                  checked={formData.acepta_marketing}
-                  onChange={(e) => setFormData({...formData, acepta_marketing: e.target.checked})}
-                  className="w-5 h-5 accent-travesia-gold"
-                />
-                <span className="text-sm text-travesia-gold/80">Deseo recibir sorpresas y promociones</span>
-              </label>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-travesia-gold text-travesia-green-deep font-black py-5 rounded-2xl hover:bg-travesia-gold-light transition-all shadow-xl"
-              >
-                {loading ? 'GUARDANDO...' : 'REGISTRARME'}
-              </button>
-            </form>
-          </div>
-        </FlujoPaso>
-
-        {/* PASO 3: REDES SOCIALES */}
-        <FlujoPaso active={paso === 3}>
-          <div className="space-y-8 text-center">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-semibold">¡Síguenos!</h2>
-              <p className="text-travesia-gold/60 italic">Apóyanos en nuestras redes para continuar</p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4">
-              <a 
-                href={config.link_instagram} 
-                target="_blank" 
-                onClick={() => setSocialCheck({...socialCheck, instagram: true})}
-                className="flex items-center justify-between bg-travesia-green-dark/40 border border-travesia-gold/20 p-5 rounded-2xl hover:border-travesia-gold transition-all"
-              >
-                <div className="flex items-center gap-4">
-                  <Instagram className="w-6 h-6" />
-                  <span className="font-medium text-lg">Instagram</span>
-                </div>
-                {socialCheck.instagram && <CheckCircle2 className="text-travesia-gold w-6 h-6" />}
-              </a>
-              
-              <a 
-                href={config.link_facebook} 
-                target="_blank" 
-                onClick={() => setSocialCheck({...socialCheck, facebook: true})}
-                className="flex items-center justify-between bg-travesia-green-dark/40 border border-travesia-gold/20 p-5 rounded-2xl hover:border-travesia-gold transition-all"
-              >
-                <div className="flex items-center gap-4">
-                  <Facebook className="w-6 h-6" />
-                  <span className="font-medium text-lg">Facebook</span>
-                </div>
-                {socialCheck.facebook && <CheckCircle2 className="text-travesia-gold w-6 h-6" />}
-              </a>
-
-              <a 
-                href={config.link_tiktok} 
-                target="_blank" 
-                onClick={() => setSocialCheck({...socialCheck, tiktok: true})}
-                className="flex items-center justify-between bg-travesia-green-dark/40 border border-travesia-gold/20 p-5 rounded-2xl hover:border-travesia-gold transition-all"
-              >
-                <div className="flex items-center gap-4">
-                  <TikTok className="w-6 h-6" />
-                  <span className="font-medium text-lg">TikTok</span>
-                </div>
-                {socialCheck.tiktok && <CheckCircle2 className="text-travesia-gold w-6 h-6" />}
-              </a>
-
-              <a 
-                href={config.link_whatsapp} 
-                target="_blank" 
-                onClick={() => setSocialCheck({...socialCheck, whatsapp: true})}
-                className="flex items-center justify-between bg-travesia-gold/10 border-2 border-travesia-gold/30 p-5 rounded-2xl hover:border-travesia-gold transition-all"
-              >
-                <div className="flex items-center gap-4 text-travesia-gold">
-                  <MessageCircle className="w-6 h-6" />
-                  <span className="font-bold text-lg">Unirme al WhatsApp</span>
-                </div>
-                {socialCheck.whatsapp && <CheckCircle2 className="text-travesia-gold w-6 h-6" />}
-              </a>
-            </div>
-
-            <button
-              onClick={handleFinalizarRedes}
-              className="w-full bg-travesia-gold text-travesia-green-deep font-black py-5 rounded-2xl hover:bg-travesia-gold-light transition-all shadow-xl mt-4"
-            >
-              CONTINUAR
-            </button>
-          </div>
-        </FlujoPaso>
-
-        {/* PASO 4: RULETA CON PIN */}
-        <FlujoPaso active={paso === 4}>
-          <div className="space-y-6 text-center">
-            {!pinCorrecto ? (
-              <div className="space-y-8 py-4">
-                <div className="space-y-2">
-                  <Lock className="w-12 h-12 mx-auto text-travesia-gold animate-pulse" />
-                  <h2 className="text-3xl font-semibold">Código de Seguridad</h2>
-                  <p className="text-travesia-gold/60">Ingresa el PIN que te dio tu mesero para girar la ruleta</p>
-                </div>
-                <div className="flex flex-col gap-4">
-                  <input
-                    type="tel"
-                    maxLength={4}
-                    placeholder="XXXX"
-                    value={userPin}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setUserPin(val);
-                      if (val === config.pin_validacion) {
-                        setPinCorrecto(true);
-                      }
-                    }}
-                    className="w-full bg-travesia-green-dark/40 border-2 border-travesia-gold/40 rounded-2xl px-6 py-5 text-4xl text-center tracking-[0.5em] font-mono focus:border-travesia-gold outline-none transition-all"
-                  />
-                  {userPin.length === 4 && userPin !== config.pin_validacion && (
-                    <p className="text-red-400 font-bold animate-shake">Código incorrecto. Inténtalo de nuevo.</p>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <h2 className="text-3xl font-semibold">Gira y Gana</h2>
-                <p className="text-travesia-gold/60 italic">¡La suerte está de tu lado!</p>
-                {premios.length > 0 ? (
-                  <Ruleta premios={premios} onResult={handleResultadoRuleta} />
-                ) : (
-                  <div className="py-10">
-                    <p>Cargando premios...</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </FlujoPaso>
-
-        {/* PASO 5: FINAL */}
-        <FlujoPaso active={paso === 5}>
-          <div className="space-y-10 text-center py-10">
+        {/* STEP: WELCOME */}
+        {step === 'welcome' && (
+          <div className="flex-1 flex flex-col justify-center space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
             <div className="space-y-4">
-              <div className="w-20 h-20 bg-travesia-gold rounded-full flex items-center justify-center mx-auto shadow-2xl animate-bounce">
-                <CheckCircle2 className="w-12 h-12 text-travesia-green-deep" />
-              </div>
-              <h2 className="text-4xl font-bold">{mensaje}</h2>
+              <h2 className="text-5xl font-serif leading-[1.1] font-bold">
+                Bienvenido a <br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-travesia-gold to-[#FFD700]">algo especial.</span>
+              </h2>
+              <p className="text-white/60 text-lg leading-relaxed font-light">
+                Únete a nuestro club exclusivo y gana premios increíbles desde tu primera visita.
+              </p>
             </div>
             
-            <div className="bg-travesia-green-dark/30 border border-travesia-gold/20 p-6 rounded-3xl space-y-2">
-              <p className="text-travesia-gold/60 uppercase tracking-widest text-xs">Visitas Acumuladas</p>
-              <p className="text-5xl font-black text-travesia-gold">{cliente?.total_visitas || 0}</p>
-              {cliente?.total_visitas >= parseInt(config.visitas_para_premio || '10') && (
-                <div className="mt-4 p-3 bg-travesia-gold text-travesia-green-deep rounded-xl font-bold animate-pulse">
-                  🎁 ¡TIENES UN PREMIO VIP PENDIENTE!
-                </div>
-              )}
+            <div className="grid grid-cols-1 gap-4">
+              <div className="flex items-center gap-4 bg-white/5 border border-white/10 p-5 rounded-[32px] backdrop-blur-md">
+                <div className="w-12 h-12 bg-travesia-gold/20 rounded-2xl flex items-center justify-center text-travesia-gold"><Gift /></div>
+                <div><p className="font-bold">Premios al Instante</p><p className="text-xs text-white/40">Gira la ruleta al registrarte.</p></div>
+              </div>
+              <div className="flex items-center gap-4 bg-white/5 border border-white/10 p-5 rounded-[32px] backdrop-blur-md">
+                <div className="w-12 h-12 bg-travesia-green-deep/40 rounded-2xl flex items-center justify-center text-travesia-gold"><Star /></div>
+                <div><p className="font-bold">Fidelidad Premium</p><p className="text-xs text-white/40">Cada visita te acerca a la meta.</p></div>
+              </div>
             </div>
 
-            <p className="text-travesia-gold/40 text-sm">
-              Muestra esta pantalla al personal del restaurante para reclamar tu premio si ganaste.
-            </p>
-
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full bg-travesia-green-dark/40 border-2 border-travesia-gold text-travesia-gold font-bold py-5 rounded-2xl hover:bg-travesia-gold hover:text-travesia-green-deep transition-all mt-6"
+            <button 
+              onClick={() => setStep('form')}
+              className="group w-full bg-gradient-to-r from-travesia-gold to-[#B8860B] text-[#0A1A12] py-6 rounded-full font-black text-sm tracking-[0.3em] uppercase shadow-[0_20px_50px_rgba(212,175,55,0.2)] hover:shadow-[0_20px_60px_rgba(212,175,55,0.4)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
             >
-              SALIR / PREMIO ENTREGADO
+              COMENZAR EXPERIENCIA <ArrowRight className="group-hover:translate-x-2 transition-transform" />
             </button>
           </div>
-        </FlujoPaso>
+        )}
+
+        {/* STEP: FORM */}
+        {step === 'form' && (
+          <div className="animate-in fade-in slide-in-from-right-8 duration-700">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <h2 className="text-3xl font-serif font-bold">Crea tu Perfil</h2>
+                <p className="text-white/40 text-sm">Completa tus datos para empezar a ganar.</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-2"><User size={12}/> Nombre</label>
+                  <input required type="text" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-travesia-gold transition-all" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-2"><User size={12}/> Apellido</label>
+                  <input required type="text" value={formData.apellido} onChange={(e) => setFormData({...formData, apellido: e.target.value})} className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-travesia-gold transition-all" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-2"><Mail size={12}/> Correo Electrónico</label>
+                <input required type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-travesia-gold transition-all" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-2"><Smartphone size={12}/> WhatsApp</label>
+                  <input required type="tel" value={formData.telefono} onChange={(e) => setFormData({...formData, telefono: e.target.value})} className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-travesia-gold transition-all" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-2"><Calendar size={12}/> Tu Cumpleaños</label>
+                  <input required type="date" value={formData.fecha_nacimiento} onChange={(e) => setFormData({...formData, fecha_nacimiento: e.target.value})} className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-travesia-gold transition-all [color-scheme:dark]" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-travesia-gold">Género</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {['Femenino', 'Masculino', 'Otro'].map((g) => (
+                    <button key={g} type="button" onClick={() => setFormData({...formData, genero: g})} className={`py-3 rounded-xl border text-[10px] font-bold tracking-widest uppercase transition-all ${formData.genero === g ? 'bg-travesia-gold border-travesia-gold text-[#0A1A12]' : 'bg-white/5 border-white/10 text-white/60 hover:border-white/30'}`}>
+                      {g}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full bg-travesia-green-deep text-white py-6 rounded-full font-black text-sm tracking-[0.3em] uppercase shadow-2xl hover:brightness-125 active:scale-95 transition-all flex items-center justify-center gap-3 border border-white/10"
+              >
+                {loading ? <Loader2 className="animate-spin" /> : <>REGISTRARME <ChevronRight /></>}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* STEP: GAME */}
+        {step === 'game' && (
+          <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in duration-1000">
+            <div className="text-center mb-8 space-y-2">
+              <h2 className="text-4xl font-serif font-bold text-travesia-gold">Gira y Gana</h2>
+              <p className="text-white/40 text-sm italic">Tu aventura comienza con un regalo.</p>
+            </div>
+            
+            <div className="w-full flex justify-center py-4">
+              <Ruleta onWin={(p) => { setPremioFinal(p); setStep('success'); }} />
+            </div>
+
+            <div className="mt-12 flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-3 rounded-full text-xs text-white/60">
+              <ShieldCheck className="text-travesia-gold" size={16} /> Verificación por PIN requerida en caja
+            </div>
+          </div>
+        )}
+
+        {/* STEP: SUCCESS */}
+        {step === 'success' && (
+          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-10 animate-in fade-in zoom-in duration-1000">
+            <div className="relative">
+              <div className="absolute inset-0 bg-travesia-gold blur-[60px] opacity-20 animate-pulse"></div>
+              <div className="relative w-32 h-32 bg-gradient-to-br from-travesia-gold to-[#B8860B] rounded-[40px] flex items-center justify-center shadow-2xl border border-white/20">
+                <CheckCircle2 className="w-16 h-16 text-[#0A1A12]" />
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <h2 className="text-5xl font-serif font-bold tracking-tight">¡Felicidades!</h2>
+              <div className="p-8 bg-white/5 border-2 border-travesia-gold/30 rounded-[40px] backdrop-blur-xl">
+                <p className="text-xs uppercase tracking-[0.3em] text-travesia-gold font-bold mb-2">Has ganado</p>
+                <p className="text-3xl font-black text-white">{premioFinal}</p>
+              </div>
+              <p className="text-white/40 text-sm leading-relaxed max-w-[280px] mx-auto italic">
+                Captura esta pantalla y muéstrala en caja para reclamar tu premio.
+              </p>
+            </div>
+
+            <div className="pt-8 border-t border-white/10 w-full">
+              <p className="text-[10px] uppercase tracking-[0.4em] text-white/20 font-black mb-4">Siguiente Paso</p>
+              <div className="flex items-center gap-3 justify-center text-travesia-gold font-serif italic text-lg">
+                <Smartphone className="w-5 h-5" /> Escanea el QR en tu próxima visita
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </main>
   );

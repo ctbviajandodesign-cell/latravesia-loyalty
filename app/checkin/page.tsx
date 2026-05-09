@@ -96,27 +96,32 @@ export default function CheckInPage() {
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#f8f5f0]"><Loader2 className="animate-spin w-10 h-10 text-travesia-green-deep" /></div>;
 
   return (
-    <div className="min-h-screen bg-[#f8f5f0] p-6 flex flex-col items-center justify-center font-serif">
-      <div className="w-full max-w-md bg-white rounded-[40px] shadow-2xl p-10 space-y-8 border border-gray-100 animate-in fade-in zoom-in duration-500">
+    <div className="min-h-screen bg-[#051A10] p-6 flex flex-col items-center justify-center font-serif text-white">
+      {/* BACKGROUND DECORATION */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-travesia-gold/5 blur-[120px] rounded-full"></div>
+      </div>
+
+      <div className="relative w-full max-w-md bg-white/5 border border-white/10 rounded-[40px] shadow-2xl p-10 space-y-8 backdrop-blur-xl animate-in fade-in zoom-in duration-500">
         
         {/* HEADER */}
         <div className="text-center space-y-2">
-          <div className="mx-auto w-16 h-16 bg-travesia-gold/10 rounded-full flex items-center justify-center">
-            <MapPin className="w-8 h-8 text-travesia-green-deep" />
+          <div className="mx-auto w-16 h-16 bg-travesia-gold/20 rounded-2xl flex items-center justify-center shadow-lg">
+            <MapPin className="w-8 h-8 text-travesia-gold" />
           </div>
-          <h1 className="text-3xl font-bold text-travesia-green-deep tracking-tight">Check-In</h1>
-          <p className="text-gray-500 font-sans text-sm tracking-wide uppercase font-bold">La Travesía Loyalty</p>
+          <h1 className="text-3xl font-bold text-travesia-gold tracking-tight">Check-In</h1>
+          <p className="text-white/40 font-sans text-[10px] tracking-[0.4em] uppercase font-black">La Travesía Loyalty</p>
         </div>
 
         {step === 'identify' && (
           <div className="space-y-6 text-center py-4">
-            <p className="text-gray-600 italic">No te hemos reconocido en este dispositivo.</p>
+            <p className="text-white/60 italic text-sm">No te hemos reconocido en este dispositivo.</p>
             <div className="flex flex-col gap-4">
               <button 
                 onClick={() => router.push('/')}
-                className="w-full bg-travesia-green-deep text-white py-5 rounded-2xl font-black text-sm tracking-[0.2em] shadow-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
+                className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-[0.2em] shadow-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-3 uppercase"
               >
-                <UserPlus className="w-5 h-5 text-travesia-gold" /> REGISTRARME / INICIAR
+                <UserPlus className="w-5 h-5" /> REGISTRARME / INICIAR
               </button>
             </div>
           </div>
@@ -124,68 +129,66 @@ export default function CheckInPage() {
 
         {step === 'pin' && (
           <div className="space-y-8 animate-in slide-in-from-bottom-4">
-            <div className="text-center p-4 bg-gray-50 rounded-2xl">
-              <p className="text-gray-500 text-xs uppercase font-black tracking-widest mb-1">Cliente</p>
-              <h2 className="text-xl text-travesia-green-deep font-bold">{cliente.nombre} {cliente.apellido}</h2>
-              <div className="mt-2 flex items-center justify-center gap-2">
+            <div className="text-center p-6 bg-white/5 border border-white/10 rounded-3xl">
+              <p className="text-travesia-gold/60 text-[10px] uppercase font-black tracking-widest mb-1">Bienvenido de vuelta</p>
+              <h2 className="text-2xl text-white font-bold">{cliente.nombre} {cliente.apellido}</h2>
+              <div className="mt-3 flex items-center justify-center gap-2">
                 <Trophy className="w-4 h-4 text-travesia-gold" />
-                <span className="text-xs font-bold text-gray-400">Visitas actuales: {cliente.visitas || 0}</span>
+                <span className="text-xs font-bold text-white/40 tracking-widest uppercase">Puntos: {cliente.visitas || 0}</span>
               </div>
             </div>
 
             <div className="space-y-4">
-              <p className="text-center text-sm text-gray-500">Ingresa el PIN de seguridad del local para validar tu visita hoy:</p>
+              <p className="text-center text-xs text-white/60 uppercase tracking-wider font-bold">Ingresa el PIN del Local</p>
               <input 
                 type="password" 
                 maxLength={4}
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
                 placeholder="****"
-                className="w-full text-center text-4xl tracking-[1em] py-4 bg-gray-50 border-2 border-gray-100 rounded-3xl outline-none focus:border-travesia-gold transition-all font-mono"
+                className="w-full text-center text-4xl tracking-[1em] py-5 bg-white/5 border-2 border-white/10 rounded-3xl outline-none focus:border-travesia-gold transition-all font-mono text-white"
               />
-              {error && <p className="text-red-500 text-xs text-center font-bold animate-bounce">{error}</p>}
+              {error && <p className="text-red-400 text-[10px] text-center font-bold uppercase tracking-widest animate-pulse">{error}</p>}
             </div>
 
             <button 
               onClick={handleCheckIn}
               disabled={processing || pin.length < 4}
-              className="w-full bg-travesia-green-deep text-white py-6 rounded-3xl font-black text-sm tracking-[0.2em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+              className="w-full bg-travesia-gold text-[#051A10] py-6 rounded-3xl font-black text-xs tracking-[0.2em] shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-30 uppercase"
             >
-              {processing ? <Loader2 className="animate-spin w-6 h-6" /> : <><CheckCircle2 className="w-6 h-6 text-travesia-gold" /> SUMAR MI VISITA</>}
+              {processing ? <Loader2 className="animate-spin w-6 h-6" /> : <><CheckCircle2 className="w-6 h-6" /> VALIDAR VISITA</>}
             </button>
           </div>
         )}
 
         {step === 'success' && (
           <div className="text-center space-y-8 py-4 animate-in zoom-in duration-700">
-            <div className="mx-auto w-24 h-24 bg-green-50 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-              <Sparkles className="w-12 h-12 text-green-500" />
+            <div className="mx-auto w-24 h-24 bg-travesia-gold/20 rounded-[32px] flex items-center justify-center border-2 border-travesia-gold/30 shadow-2xl">
+              <Sparkles className="w-12 h-12 text-travesia-gold" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold text-gray-900">¡Visita Registrada!</h2>
-              <p className="text-gray-500 italic">Gracias por acompañarnos hoy.</p>
+              <h2 className="text-3xl font-bold text-white tracking-tight">¡Visita Registrada!</h2>
+              <p className="text-white/40 italic text-sm font-light">Un paso más cerca de tu próximo premio.</p>
             </div>
-            <div className="bg-travesia-green-deep/5 p-6 rounded-[32px] border border-travesia-green-deep/10">
-              <p className="text-xs text-gray-400 uppercase font-black tracking-widest mb-2">Tu Progreso</p>
-              <p className="text-5xl font-black text-travesia-green-deep">{cliente.visitas} / 10</p>
-              <p className="text-xs text-travesia-gold font-bold mt-2 tracking-widest">¡Sigue así para tu premio!</p>
+            
+            <div className="bg-gradient-to-br from-travesia-gold to-[#B8860B] p-8 rounded-[40px] shadow-2xl border border-white/20">
+              <p className="text-[10px] text-[#051A10]/60 uppercase font-black tracking-widest mb-1">Tu Progreso Actual</p>
+              <p className="text-6xl font-black text-[#051A10] tracking-tighter">{cliente.visitas} / 10</p>
+              <p className="text-[10px] text-[#051A10] font-bold mt-2 tracking-[0.2em] uppercase">¡Vas por muy buen camino!</p>
             </div>
 
-            {/* CTA GOOGLE REVIEWS (A partir de la visita 2) */}
+            {/* CTA GOOGLE REVIEWS */}
             {cliente.visitas >= 2 && googleLink && (
-              <div className="bg-travesia-gold/10 p-6 rounded-[32px] border border-travesia-gold/20 space-y-4 animate-in fade-in slide-in-from-bottom-2 delay-300">
+              <div className="bg-white/5 p-6 rounded-[32px] border border-white/10 space-y-4">
                 <div className="flex items-center justify-center gap-1 text-travesia-gold">
-                  <Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" /><Star className="w-5 h-5 fill-current" />
+                  <Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" />
                 </div>
-                <p className="text-sm font-bold text-travesia-green-deep leading-tight">
-                  ¡Gracias por ser cliente fiel! <br/>
-                  <span className="text-xs font-normal text-gray-600">¿Nos regalas 1 minuto para dejar tu reseña en Google?</span>
-                </p>
+                <p className="text-xs font-bold text-white tracking-widest uppercase">¿Te gusta la experiencia?</p>
                 <a 
                   href={googleLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block w-full bg-travesia-gold text-travesia-green-deep py-3 rounded-xl font-black text-xs tracking-widest uppercase shadow-md hover:bg-travesia-gold/80 transition-all"
+                  className="inline-block w-full border border-travesia-gold text-travesia-gold py-3 rounded-xl font-black text-[10px] tracking-[0.3em] uppercase hover:bg-travesia-gold hover:text-[#051A10] transition-all"
                 >
                   DEJAR MI RESEÑA ⭐
                 </a>
@@ -194,7 +197,7 @@ export default function CheckInPage() {
 
             <button 
               onClick={() => router.push('/')}
-              className="text-travesia-green-deep font-bold text-sm underline underline-offset-8 decoration-travesia-gold"
+              className="text-travesia-gold/60 font-bold text-xs uppercase tracking-widest hover:text-travesia-gold transition-colors"
             >
               Volver al inicio
             </button>
@@ -203,7 +206,7 @@ export default function CheckInPage() {
 
       </div>
       
-      <p className="mt-8 text-gray-400 text-[10px] uppercase tracking-[0.3em]">Hostería La Travesía • Luxury Experience</p>
+      <p className="mt-8 text-white/20 text-[9px] uppercase tracking-[0.4em] font-black italic">Hostería La Travesía • High Fidelity Loyalty</p>
     </div>
   );
 }
