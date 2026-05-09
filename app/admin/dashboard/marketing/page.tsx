@@ -24,7 +24,8 @@ export default function MarketingPage() {
   const [config, setConfig] = useState({
     email_asunto: '',
     email_mensaje: '',
-    email_foto_url: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?q=80&w=2070&auto=format&fit=crop'
+    email_foto_url: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?q=80&w=2070&auto=format&fit=crop',
+    admin_email: ''
   });
   const [cumpleañerosSemana, setCumpleañerosSemana] = useState<any[]>([]);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -44,7 +45,8 @@ export default function MarketingPage() {
       setConfig({
         email_asunto: configObj?.email_asunto || '¡Feliz Semana de tu Cumpleaños! 🎂',
         email_mensaje: configObj?.email_mensaje || 'Hola {nombre}, queremos invitarte a celebrar tu semana especial con nosotros...',
-        email_foto_url: configObj?.email_foto_url || 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?q=80&w=2070&auto=format&fit=crop'
+        email_foto_url: configObj?.email_foto_url || 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?q=80&w=2070&auto=format&fit=crop',
+        admin_email: configObj?.admin_email || ''
       });
 
       const { data: clientes } = await supabase.from('clientes').select('nombre, apellido, telefono, fecha_nacimiento');
@@ -110,11 +112,11 @@ export default function MarketingPage() {
         <div className="flex gap-2">
           <button 
             onClick={handleTestSend}
-            disabled={testSending}
-            className="px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-2xl font-bold flex items-center gap-2 hover:bg-gray-50 transition-all disabled:opacity-50"
+            disabled={testSending || !config.admin_email}
+            className="px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-2xl font-bold flex items-center gap-2 hover:bg-gray-50 transition-all disabled:opacity-50 shadow-sm"
           >
             {testSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 text-travesia-green-deep" />}
-            Enviar Prueba
+            {config.admin_email ? `Prueba a ${config.admin_email}` : 'Falta Correo Admin'}
           </button>
           <button 
             onClick={handleSaveConfig}

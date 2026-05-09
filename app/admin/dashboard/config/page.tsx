@@ -30,7 +30,8 @@ export default function ConfigPage() {
     admin_password: '',
     pin_validacion: '0000',
     email_asunto: '¡Feliz Semana de tu Cumpleaños! 🎂 La Travesía',
-    email_mensaje: 'Hola {nombre}, queremos invitarte a celebrar tu semana especial con nosotros. ¡Ven este sábado o domingo y reclama una sorpresa!'
+    email_mensaje: 'Hola {nombre}, queremos invitarte a celebrar tu semana especial con nosotros. ¡Ven este sábado o domingo y reclama una sorpresa!',
+    admin_email: ''
   });
 
   // const supabase = createClientComponentClient();
@@ -204,6 +205,20 @@ export default function ConfigPage() {
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
             />
             <p className="text-xs text-gray-500 italic">Ten cuidado al cambiarla, asegúrate de recordarla.</p>
+          </div>
+
+          <div className="space-y-2 max-w-sm">
+            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Mail className="w-4 h-4 text-blue-600" /> Correo de Administrador
+            </label>
+            <input 
+              type="email"
+              value={config.admin_email}
+              onChange={(e) => setConfig({...config, admin_email: e.target.value})}
+              placeholder="admin@latravesia.com"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
+            />
+            <p className="text-xs text-gray-500">Aquí recibirás los correos de prueba y reportes del sistema.</p>
           </div>
 
           <div className="space-y-2 max-w-sm">
