@@ -18,6 +18,7 @@ interface Premio {
   id: string;
   nombre: string;
   descripcion: string;
+  emoji: string;
   probabilidad: number;
   stock: number;
   created_at: string;
@@ -33,6 +34,7 @@ export default function PremiosPage() {
   const [showForm, setShowForm] = useState(false);
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
+  const [emoji, setEmoji] = useState('🎁');
   const [probabilidad, setProbabilidad] = useState('10');
   const [stock, setStock] = useState('100');
 
@@ -69,6 +71,7 @@ export default function PremiosPage() {
         .insert([{
           nombre,
           descripcion,
+          emoji,
           probabilidad: parseFloat(probabilidad),
           stock: parseInt(stock)
         }]);
@@ -78,6 +81,7 @@ export default function PremiosPage() {
       setMessage({ type: 'success', text: 'Premio añadido correctamente' });
       setNombre('');
       setDescripcion('');
+      setEmoji('🎁');
       setProbabilidad('10');
       setStock('100');
       setShowForm(false);
@@ -143,13 +147,24 @@ export default function PremiosPage() {
         <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 animate-in zoom-in-95 duration-200">
           <form onSubmit={handleAddPremio} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Icono / Emoji</label>
+              <input 
+                required
+                value={emoji}
+                onChange={(e) => setEmoji(e.target.value)}
+                placeholder="Ej: ☕"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none text-2xl text-center"
+              />
+            </div>
+
+            <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Nombre del Premio</label>
               <input 
                 required
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
                 placeholder="Ej: Café Gratis"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] focus:border-transparent outline-none"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
               />
             </div>
             
@@ -241,8 +256,13 @@ export default function PremiosPage() {
                 {premios.map((premio) => (
                   <tr key={premio.id} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{premio.nombre}</div>
-                      <div className="text-sm text-gray-500">{premio.descripcion || 'Sin descripción'}</div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{premio.emoji}</span>
+                        <div>
+                          <div className="font-medium text-gray-900">{premio.nombre}</div>
+                          <div className="text-sm text-gray-500">{premio.descripcion || 'Sin descripción'}</div>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">

@@ -42,22 +42,22 @@ export default function Home() {
       setConfig(configObj || {});
 
       // Ruleta activa hoy
-      const hoy = new Date();
-      const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-      const nombreDia = diasSemana[hoy.getDay()];
-      
       const { data: ruleta } = await supabase
         .from('ruletas')
-        .select('*, premios(*)')
+        .select('*')
         .eq('activa', true)
-        .contains('dias', [nombreDia])
-        .order('created_at', { ascending: false })
-        .limit(1)
         .maybeSingle();
 
-      if (ruleta) {
+      if (ruleta && ruleta.configuracion?.premiosIds) {
         setRuletaActiva(ruleta);
-        setPremios(ruleta.premios?.filter((p: any) => p.activo) || []);
+        // Obtener los detalles de los premios seleccionados
+        const { data: premiosData } = await supabase
+          .from('premios')
+          .select('*')
+          .in('id', ruleta.configuracion.premiosIds)
+          .gt('stock', 0);
+        
+        setPremios(premiosData || []);
       }
     };
 
@@ -167,7 +167,17 @@ export default function Home() {
   };
 
   const handleResultadoRuleta = async (premio: any) => {
+    // 1. Restar stock del premio
+    const { error: stockError } = await supabase
+      .from('premios')
+      .update({ stock: Math.max(0, premio.stock - 1) })
+      .eq('id', premio.id);
+
+    if (stockError) console.error('Error actualizando stock:', stockError);
+
+    // 2. Registrar la visita y el premio
     await registrarVisita(premio.nombre);
+    
     setMensaje(`¡FELICIDADES! 🎉 Ganaste: ${premio.nombre}`);
     setTimeout(() => setPaso(5), 2000); // Ir a final después de ver confetti
   };
