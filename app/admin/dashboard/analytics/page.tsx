@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { supabase } from '@/lib/supabase';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -24,7 +24,7 @@ export default function AnalyticsPage() {
     topPremios: [] as { nombre: string, count: number }[]
   });
 
-  const supabase = createClientComponentClient();
+  // const supabase = createClientComponentClient();
 
   useEffect(() => {
     fetchAnalytics();
