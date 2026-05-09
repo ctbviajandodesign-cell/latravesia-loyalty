@@ -146,13 +146,19 @@ export default async function DashboardPage() {
           <p className="text-white/70 leading-relaxed">
             El sistema está funcionando correctamente. Hoy hemos tenido <span className="text-travesia-gold font-bold">{metrics.visitasHoy} visitas</span> registradas.
           </p>
-          <div className="flex gap-4">
-            <button className="bg-travesia-gold text-travesia-green-deep px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform">
+          <div className="flex flex-wrap gap-4">
+            <a 
+              href="/admin/dashboard/clientes"
+              className="bg-travesia-gold text-travesia-green-deep px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform inline-block"
+            >
               Ver Clientes
-            </button>
-            <button className="bg-white/10 border border-white/20 text-white px-6 py-3 rounded-xl font-bold hover:bg-white/20 transition-all">
+            </a>
+            <a 
+              href="/admin/dashboard/config"
+              className="bg-white/10 border border-white/20 text-white px-6 py-3 rounded-xl font-bold hover:bg-white/20 transition-all inline-block"
+            >
               Configuración
-            </button>
+            </a>
           </div>
         </div>
         
