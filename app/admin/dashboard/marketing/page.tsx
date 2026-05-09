@@ -23,12 +23,19 @@ import {
 const formatImageUrl = (url: string) => {
   if (!url) return '';
   
-  // Si es un link de página de Unsplash: unsplash.com/photos/ID o unsplash.com/es/fotos/ID
+  // 1. Detectar si es un link de página de Unsplash (es/fotos/ID o photos/ID)
   const unsplashRegex = /unsplash\.com\/(?:[a-z]{2}\/fotos\/|photos\/)([a-zA-Z0-9_-]+)/;
   const match = url.match(unsplashRegex);
-  
   if (match && match[1]) {
     return `https://images.unsplash.com/photo-${match[1]}?auto=format&fit=crop&q=80&w=1000`;
+  }
+
+  // 2. Detectar si es un ID suelto o un nombre de archivo de Unsplash (ej: juan-marca-e4kmTGIQFIw-unsplash)
+  // El patrón de Unsplash suele ser un guión seguido de 11 caracteres alfanuméricos justo antes de "-unsplash"
+  const fileRegex = /([a-zA-Z0-9_-]{11})-unsplash/;
+  const fileMatch = url.match(fileRegex);
+  if (fileMatch && fileMatch[1]) {
+    return `https://images.unsplash.com/photo-${fileMatch[1]}?auto=format&fit=crop&q=80&w=1000`;
   }
   
   return url;
