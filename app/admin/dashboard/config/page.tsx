@@ -238,36 +238,6 @@ export default function ConfigPage() {
           </div>
         </div>
 
-        {/* Campaña de Email */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
-          <h2 className="text-lg font-bold text-gray-900 border-b pb-2 flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-blue-500" /> Campaña Automática de Cumpleaños
-          </h2>
-          
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Asunto del Correo</label>
-              <input 
-                type="text"
-                value={config.email_asunto}
-                onChange={(e) => setConfig({...config, email_asunto: e.target.value})}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Mensaje de Invitación</label>
-              <textarea 
-                rows={4}
-                value={config.email_mensaje}
-                onChange={(e) => setConfig({...config, email_mensaje: e.target.value})}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
-                placeholder="Usa {nombre} para personalizar el saludo..."
-              />
-              <p className="text-xs text-gray-500">Este mensaje se enviará todos los lunes a quienes cumplan años esa semana. Usa <b>{"{nombre}"}</b> para poner el nombre del cliente automáticamente.</p>
-            </div>
-          </div>
-        </div>
-
         <button 
           type="submit"
           disabled={saving}
