@@ -88,13 +88,34 @@ export default function MarketingPage() {
   }
 
   async function handleTestSend() {
+    if (!config.admin_email) {
+      setMessage({ type: 'error', text: 'Configura un correo de administrador primero.' });
+      return;
+    }
+
     setTestSending(true);
-    // Simulación de envío
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/marketing/test-send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: config.email_asunto,
+          message: config.email_mensaje,
+          imageUrl: config.email_foto_url,
+          to: config.admin_email
+        })
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+
+      setMessage({ type: 'success', text: `¡Correo enviado de verdad a ${config.admin_email}!` });
+      setTimeout(() => setMessage(null), 5000);
+    } catch (error: any) {
+      setMessage({ type: 'error', text: `Error al enviar: ${error.message}` });
+    } finally {
       setTestSending(false);
-      setMessage({ type: 'success', text: 'Correo de prueba enviado a tu bandeja (Simulado).' });
-      setTimeout(() => setMessage(null), 3000);
-    }, 1500);
+    }
   }
 
   if (loading) return <div className="p-12 text-center"><Loader2 className="animate-spin mx-auto w-8 h-8 text-travesia-green-deep" /></div>;

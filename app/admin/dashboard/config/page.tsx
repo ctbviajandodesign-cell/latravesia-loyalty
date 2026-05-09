@@ -32,7 +32,8 @@ export default function ConfigPage() {
     pin_validacion: '0000',
     email_asunto: '¡Feliz Semana de tu Cumpleaños! 🎂 La Travesía',
     email_mensaje: 'Hola {nombre}, queremos invitarte a celebrar tu semana especial con nosotros. ¡Ven este sábado o domingo y reclama una sorpresa!',
-    admin_email: ''
+    admin_email: '',
+    resend_api_key: ''
   });
 
   // const supabase = createClientComponentClient();
@@ -220,6 +221,20 @@ export default function ConfigPage() {
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
             />
             <p className="text-xs text-gray-500">Aquí recibirás los correos de prueba y reportes del sistema.</p>
+          </div>
+
+          <div className="space-y-2 max-w-sm">
+            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Lock className="w-4 h-4 text-orange-600" /> API Key de Resend (Para Envíos Reales)
+            </label>
+            <input 
+              type="password"
+              value={config.resend_api_key}
+              onChange={(e) => setConfig({...config, resend_api_key: e.target.value})}
+              placeholder="re_123456789..."
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none font-mono text-sm"
+            />
+            <p className="text-[10px] text-gray-400">Consíguela gratis en <a href="https://resend.com" target="_blank" className="underline">resend.com</a> para activar los correos reales.</p>
           </div>
 
           <div className="space-y-2 max-w-sm">
