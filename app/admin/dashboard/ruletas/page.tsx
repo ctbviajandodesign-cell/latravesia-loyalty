@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { supabase } from '@/lib/supabase';
 import { 
   RotateCw, 
   Plus, 
@@ -27,7 +27,7 @@ export default function RuletasPage() {
   const [nombre, setNombre] = useState('');
   const [selectedPremios, setSelectedPremios] = useState<string[]>([]);
 
-  const supabase = createClientComponentClient();
+  // const supabase = createClientComponentClient(); // Eliminado por consistencia
 
   useEffect(() => {
     fetchData();
