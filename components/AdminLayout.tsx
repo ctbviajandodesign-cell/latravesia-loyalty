@@ -54,7 +54,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="p-6">
           <h2 className="text-2xl font-bold text-travesia-gold tracking-tighter border-b border-travesia-gold/20 pb-4 mb-6">
             LA TRAVESÍA
-            <span className="block text-[10px] font-medium tracking-[0.3em] uppercase opacity-60">Admin Panel</span>
+            <span className="block text-[10px] font-medium tracking-[0.3em] uppercase opacity-60">Admin Panel <span className="text-travesia-gold">v2.2</span></span>
           </h2>
 
           <nav className="space-y-1">
