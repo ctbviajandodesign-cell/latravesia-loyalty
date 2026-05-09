@@ -15,31 +15,14 @@ import {
   Gift
 } from 'lucide-react';
 
-interface Premio {
-  id: string;
-  nombre: string;
-  probabilidad: number;
-  stock: number;
-}
-
-interface Ruleta {
-  id: string;
-  nombre: string;
-  activa: boolean;
-  configuracion: {
-    premiosIds: string[];
-  };
-  created_at: string;
-}
-
 export default function RuletasPage() {
-  const [ruletas, setRuletas] = useState<Ruleta[]>([]);
-  const [premiosDisponibles, setPremiosDisponibles] = useState<Premio[]>([]);
+  const [ruletas, setRuletas] = useState<any[]>([]);
+  const [premiosDisponibles, setPremiosDisponibles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   
-  // Form state
   const [showForm, setShowForm] = useState(false);
   const [nombre, setNombre] = useState('');
   const [selectedPremios, setSelectedPremios] = useState<string[]>([]);
@@ -51,19 +34,27 @@ export default function RuletasPage() {
   }, []);
 
   async function fetchData() {
+    setLoading(true);
+    setError(null);
     try {
-      const [ruletasRes, premiosRes] = await Promise.all([
-        supabase.from('ruletas').select('*').order('created_at', { ascending: false }),
-        supabase.from('premios').select('id, nombre, probabilidad, stock').gt('stock', 0)
-      ]);
+      // Consultas simples para evitar errores de columnas faltantes
+      const { data: ruletasData, error: rError } = await supabase
+        .from('ruletas')
+        .select('*');
+      
+      if (rError) throw new Error(`Error en Ruletas: ${rError.message}`);
 
-      if (ruletasRes.error) throw ruletasRes.error;
-      if (premiosRes.error) throw premiosRes.error;
+      const { data: premiosData, error: pError } = await supabase
+        .from('premios')
+        .select('*');
 
-      setRuletas(ruletasRes.data || []);
-      setPremiosDisponibles(premiosRes.data || []);
-    } catch (error) {
-      console.error('Error fetching data:', error);
+      if (pError) throw new Error(`Error en Premios: ${pError.message}`);
+
+      setRuletas(ruletasData || []);
+      setPremiosDisponibles(premiosData || []);
+    } catch (err: any) {
+      console.error('Fetch error:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -72,7 +63,7 @@ export default function RuletasPage() {
   async function handleCreateRuleta(e: React.FormEvent) {
     e.preventDefault();
     if (selectedPremios.length === 0) {
-      setMessage({ type: 'error', text: 'Debes seleccionar al menos un premio.' });
+      setMessage({ type: 'error', text: 'Selecciona al menos un premio.' });
       return;
     }
 
@@ -88,13 +79,13 @@ export default function RuletasPage() {
 
       if (error) throw error;
 
-      setMessage({ type: 'success', text: 'Ruleta creada correctamente.' });
+      setMessage({ type: 'success', text: 'Ruleta creada.' });
       setNombre('');
       setSelectedPremios([]);
       setShowForm(false);
       fetchData();
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message });
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
     } finally {
       setActionLoading(false);
     }
@@ -103,48 +94,39 @@ export default function RuletasPage() {
   async function toggleStatus(id: string, currentStatus: boolean) {
     setActionLoading(true);
     try {
-      // If we are activating this one, deactivate all others first
       if (!currentStatus) {
         await supabase.from('ruletas').update({ activa: false }).neq('id', id);
       }
-
-      const { error } = await supabase
-        .from('ruletas')
-        .update({ activa: !currentStatus })
-        .eq('id', id);
-
+      const { error } = await supabase.from('ruletas').update({ activa: !currentStatus }).eq('id', id);
       if (error) throw error;
-      
-      setMessage({ type: 'success', text: !currentStatus ? 'Ruleta activada' : 'Ruleta desactivada' });
       fetchData();
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message });
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
     } finally {
       setActionLoading(false);
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('¿Estás seguro de eliminar esta ruleta?')) return;
-    
-    setActionLoading(true);
-    try {
-      const { error } = await supabase.from('ruletas').delete().eq('id', id);
-      if (error) throw error;
-      setRuletas(ruletas.filter(r => r.id !== id));
-      setMessage({ type: 'success', text: 'Ruleta eliminada' });
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message });
-    } finally {
-      setActionLoading(false);
-    }
-  }
+  if (loading) return (
+    <div className="p-20 flex flex-col items-center gap-4">
+      <Loader2 className="w-12 h-12 animate-spin text-[#4A5D4E]" />
+      <p className="text-gray-500 font-medium animate-pulse">Cargando sistema de ruletas...</p>
+    </div>
+  );
 
-  const togglePremio = (id: string) => {
-    setSelectedPremios(prev => 
-      prev.includes(id) ? prev.filter(pId => pId !== id) : [...prev, id]
-    );
-  };
+  if (error) return (
+    <div className="p-10 bg-red-50 rounded-2xl border border-red-100 text-center space-y-4">
+      <AlertCircle className="w-12 h-12 text-red-500 mx-auto" />
+      <h2 className="text-xl font-bold text-red-700">Ups, algo salió mal</h2>
+      <p className="text-red-600 max-w-md mx-auto">{error}</p>
+      <button 
+        onClick={fetchData}
+        className="px-6 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all"
+      >
+        Reintentar conexión
+      </button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -154,22 +136,19 @@ export default function RuletasPage() {
             <RotateCw className="w-8 h-8" />
             Configuración de Ruletas
           </h1>
-          <p className="text-gray-600 mt-1">Activa y configura las promociones del día.</p>
+          <p className="text-gray-600 mt-1">Gestiona las promociones activas.</p>
         </div>
         
         <button 
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center justify-center gap-2 bg-[#4A5D4E] text-white px-6 py-3 rounded-xl hover:bg-[#3D4D40] transition-all shadow-lg active:scale-95"
+          className="bg-[#4A5D4E] text-white px-6 py-3 rounded-xl hover:bg-[#3D4D40] transition-all shadow-lg"
         >
-          {showForm ? 'Cerrar' : <><Plus className="w-5 h-5" /> Nueva Ruleta</>}
+          {showForm ? 'Cancelar' : 'Nueva Ruleta'}
         </button>
       </div>
 
       {message && (
-        <div className={`p-4 rounded-xl flex items-center gap-3 ${
-          message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'
-        }`}>
-          {message.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+        <div className={`p-4 rounded-xl flex items-center gap-3 ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
           {message.text}
         </div>
       )}
@@ -177,126 +156,38 @@ export default function RuletasPage() {
       {showForm && (
         <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 animate-in zoom-in-95">
           <form onSubmit={handleCreateRuleta} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Nombre de la Ruleta</label>
-              <input 
-                required
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                placeholder="Ej: Promo San Valentín"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
-              />
+            <input 
+              required
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              placeholder="Nombre de la ruleta..."
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none"
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {premiosDisponibles.map(p => (
+                <div 
+                  key={p.id}
+                  onClick={() => setSelectedPremios(prev => prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id])}
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedPremios.includes(p.id) ? 'border-[#4A5D4E] bg-green-50' : 'border-gray-100'}`}
+                >
+                  <p className="font-bold">{p.emoji || '🎁'} {p.nombre}</p>
+                </div>
+              ))}
             </div>
-
-            <div className="space-y-3">
-              <label className="text-sm font-medium text-gray-700">Selecciona los Premios a incluir:</label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {premiosDisponibles.map(premio => (
-                  <div 
-                    key={premio.id}
-                    onClick={() => togglePremio(premio.id)}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex items-center gap-3 ${
-                      selectedPremios.includes(premio.id) 
-                        ? 'border-[#4A5D4E] bg-green-50 shadow-md' 
-                        : 'border-gray-100 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className={`w-5 h-5 rounded flex items-center justify-center border ${
-                      selectedPremios.includes(premio.id) ? 'bg-[#4A5D4E] border-[#4A5D4E]' : 'border-gray-300'
-                    }`}>
-                      {selectedPremios.includes(premio.id) && <Plus className="w-4 h-4 text-white" />}
-                    </div>
-                    <div>
-                      <div className="font-medium text-sm">{premio.nombre}</div>
-                      <div className="text-xs text-gray-500">Prob: {premio.probabilidad}% | Stock: {premio.stock}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {premiosDisponibles.length === 0 && (
-                <p className="text-sm text-amber-600 bg-amber-50 p-3 rounded-lg border border-amber-100 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4" /> No hay premios con stock disponible. Crea premios primero.
-                </p>
-              )}
-            </div>
-
-            <button 
-              type="submit"
-              disabled={actionLoading || premiosDisponibles.length === 0}
-              className="w-full bg-[#4A5D4E] text-white py-4 rounded-xl font-medium hover:bg-[#3D4D40] disabled:opacity-50 transition-all"
-            >
-              {actionLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Crear y Guardar Ruleta'}
-            </button>
+            <button type="submit" className="w-full bg-[#4A5D4E] text-white py-4 rounded-xl font-bold">Crear Ruleta</button>
           </form>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {loading ? (
-          <div className="col-span-full p-12 flex flex-col items-center gap-4">
-            <Loader2 className="w-10 h-10 animate-spin text-[#4A5D4E]" />
-            <p className="text-gray-500">Cargando ruletas...</p>
-          </div>
-        ) : ruletas.length === 0 ? (
-          <div className="col-span-full bg-white p-12 text-center rounded-2xl border border-dashed border-gray-300">
-            <Settings2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">Aún no has configurado ninguna ruleta.</p>
-          </div>
-        ) : ruletas.map((ruleta) => (
-          <div 
-            key={ruleta.id}
-            className={`bg-white p-6 rounded-2xl shadow-sm border-2 transition-all ${
-              ruleta.activa ? 'border-[#4A5D4E] ring-4 ring-green-900/5' : 'border-gray-100 hover:border-gray-200'
-            }`}
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-serif text-gray-900">{ruleta.nombre}</h3>
-                  {ruleta.activa && (
-                    <span className="bg-green-100 text-green-700 text-[10px] uppercase font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <span className="w-1 h-1 bg-green-700 rounded-full animate-pulse" /> Activa
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-gray-500 mt-1">
-                  Creada el {new Date(ruleta.created_at).toLocaleDateString()}
-                </p>
-              </div>
-              <button 
-                onClick={() => handleDelete(ruleta.id)}
-                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="bg-gray-50 rounded-xl p-4 mb-6">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Premios incluidos:</h4>
-              <div className="flex flex-wrap gap-2">
-                {ruleta.configuracion?.premiosIds?.map(id => {
-                  const p = premiosDisponibles.find(pr => pr.id === id);
-                  return (
-                    <span key={id} className="bg-white border border-gray-200 px-3 py-1.5 rounded-lg text-sm text-gray-700 flex items-center gap-2">
-                      <Gift className="w-3 h-3 text-[#4A5D4E]" /> {p?.nombre || 'Premio'}
-                    </span>
-                  );
-                }) || <p className="text-xs text-gray-400 italic">No hay premios seleccionados</p>}
-              </div>
-            </div>
-
+        {ruletas.map((r) => (
+          <div key={r.id} className={`bg-white p-6 rounded-2xl border-2 ${r.activa ? 'border-[#4A5D4E]' : 'border-gray-100'}`}>
+            <h3 className="text-xl font-bold mb-4">{r.nombre}</h3>
             <button 
-              onClick={() => toggleStatus(ruleta.id, ruleta.activa)}
-              disabled={actionLoading}
-              className={`w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-all ${
-                ruleta.activa 
-                  ? 'bg-red-50 text-red-700 hover:bg-red-100' 
-                  : 'bg-[#4A5D4E] text-white hover:bg-[#3D4D40] shadow-lg shadow-green-900/10'
-              }`}
+              onClick={() => toggleStatus(r.id, r.activa)}
+              className={`w-full py-3 rounded-xl font-bold ${r.activa ? 'bg-red-50 text-red-700' : 'bg-[#4A5D4E] text-white'}`}
             >
-              {actionLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                ruleta.activa ? <><Square className="w-5 h-5" /> Desactivar</> : <><Play className="w-5 h-5" /> Activar Ruleta</>
-              )}
+              {r.activa ? 'Desactivar' : 'Activar'}
             </button>
           </div>
         ))}
