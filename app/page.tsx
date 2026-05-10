@@ -15,15 +15,27 @@ import {
   ArrowRight,
   ShieldCheck,
   Smartphone,
-  Info
+  Globe
 } from 'lucide-react';
 import Ruleta from '@/components/Ruleta';
 import { useRouter } from 'next/navigation';
 
+const COUNTRY_CODES = [
+  { code: '+593', name: 'EC', label: 'Ecuador (+593)' },
+  { code: '+57', name: 'CO', label: 'Colombia (+57)' },
+  { code: '+51', name: 'PE', label: 'Perú (+51)' },
+  { code: '+1', name: 'US', label: 'USA (+1)' },
+  { code: '+34', name: 'ES', label: 'España (+34)' },
+  { code: '+54', name: 'AR', label: 'Argentina (+54)' },
+  { code: '+56', name: 'CL', label: 'Chile (+56)' },
+  { code: '+52', name: 'MX', label: 'México (+52)' },
+];
+
 export default function Home() {
   const [step, setStep] = useState<'welcome' | 'form' | 'game' | 'success'>('welcome');
-  const [loading, setLoading] = useState(true); // Empezamos en loading para validar sesión
+  const [loading, setLoading] = useState(true);
   const [formLoading, setFormLoading] = useState(false);
+  const [countryCode, setCountryCode] = useState('+593');
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -42,25 +54,13 @@ export default function Home() {
 
   async function validarSesion() {
     const savedId = localStorage.getItem('travesia_cliente_id');
-    
     if (savedId) {
-      // VALIDACIÓN CRÍTICA: ¿El usuario existe realmente en la DB?
-      const { data, error } = await supabase
-        .from('clientes')
-        .select('id')
-        .eq('id', savedId)
-        .single();
-
+      const { data, error } = await supabase.from('clientes').select('id').eq('id', savedId).single();
       if (error || !data) {
-        // El usuario fue borrado o el ID es inválido -> Limpiamos fantasma
-        console.log("Sesión fantasma detectada. Limpiando...");
         localStorage.removeItem('travesia_cliente_id');
-        setClienteId(null);
-        setStep('welcome');
       } else {
-        // El usuario es real -> Mandamos al check-in
         router.push('/checkin');
-        return; // Salimos para no quitar el loading y evitar parpadeo
+        return;
       }
     }
     setLoading(false);
@@ -70,19 +70,14 @@ export default function Home() {
     e.preventDefault();
     setFormLoading(true);
     
-    const numLimpio = formData.telefono.replace(/^0/, '');
-    const telefonoFinal = `+593${numLimpio}`;
+    const numLimpio = formData.telefono.replace(/^0/, '').replace(/\s+/g, '');
+    const telefonoFinal = `${countryCode}${numLimpio}`;
 
     try {
       const { data, error } = await supabase
         .from('clientes')
-        .insert([{ 
-          ...formData, 
-          telefono: telefonoFinal,
-          visitas: 1 
-        }])
-        .select()
-        .single();
+        .insert([{ ...formData, telefono: telefonoFinal, visitas: 1 }])
+        .select().single();
 
       if (error) throw error;
       
@@ -94,144 +89,126 @@ export default function Home() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'BIRTHDAY_WELCOME', cliente: data })
-      }).catch(e => console.error("Notif error:", e));
+      }).catch(e => console.error(e));
 
     } catch (error: any) {
-      alert("Hubo un problema al registrarte. Por favor intenta de nuevo.");
-      console.error(error);
+      alert("Error en el registro. Verifica los datos.");
     } finally {
       setFormLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#051A10] flex items-center justify-center">
-        <Loader2 className="animate-spin text-travesia-gold w-10 h-10" />
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-screen bg-[#051A10] flex items-center justify-center"><Loader2 className="animate-spin text-travesia-gold w-10 h-10" /></div>;
 
   return (
-    <main className="min-h-screen bg-[#051A10] text-white selection:bg-travesia-gold selection:text-travesia-green-deep overflow-x-hidden">
-      
-      {/* BACKGROUND DECORATION */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] bg-travesia-gold/5 blur-[120px] rounded-full"></div>
+    <main className="min-h-screen bg-[#051A10] text-white overflow-x-hidden">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] bg-travesia-gold/5 blur-[100px] rounded-full"></div>
       </div>
 
-      <div className="relative max-w-lg mx-auto min-h-screen flex flex-col px-6 py-8">
+      <div className="relative max-w-md mx-auto min-h-screen flex flex-col px-5 py-6">
         
-        {/* LOGO AREA */}
-        <div className="flex flex-col items-center mb-8 animate-in fade-in slide-in-from-top-4 duration-1000">
-          <div className="w-16 h-16 bg-gradient-to-br from-travesia-gold to-[#B8860B] rounded-2xl flex items-center justify-center shadow-2xl border border-white/20">
-            <Sparkles className="w-8 h-8 text-[#051A10]" />
+        {/* LOGO */}
+        <div className="flex flex-col items-center mb-6 animate-in fade-in slide-in-from-top-4 duration-1000">
+          <div className="w-14 h-14 bg-gradient-to-br from-travesia-gold to-[#B8860B] rounded-2xl flex items-center justify-center shadow-xl">
+            <Sparkles className="w-7 h-7 text-[#051A10]" />
           </div>
-          <h1 className="mt-4 text-3xl font-serif font-bold tracking-tighter text-travesia-gold">La Travesía</h1>
-          <p className="text-[8px] uppercase tracking-[0.5em] font-black text-white/40 mt-1 italic">Loyalty Experience</p>
+          <h1 className="mt-3 text-2xl font-serif font-bold text-travesia-gold">La Travesía</h1>
+          <p className="text-[7px] uppercase tracking-[0.4em] font-black text-white/30 italic">Loyalty Experience</p>
         </div>
 
-        {/* STEP: WELCOME */}
         {step === 'welcome' && (
-          <div className="flex-1 flex flex-col justify-center space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
-            <div className="space-y-4">
-              <h2 className="text-4xl font-serif leading-tight font-bold">
-                Bienvenido a <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-travesia-gold to-[#FFD700]">La Travesía.</span>
-              </h2>
-              <p className="text-white/60 text-base leading-relaxed font-light">
-                Únete a nuestro club de fidelidad y gana premios exclusivos desde tu primer registro.
-              </p>
+          <div className="flex-1 flex flex-col justify-center space-y-8 animate-in fade-in slide-in-from-bottom-8">
+            <div className="space-y-3">
+              <h2 className="text-3xl font-serif leading-tight font-bold text-white">Únete al Club.</h2>
+              <p className="text-white/50 text-sm font-light">Registra tus datos y gana premios exclusivos desde hoy.</p>
             </div>
-            
-            <button 
-              onClick={() => setStep('form')}
-              className="group w-full bg-gradient-to-r from-travesia-gold to-[#B8860B] text-[#051A10] py-6 rounded-3xl font-black text-xs tracking-[0.3em] uppercase shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
-            >
-              EMPEZAR REGISTRO <ArrowRight className="w-4 h-4" />
+            <button onClick={() => setStep('form')} className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-[20px] font-black text-xs tracking-widest uppercase shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+              REGISTRARME AHORA <ArrowRight size={14} />
             </button>
           </div>
         )}
 
-        {/* STEP: FORM */}
         {step === 'form' && (
-          <div className="animate-in fade-in slide-in-from-right-8 duration-700">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <h2 className="text-2xl font-serif font-bold text-white tracking-tight">Crea tu Perfil</h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-2"><User size={12}/> Nombre</label>
-                  <input required type="text" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-travesia-gold transition-all text-sm" />
+          <div className="animate-in fade-in slide-in-from-right-8">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={10}/> Nombre</label>
+                    <input required type="text" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" placeholder="Juan" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={10}/> Apellido</label>
+                    <input required type="text" value={formData.apellido} onChange={(e) => setFormData({...formData, apellido: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" placeholder="Marca" />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-2"><User size={12}/> Apellido</label>
-                  <input required type="text" value={formData.apellido} onChange={(e) => setFormData({...formData, apellido: e.target.value})} className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-travesia-gold transition-all text-sm" />
+
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Mail size={10}/> Correo</label>
+                  <input required type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" placeholder="juan@gmail.com" />
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-2"><Mail size={12}/> Correo Electrónico</label>
-                <input required type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-travesia-gold transition-all text-sm" />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-2"><Smartphone size={12}/> WhatsApp (Ecuador)</label>
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Globe size={10}/> País y WhatsApp</label>
                   <div className="flex gap-2">
-                    <div className="bg-white/10 border border-white/10 px-4 flex items-center rounded-2xl text-travesia-gold font-bold text-sm">+593</div>
+                    <select 
+                      value={countryCode} 
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      className="w-[100px] bg-white/10 border border-white/10 px-2 rounded-xl text-travesia-gold font-bold text-xs outline-none focus:border-travesia-gold"
+                    >
+                      {COUNTRY_CODES.map(c => (
+                        <option key={c.code} value={c.code} className="bg-[#051A10] text-white">{c.name} ({c.code})</option>
+                      ))}
+                    </select>
                     <input 
                       required 
                       type="tel" 
                       value={formData.telefono} 
                       onChange={(e) => setFormData({...formData, telefono: e.target.value.replace(/[^0-9]/g, '')})} 
-                      className="flex-1 bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-travesia-gold transition-all text-sm" 
+                      className="flex-1 bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" 
+                      placeholder="968460705"
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-2"><Calendar size={12}/> Tu Cumpleaños</label>
-                  <input required type="date" value={formData.fecha_nacimiento} onChange={(e) => setFormData({...formData, fecha_nacimiento: e.target.value})} className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-travesia-gold transition-all [color-scheme:dark] text-sm min-h-[52px]" />
+
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Calendar size={10}/> Tu Cumpleaños</label>
+                  <input required type="date" value={formData.fecha_nacimiento} onChange={(e) => setFormData({...formData, fecha_nacimiento: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none focus:border-travesia-gold transition-all [color-scheme:dark] text-sm" />
                 </div>
               </div>
 
               <button 
                 type="submit" 
                 disabled={formLoading}
-                className="w-full bg-travesia-gold text-[#051A10] py-6 rounded-3xl font-black text-xs tracking-[0.3em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3"
+                className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-[20px] font-black text-xs tracking-[0.2em] uppercase shadow-xl hover:brightness-110 transition-all flex items-center justify-center gap-2"
               >
-                {formLoading ? <Loader2 className="animate-spin w-5 h-5" /> : <>FINALIZAR Y JUGAR <ChevronRight className="w-4 h-4" /></>}
+                {formLoading ? <Loader2 className="animate-spin w-5 h-5" /> : <>FINALIZAR Y JUGAR <ChevronRight size={14} /></>}
               </button>
             </form>
           </div>
         )}
 
-        {/* STEP: GAME */}
         {step === 'game' && (
-          <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in duration-1000">
+          <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in">
             <Ruleta onWin={(p) => { setPremioFinal(p); setStep('success'); }} />
           </div>
         )}
 
-        {/* STEP: SUCCESS */}
         {step === 'success' && (
-          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-10 animate-in fade-in zoom-in duration-1000">
-            <div className="space-y-4">
-              <div className="mx-auto w-20 h-20 bg-travesia-gold/20 rounded-[30px] flex items-center justify-center border border-travesia-gold/30">
-                <CheckCircle2 className="w-10 h-10 text-travesia-gold" />
+          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in zoom-in">
+            <div className="space-y-3">
+              <div className="mx-auto w-16 h-16 bg-travesia-gold/20 rounded-2xl flex items-center justify-center border border-travesia-gold/30">
+                <CheckCircle2 className="w-8 h-8 text-travesia-gold" />
               </div>
-              <h2 className="text-4xl font-serif font-bold tracking-tight">¡Bienvenido!</h2>
-              <div className="p-8 bg-white/5 border-2 border-travesia-gold/30 rounded-[40px] backdrop-blur-xl shadow-2xl">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-travesia-gold font-black mb-2">Premio Ganado</p>
-                <p className="text-3xl font-black text-white leading-tight">{premioFinal}</p>
+              <h2 className="text-3xl font-serif font-bold">¡Bienvenido!</h2>
+              <div className="p-6 bg-white/5 border-2 border-travesia-gold/30 rounded-[30px] backdrop-blur-xl">
+                <p className="text-[8px] uppercase tracking-widest text-travesia-gold font-black mb-1">Premio Ganado</p>
+                <p className="text-2xl font-black text-white">{premioFinal}</p>
               </div>
             </div>
-
-            <button 
-              onClick={() => router.push('/checkin')}
-              className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-[0.3em] uppercase shadow-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
-            >
-              IR A MI PANEL <ArrowRight size={16} />
+            <button onClick={() => router.push('/checkin')} className="w-full border border-travesia-gold text-travesia-gold py-4 rounded-xl font-black text-[10px] tracking-widest uppercase hover:bg-travesia-gold hover:text-[#051A10] transition-all">
+              IR A MI PANEL <ArrowRight size={14} />
             </button>
           </div>
         )}
