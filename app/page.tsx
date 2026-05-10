@@ -15,9 +15,7 @@ import {
   ArrowRight,
   ShieldCheck,
   Smartphone,
-  Info,
-  RefreshCw,
-  LogOut
+  Info
 } from 'lucide-react';
 import Ruleta from '@/components/Ruleta';
 import { useRouter } from 'next/navigation';
@@ -40,18 +38,10 @@ export default function Home() {
   useEffect(() => {
     const savedId = localStorage.getItem('travesia_cliente_id');
     if (savedId) {
-      setClienteId(savedId);
-      // Solo saltamos al juego si el usuario quiere, o si no ha jugado aún.
-      // Para pruebas, permitiremos que el usuario vea la bienvenida primero.
+      // Si ya está registrado, lo mandamos al check-in para que sume visitas
+      router.push('/checkin');
     }
-  }, []);
-
-  const handleResetSession = () => {
-    localStorage.removeItem('travesia_cliente_id');
-    setClienteId(null);
-    setStep('welcome');
-    window.location.reload(); // Limpiar todo el estado
-  };
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,25 +61,21 @@ export default function Home() {
         .select()
         .single();
 
-      if (error) {
-        if (error.message.includes('visitas')) {
-          alert('⚠️ ERROR DE BASE DE DATOS: Por favor, ejecuta el comando SQL en Supabase para añadir la columna "visitas".');
-          throw error;
-        }
-        throw error;
-      }
+      if (error) throw error;
       
       localStorage.setItem('travesia_cliente_id', data.id);
       setClienteId(data.id);
       setStep('game');
       
-      await fetch('/api/marketing/notifications', {
+      // Notificación de bienvenida (opcional, no bloquea el flujo)
+      fetch('/api/marketing/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'BIRTHDAY_WELCOME', cliente: data })
-      });
+      }).catch(e => console.error("Notif error:", e));
 
     } catch (error: any) {
+      alert("Error en el registro. Por favor verifica los datos o intenta más tarde.");
       console.error(error);
     } finally {
       setLoading(false);
@@ -118,56 +104,30 @@ export default function Home() {
 
         {/* STEP: WELCOME */}
         {step === 'welcome' && (
-          <div className="flex-1 flex flex-col justify-center space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+          <div className="flex-1 flex flex-col justify-center space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
             <div className="space-y-4">
               <h2 className="text-4xl font-serif leading-tight font-bold">
                 Tu fidelidad tiene <br/>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-travesia-gold to-[#FFD700]">un lugar aquí.</span>
               </h2>
               <p className="text-white/60 text-base leading-relaxed font-light">
-                {clienteId ? '¡Qué gusto verte de nuevo! Ya eres parte de nuestra comunidad.' : 'Regístrate hoy y gana tu primer premio girando nuestra ruleta de lujo.'}
+                Regístrate hoy y gana tu primer premio girando nuestra ruleta de lujo.
               </p>
             </div>
             
             <div className="grid grid-cols-1 gap-3">
-              {!clienteId ? (
-                <div className="flex items-center gap-4 bg-white/5 border border-white/10 p-5 rounded-[28px] backdrop-blur-md">
-                  <div className="w-10 h-10 bg-travesia-gold/20 rounded-xl flex items-center justify-center text-travesia-gold"><Gift size={20}/></div>
-                  <div><p className="font-bold text-sm">Premio de Bienvenida</p><p className="text-[10px] text-white/40 uppercase tracking-widest font-black italic">Solo por registrarte</p></div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-4 bg-white/5 border border-white/10 p-5 rounded-[28px] backdrop-blur-md">
-                  <div className="w-10 h-10 bg-travesia-green-deep/40 rounded-xl flex items-center justify-center text-travesia-gold"><ShieldCheck size={20}/></div>
-                  <div><p className="font-bold text-sm">Ya estás registrado</p><p className="text-[10px] text-white/40 uppercase tracking-widest font-black italic">Escanea el QR en el local</p></div>
-                </div>
-              )}
+              <div className="flex items-center gap-4 bg-white/5 border border-white/10 p-5 rounded-[28px] backdrop-blur-md">
+                <div className="w-10 h-10 bg-travesia-gold/20 rounded-xl flex items-center justify-center text-travesia-gold"><Gift size={20}/></div>
+                <div><p className="font-bold text-sm">Premio de Bienvenida</p><p className="text-[10px] text-white/40 uppercase tracking-widest font-black italic">Beneficio inmediato</p></div>
+              </div>
             </div>
 
-            <div className="flex flex-col gap-4">
-              {!clienteId ? (
-                <button 
-                  onClick={() => setStep('form')}
-                  className="group w-full bg-gradient-to-r from-travesia-gold to-[#B8860B] text-[#051A10] py-6 rounded-3xl font-black text-xs tracking-[0.3em] uppercase shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
-                >
-                  EMPEZAR REGISTRO <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
-                </button>
-              ) : (
-                <>
-                  <button 
-                    onClick={() => router.push('/checkin')}
-                    className="w-full bg-travesia-gold text-[#051A10] py-6 rounded-3xl font-black text-xs tracking-[0.3em] uppercase shadow-2xl hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
-                  >
-                    HACER MI CHECK-IN <MapPin size={18} />
-                  </button>
-                  <button 
-                    onClick={handleResetSession}
-                    className="text-white/30 text-[10px] uppercase tracking-[0.3em] font-black hover:text-travesia-gold transition-colors flex items-center justify-center gap-2"
-                  >
-                    <RefreshCw size={12} /> Nuevo Registro (Borrar sesión de prueba)
-                  </button>
-                </>
-              )}
-            </div>
+            <button 
+              onClick={() => setStep('form')}
+              className="group w-full bg-gradient-to-r from-travesia-gold to-[#B8860B] text-[#051A10] py-6 rounded-3xl font-black text-xs tracking-[0.3em] uppercase shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+            >
+              INICIAR REGISTRO <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+            </button>
           </div>
         )}
 
@@ -175,14 +135,9 @@ export default function Home() {
         {step === 'form' && (
           <div className="animate-in fade-in slide-in-from-right-8 duration-700">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h2 className="text-2xl font-serif font-bold text-white tracking-tight">Crea tu Perfil</h2>
-                  <p className="text-white/40 text-[10px] uppercase tracking-[0.3em] font-black">Paso 1 de 2</p>
-                </div>
-                <button type="button" onClick={() => setStep('welcome')} className="text-white/20 hover:text-white transition-colors">
-                  <LogOut size={20} />
-                </button>
+              <div className="space-y-1">
+                <h2 className="text-2xl font-serif font-bold text-white tracking-tight">Crea tu Perfil</h2>
+                <p className="text-white/40 text-[10px] uppercase tracking-[0.3em] font-black italic">Completa tus datos personales</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
