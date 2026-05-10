@@ -22,20 +22,13 @@ import {
   Image as LucideImage
 } from 'lucide-react';
 
-const SUGGESTED_IMAGES = [
-  { id: '1', url: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80', label: 'Spa & Relax' },
-  { id: '2', url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80', label: 'Hostería Lujo' },
-  { id: '3', url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80', label: 'Cena Romántica' },
-  { id: '4', url: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=800&q=80', label: 'Piscina & Sol' },
-];
-
 export default function MarketingPage() {
   const [activeTab, setActiveTab] = useState<'birthday' | 'welcome' | 'loyalty' | 'mass'>('birthday');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [genderFilter, setGenderFilter] = useState<'Todos' | 'Masculino' | 'Femenino'>('Todos');
   const [visitGoal, setVisitGoal] = useState('5');
-  const [previewImage, setPreviewImage] = useState(SUGGESTED_IMAGES[0].url);
+  const [previewImage, setPreviewImage] = useState('https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80');
   
   const [marketingData, setMarketingData] = useState({
     asunto: '',
@@ -66,9 +59,9 @@ export default function MarketingPage() {
         setMarketingData({
           asunto: asunto || getDefaultAsunto(activeTab),
           mensaje: mensaje || 'Hola {nombre}, un mensaje especial para ti.',
-          image_url: img || (activeTab === 'mass' ? '' : SUGGESTED_IMAGES[0].url)
+          image_url: img || ''
         });
-        setPreviewImage(img || (activeTab === 'mass' ? 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80' : SUGGESTED_IMAGES[0].url));
+        setPreviewImage(img || 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80');
       }
     } catch (e) {
       console.error(e);
@@ -104,9 +97,9 @@ export default function MarketingPage() {
             <div className="w-10 h-10 bg-pink-500/10 border border-pink-500/20 rounded-xl flex items-center justify-center text-pink-400">
               <Palette size={20} />
             </div>
-            <h2 className="text-3xl font-serif font-bold text-white tracking-tight">Centro de Campañas</h2>
+            <h2 className="text-3xl font-serif font-bold text-white tracking-tight">Centro de Campañas Hub</h2>
           </div>
-          <p className="text-white/40 text-sm ml-13">Configura y lanza tus estrategias de comunicación.</p>
+          <p className="text-white/40 text-sm ml-13">Administra tus estrategias de comunicación institucional.</p>
         </div>
 
         <div className="flex flex-wrap gap-1 p-1 bg-white/5 border border-white/10 rounded-[24px]">
@@ -200,28 +193,9 @@ export default function MarketingPage() {
               </div>
             </div>
 
-            {/* CARGA DE IMAGEN (SIN GALERÍA EN MASIVO) */}
+            {/* CARGA DE IMAGEN */}
             <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-2">Imagen de la Campaña (Link Unsplash)</label>
-              
-              {activeTab !== 'mass' && (
-                <div className="grid grid-cols-4 gap-3 mb-4">
-                  {SUGGESTED_IMAGES.map((img) => (
-                    <button 
-                      key={img.id}
-                      onClick={() => {
-                        setPreviewImage(img.url);
-                        setMarketingData({...marketingData, image_url: img.url});
-                        handleUpdate('image_url', img.url);
-                      }}
-                      className={`group relative aspect-square rounded-2xl overflow-hidden border-2 transition-all ${previewImage === img.url ? 'border-travesia-gold scale-95' : 'border-transparent'}`}
-                    >
-                      <img src={img.url} className="w-full h-full object-cover" alt={img.label} />
-                    </button>
-                  ))}
-                </div>
-              )}
-
+              <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-2">Imagen de Campaña (Link Unsplash)</label>
               <div className="relative">
                 <input 
                   type="text" 
@@ -233,9 +207,6 @@ export default function MarketingPage() {
                 />
                 <LucideImage size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" />
               </div>
-              {activeTab === 'mass' && (
-                <p className="text-[9px] text-white/20 italic ml-2">⚠️ Solo se usará la imagen que cargues arriba para esta promoción masiva.</p>
-              )}
             </div>
 
             {/* ACCIÓN */}
@@ -244,7 +215,7 @@ export default function MarketingPage() {
                 disabled={sending}
                 className={`w-full py-5 rounded-[24px] font-black text-[10px] tracking-[0.3em] uppercase shadow-2xl transition-all flex items-center justify-center gap-3 ${activeTab === 'mass' ? 'bg-blue-500 text-white shadow-blue-500/20' : 'bg-travesia-gold text-[#051A10]'}`}
               >
-                <Zap size={16} /> {activeTab === 'mass' ? `ENVIAR PROMO A ${genderFilter.toUpperCase()}` : 'LANZAR CAMPAÑA FORZADA'}
+                <Zap size={16} /> {activeTab === 'mass' ? `ENVIAR A ${genderFilter.toUpperCase()}` : 'LANZAR CAMPAÑA FORZADA'}
               </button>
             </div>
           </div>
@@ -265,15 +236,15 @@ export default function MarketingPage() {
               </div>
 
               <div className="aspect-[4/3] w-full rounded-xl overflow-hidden shadow-lg border-2 border-white">
-                <img src={previewImage || 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80'} className="w-full h-full object-cover" alt="Promo" />
+                <img src={previewImage || 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80'} className="w-full h-full object-cover" alt="Campaign" />
               </div>
 
               <div className="space-y-2">
                 <h4 className="text-gray-900 font-serif font-black text-lg leading-tight">
-                  {marketingData.asunto || 'Promoción Especial'}
+                  {marketingData.asunto || 'Título de Campaña'}
                 </h4>
                 <p className="text-gray-500 text-[9px] leading-relaxed italic font-medium">
-                  {marketingData.mensaje || 'Un mensaje especial para ti de parte de La Travesía.'}
+                  {marketingData.mensaje || 'Contenido de tu mensaje institucional.'}
                 </p>
               </div>
 
