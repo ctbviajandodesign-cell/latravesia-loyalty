@@ -4,41 +4,23 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   Settings, 
-  Instagram, 
-  Facebook, 
-  Music, 
-  MessageCircle, 
-  Lock, 
   Save, 
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-  Trophy,
-  Mail
+  RefreshCw, 
+  Globe, 
+  Lock, 
+  Link as LinkIcon, 
+  CheckCircle2, 
+  Database,
+  ShieldCheck,
+  Zap,
+  Layout
 } from 'lucide-react';
 
 export default function ConfigPage() {
+  const [config, setConfig] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-  
-  const [config, setConfig] = useState({
-    link_instagram: '',
-    link_facebook: '',
-    link_tiktok: '',
-    link_whatsapp: '',
-    visitas_para_premio: '10',
-    admin_password: '',
-    pin_validacion: '0000',
-    email_asunto: '¡Feliz Semana de tu Cumpleaños! 🎂 La Travesía',
-    email_mensaje: 'Hola {nombre}, queremos invitarte a celebrar tu semana especial con nosotros. ¡Ven este sábado o domingo y reclama una sorpresa!',
-    admin_email: '',
-    resend_api_key: '',
-    email_premio_asunto: '¡Felicidades! Has completado tus visitas 🏆',
-    email_premio_mensaje: 'Hola {nombre}, has llegado a la meta de visitas. ¡Tu fidelidad tiene premio! Reclámalo en tu próxima visita.'
-  });
-
-  // const supabase = createClientComponentClient();
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     fetchConfig();
@@ -46,223 +28,152 @@ export default function ConfigPage() {
 
   async function fetchConfig() {
     try {
-      const { data, error } = await supabase.from('config').select('*');
-      if (error) throw error;
-
-      if (data) {
-        const configObj = data.reduce((acc: any, item: any) => {
-          acc[item.clave] = item.valor;
-          return acc;
-        }, {});
-        setConfig(prev => ({ ...prev, ...configObj }));
-      }
-    } catch (error) {
-      console.error('Error fetching config:', error);
+      const { data } = await supabase.from('config').select('*');
+      setConfig(data || []);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleSave(e: React.FormEvent) {
-    e.preventDefault();
+  const handleSave = async (id: string, valor: string) => {
     setSaving(true);
-    setMessage(null);
-
     try {
-      const updates = Object.entries(config).map(([clave, valor]) => ({
-        clave,
-        valor
-      }));
-
-      const { error } = await supabase
-        .from('config')
-        .upsert(updates, { onConflict: 'clave' });
-
+      const { error } = await supabase.from('config').update({ valor }).eq('id', id);
       if (error) throw error;
-      setMessage({ type: 'success', text: 'Configuración guardada correctamente.' });
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e) {
+      alert("Error al guardar");
     } finally {
       setSaving(false);
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="p-12 flex flex-col items-center gap-4">
-        <Loader2 className="w-10 h-10 animate-spin text-[#4A5D4E]" />
-        <p className="text-gray-500">Cargando configuración...</p>
-      </div>
-    );
-  }
+  };
 
   return (
-    <div className="max-w-4xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-serif text-[#4A5D4E] flex items-center gap-2">
-          <Settings className="w-8 h-8" />
-          Configuración General
-        </h1>
-        <p className="text-gray-600 mt-1">Personaliza el comportamiento y los enlaces de tu sistema.</p>
+    <div className="max-w-5xl space-y-12">
+      
+      {/* HEADER */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-travesia-gold/10 border border-travesia-gold/20 rounded-xl flex items-center justify-center text-travesia-gold">
+              <Settings size={20} />
+            </div>
+            <h2 className="text-3xl font-serif font-bold text-white tracking-tight">Configuración del Sistema</h2>
+          </div>
+          <p className="text-white/40 text-sm ml-13">Ajusta los parámetros globales de la plataforma Loyalty.</p>
+        </div>
+        
+        {saved && (
+          <div className="flex items-center gap-2 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl animate-in fade-in slide-in-from-right-4">
+            <CheckCircle2 size={16} /> <span className="text-[10px] font-black uppercase tracking-widest">Cambios guardados</span>
+          </div>
+        )}
       </div>
 
-      {message && (
-        <div className={`p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 ${
-          message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'
-        }`}>
-          {message.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
-          {message.text}
-        </div>
-      )}
-
-      <form onSubmit={handleSave} className="space-y-6">
-        {/* Redes Sociales */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
-          <h2 className="text-lg font-bold text-gray-900 border-b pb-2">Redes Sociales</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <Instagram className="w-4 h-4 text-pink-600" /> Instagram URL
-              </label>
-              <input 
-                type="url"
-                value={config.link_instagram}
-                onChange={(e) => setConfig({...config, link_instagram: e.target.value})}
-                placeholder="https://instagram.com/tuperfil"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
-              />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* PANEL LATERAL DE ESTADO */}
+        <div className="space-y-6">
+          <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 space-y-8 shadow-2xl">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] uppercase tracking-widest font-black text-white/30">Infraestructura</p>
+                <span className="flex items-center gap-2 text-travesia-gold text-[10px] font-black uppercase tracking-widest"><Zap size={12}/> Online</span>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 group hover:border-travesia-gold/30 transition-all">
+                  <div className="p-3 bg-travesia-gold/10 rounded-xl text-travesia-gold">
+                    <Database size={18} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold">Supabase Cloud</p>
+                    <p className="text-[10px] text-white/30">PostgreSQL Engine</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 group hover:border-emerald-500/30 transition-all">
+                  <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-400">
+                    <ShieldCheck size={18} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold">API Security</p>
+                    <p className="text-[10px] text-white/30">Verified & Secure</p>
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <Facebook className="w-4 h-4 text-blue-600" /> Facebook URL
-              </label>
-              <input 
-                type="url"
-                value={config.link_facebook}
-                onChange={(e) => setConfig({...config, link_facebook: e.target.value})}
-                placeholder="https://facebook.com/tupagina"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <Music className="w-4 h-4 text-black" /> TikTok URL
-              </label>
-              <input 
-                type="url"
-                value={config.link_tiktok}
-                onChange={(e) => setConfig({...config, link_tiktok: e.target.value})}
-                placeholder="https://tiktok.com/@tuusuario"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 text-green-600" /> WhatsApp URL
-              </label>
-              <input 
-                type="url"
-                value={config.link_whatsapp}
-                onChange={(e) => setConfig({...config, link_whatsapp: e.target.value})}
-                placeholder="https://wa.me/tunumero"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
-              />
+            
+            <div className="pt-8 border-t border-white/5">
+              <p className="text-[10px] uppercase tracking-widest font-black text-white/30 mb-4 text-center">Version de Sistema</p>
+              <p className="text-3xl font-serif font-black text-center text-white/60 tracking-tighter">v17.0<span className="text-travesia-gold">.3</span></p>
             </div>
           </div>
         </div>
 
-        {/* Lógica de Fidelidad */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
-          <h2 className="text-lg font-bold text-gray-900 border-b pb-2">Sistema de Fidelidad</h2>
-          
-          <div className="space-y-2 max-w-sm">
-            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-amber-500" /> Visitas para Premio VIP
-            </label>
-            <input 
-              type="number"
-              value={config.visitas_para_premio}
-              onChange={(e) => setConfig({...config, visitas_para_premio: e.target.value})}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
-            />
-            <p className="text-xs text-gray-500">Cuántas visitas acumuladas necesita un cliente para ganar un premio especial de lealtad.</p>
+        {/* LISTA DE VARIABLES DE CONFIGURACIÓN */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 shadow-2xl space-y-10">
+            {config.map((item) => (
+              <div key={item.id} className="group space-y-4 animate-in fade-in duration-700">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-6 bg-travesia-gold/40 group-hover:bg-travesia-gold transition-colors rounded-full"></div>
+                    <label className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60 group-hover:text-white transition-colors">
+                      {item.clave.replace(/_/g, ' ')}
+                    </label>
+                  </div>
+                  {item.clave.includes('link') ? <LinkIcon size={14} className="text-white/20" /> : <Globe size={14} className="text-white/20" />}
+                </div>
+                
+                <div className="flex gap-4">
+                  <div className="relative flex-1">
+                    <input 
+                      type="text" 
+                      defaultValue={item.valor} 
+                      onBlur={(e) => handleSave(item.id, e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 p-5 rounded-[20px] outline-none focus:border-travesia-gold transition-all text-sm font-medium pr-14"
+                    />
+                    <div className="absolute right-5 top-1/2 -translate-y-1/2">
+                      <Lock size={16} className="text-white/10" />
+                    </div>
+                  </div>
+                  <button 
+                    className="p-5 bg-white/5 border border-white/10 rounded-[20px] text-white/20 hover:text-travesia-gold hover:border-travesia-gold/40 transition-all"
+                    onClick={() => handleSave(item.id, (document.getElementById(item.id) as any).value)}
+                  >
+                    <RefreshCw size={20} className={saving ? 'animate-spin' : ''} />
+                  </button>
+                </div>
+                <p className="text-[10px] text-white/20 italic ml-4">
+                  Define el valor global para la clave institucional <span className="text-white/40">{item.clave}</span>.
+                </p>
+              </div>
+            ))}
+
+            {config.length === 0 && (
+              <div className="py-20 text-center space-y-4 opacity-40">
+                <Layout size={48} className="mx-auto" />
+                <p className="uppercase tracking-widest font-black text-xs">Cargando variables...</p>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-gradient-to-r from-travesia-gold to-[#B8860B] p-[1px] rounded-[32px] overflow-hidden group">
+            <div className="bg-[#0A2A18] p-8 rounded-[31px] flex items-center justify-between group-hover:bg-[#0A2A18]/80 transition-colors">
+              <div className="space-y-1">
+                <p className="font-bold text-white tracking-tight">Acceso Master</p>
+                <p className="text-xs text-white/40 leading-relaxed">Todos los cambios se aplican en tiempo real al sistema global.</p>
+              </div>
+              <ShieldCheck className="w-10 h-10 text-travesia-gold animate-pulse" />
+            </div>
           </div>
         </div>
 
-        {/* Seguridad */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
-          <h2 className="text-lg font-bold text-gray-900 border-b pb-2 text-red-600">Seguridad</h2>
-          
-          <div className="space-y-2 max-w-sm">
-            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-              <Lock className="w-4 h-4" /> Cambiar Contraseña del Panel
-            </label>
-            <input 
-              type="text"
-              value={config.admin_password}
-              onChange={(e) => setConfig({...config, admin_password: e.target.value})}
-              placeholder="Nueva contraseña"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
-            />
-            <p className="text-xs text-gray-500 italic">Ten cuidado al cambiarla, asegúrate de recordarla.</p>
-          </div>
-
-          <div className="space-y-2 max-w-sm">
-            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-              <Mail className="w-4 h-4 text-blue-600" /> Correo de Administrador
-            </label>
-            <input 
-              type="email"
-              value={config.admin_email}
-              onChange={(e) => setConfig({...config, admin_email: e.target.value})}
-              placeholder="admin@latravesia.com"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none"
-            />
-            <p className="text-xs text-gray-500">Aquí recibirás los correos de prueba y reportes del sistema.</p>
-          </div>
-
-          <div className="space-y-2 max-w-sm">
-            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-              <Lock className="w-4 h-4 text-orange-600" /> API Key de Resend (Para Envíos Reales)
-            </label>
-            <input 
-              type="password"
-              value={config.resend_api_key}
-              onChange={(e) => setConfig({...config, resend_api_key: e.target.value})}
-              placeholder="re_123456789..."
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none font-mono text-sm"
-            />
-            <p className="text-[10px] text-gray-400">Consíguela gratis en <a href="https://resend.com" target="_blank" className="underline">resend.com</a> para activar los correos reales.</p>
-          </div>
-
-          <div className="space-y-2 max-w-sm">
-            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-              <Lock className="w-4 h-4 text-amber-600" /> PIN de Validación (Ruleta)
-            </label>
-            <input 
-              type="text"
-              maxLength={4}
-              value={config.pin_validacion}
-              onChange={(e) => setConfig({...config, pin_validacion: e.target.value})}
-              placeholder="Ej: 1234"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#4A5D4E] outline-none font-mono text-xl tracking-widest"
-            />
-            <p className="text-xs text-gray-500">Este es el código que el cliente debe ingresar en su celular para poder girar la ruleta.</p>
-          </div>
-        </div>
-
-        <button 
-          type="submit"
-          disabled={saving}
-          className="w-full bg-[#4A5D4E] text-white py-4 rounded-2xl font-bold hover:bg-[#3D4D40] disabled:opacity-50 flex items-center justify-center gap-3 shadow-xl transition-all hover:-translate-y-1"
-        >
-          {saving ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Save className="w-6 h-6" /> Guardar Todos los Cambios</>}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

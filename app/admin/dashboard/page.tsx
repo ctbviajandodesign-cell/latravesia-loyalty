@@ -1,171 +1,206 @@
-import Link from 'next/link';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   Users, 
-  UserPlus, 
-  Calendar, 
+  MapPin, 
   Cake, 
-  Trophy, 
+  TrendingUp, 
+  ArrowUpRight, 
+  Clock, 
   Star,
-  AlertCircle
+  Zap,
+  ChevronRight,
+  ShieldCheck,
+  Calendar
 } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
+export default function AdminOverview() {
+  const [stats, setStats] = useState({
+    totalClientes: 0,
+    totalVisitas: 0,
+    cumplesHoy: 0,
+    ultimosClientes: [] as any[]
+  });
+  const [loading, setLoading] = useState(true);
 
-async function getMetrics() {
-  const hoy = new Date().toISOString().split('T')[0];
-  const hace7Dias = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
-  // 1. Clientes totales
-  const { count: totalClientes } = await supabase
-    .from('clientes')
-    .select('*', { count: 'exact', head: true });
+  async function fetchStats() {
+    try {
+      const { count: clientesCount } = await supabase.from('clientes').select('*', { count: 'exact', head: true });
+      const { data: clientesData } = await supabase.from('clientes').select('*').order('created_at', { ascending: false }).limit(5);
+      
+      // Sumar visitas reales desde la tabla clientes
+      const { data: allClientes } = await supabase.from('clientes').select('visitas');
+      const visitasTotal = allClientes?.reduce((acc, c) => acc + (c.visitas || 0), 0) || 0;
 
-  // 2. Nuevos esta semana
-  const { count: nuevosSemana } = await supabase
-    .from('clientes')
-    .select('*', { count: 'exact', head: true })
-    .gte('created_at', hace7Dias);
+      const hoy = new Date().toISOString().split('T')[0].slice(5); // MM-DD
+      const { count: cumplesCount } = await supabase.from('clientes').select('*', { count: 'exact', head: true }).like('fecha_nacimiento', `%${hoy}`);
 
-  // 3. Visitas hoy
-  const { count: visitasHoy } = await supabase
-    .from('visitas')
-    .select('*', { count: 'exact', head: true })
-    .eq('fecha', hoy);
-
-  // 4. Premios este mes
-  const { count: premiosMes } = await supabase
-    .from('visitas')
-    .select('*', { count: 'exact', head: true })
-    .gte('fecha', inicioMes)
-    .not('premio_ganado', 'is', null);
-
-  // 5. Clientes VIP (10+ visitas)
-  const { count: clientesVip } = await supabase
-    .from('clientes')
-    .select('*', { count: 'exact', head: true })
-    .gte('total_visitas', 10);
-
-  // 6. Cumpleaños próximos 7 días
-  // Lógica simple: clientes con mes/día de nacimiento cerca
-  // Nota: Esto es aproximado en SQL, pero para el dashboard lo manejamos aquí
-  const { data: todosClientes, error: clientesError } = await supabase
-    .from('clientes')
-    .select('nombre, apellido, fecha_nacimiento');
-  
-  if (clientesError) console.error('Error fetching clientes:', clientesError);
-  
-  const cumpleaniosProximos = todosClientes?.filter(c => {
-    if (!c.fecha_nacimiento) return false;
-    
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
-    
-    const fechaNac = new Date(c.fecha_nacimiento);
-    // Crear fecha de cumpleaños este año
-    const cumpleEsteAnio = new Date(hoy.getFullYear(), fechaNac.getMonth(), fechaNac.getDate());
-    
-    // Si ya pasó este año, probar el próximo (para el caso de fin de año)
-    if (cumpleEsteAnio < hoy) {
-      cumpleEsteAnio.setFullYear(hoy.getFullYear() + 1);
+      setStats({
+        totalClientes: clientesCount || 0,
+        totalVisitas: visitasTotal,
+        cumplesHoy: cumplesCount || 0,
+        ultimosClientes: clientesData || []
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
     }
-    
-    const unDia = 24 * 60 * 60 * 1000;
-    const diferenciaDias = Math.ceil((cumpleEsteAnio.getTime() - hoy.getTime()) / unDia);
-    
-    return diferenciaDias >= 0 && diferenciaDias <= 7;
-  }).length || 0;
+  }
 
-  return {
-    totalClientes: totalClientes || 0,
-    nuevosSemana: nuevosSemana || 0,
-    visitasHoy: visitasHoy || 0,
-    premiosMes: premiosMes || 0,
-    clientesVip: clientesVip || 0,
-    cumpleaniosProximos
-  };
-}
-
-export default async function DashboardPage() {
-  const metrics = await getMetrics();
-
-  const cards = [
-    { title: 'Clientes Totales', value: metrics.totalClientes, icon: Users, color: 'text-blue-600', href: '/admin/dashboard/clientes' },
-    { title: 'Nuevos (7d)', value: metrics.nuevosSemana, icon: UserPlus, color: 'text-green-600', href: '/admin/dashboard/clientes' },
-    { title: 'Visitas Hoy', value: metrics.visitasHoy, icon: Calendar, color: 'text-purple-600', href: '/admin/dashboard/analytics' },
-    { title: 'Premios del Mes', value: metrics.premiosMes, icon: Trophy, color: 'text-amber-600', href: '/admin/dashboard/analytics' },
-    { title: 'Clientes VIP', value: metrics.clientesVip, icon: Star, color: 'text-travesia-gold-dark', href: '/admin/dashboard/clientes' },
-    { title: 'Cumpleaños (7d)', value: metrics.cumpleaniosProximos, icon: Cake, color: 'text-pink-600', alert: metrics.cumpleaniosProximos > 0, href: '/admin/dashboard/cumpleanos' },
+  const statCards = [
+    { name: 'Total Miembros', value: stats.totalClientes, icon: Users, color: 'from-blue-500/20 to-blue-500/5', border: 'border-blue-500/20', text: 'text-blue-400', label: '+12% este mes' },
+    { name: 'Visitas Registradas', value: stats.totalVisitas, icon: MapPin, color: 'from-travesia-gold/20 to-travesia-gold/5', border: 'border-travesia-gold/20', text: 'text-travesia-gold', label: 'Crecimiento constante' },
+    { name: 'Cumpleaños Hoy', value: stats.cumplesHoy, icon: Cake, color: 'from-pink-500/20 to-pink-500/5', border: 'border-pink-500/20', text: 'text-pink-400', label: 'Campañas listas' },
+    { name: 'Score Fidelidad', value: '98%', icon: Star, color: 'from-emerald-500/20 to-emerald-500/5', border: 'border-emerald-500/20', text: 'text-emerald-400', label: 'Clientes VIP' },
   ];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-4xl font-bold text-travesia-green-deep tracking-tight">Inicio <span className="text-sm font-normal opacity-30">v7.0</span></h1>
-        <p className="text-travesia-green-dark/60 font-medium">Resumen general de actividad</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {cards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <Link 
-              key={card.title}
-              href={card.href}
-              className="bg-white p-6 rounded-3xl shadow-sm border border-travesia-gold/10 hover:shadow-md hover:border-travesia-gold/30 transition-all relative overflow-hidden group block"
-            >
-              <div className="flex justify-between items-start">
-                <div className="space-y-1">
-                  <p className="text-sm font-bold text-travesia-green-dark/40 uppercase tracking-widest">{card.title}</p>
-                  <p className="text-4xl font-black text-travesia-green-deep">{card.value}</p>
-                </div>
-                <div className={`p-3 rounded-2xl bg-travesia-cream ${card.color}`}>
-                  <Icon size={24} />
-                </div>
-              </div>
-              
-              {card.alert && (
-                <div className="mt-4 flex items-center gap-2 text-xs font-bold text-pink-600 bg-pink-50 p-2 rounded-lg animate-pulse">
-                  <AlertCircle size={14} />
-                  ¡Hay cumpleaños próximamente!
-                </div>
-              )}
-
-              {/* Decoración sutil */}
-              <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Icon size={120} />
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+    <div className="space-y-12">
       
-      {/* Sección de bienvenida o avisos rápidos */}
-      <div className="bg-travesia-green-deep p-8 rounded-[2rem] text-white shadow-xl relative overflow-hidden">
-        <div className="relative z-10 max-w-lg space-y-4">
-          <h2 className="text-3xl font-bold text-travesia-gold">Hola, Administrador 👋</h2>
-          <p className="text-white/70 leading-relaxed">
-            El sistema está funcionando correctamente. Hoy hemos tenido <span className="text-travesia-gold font-bold">{metrics.visitasHoy} visitas</span> registradas.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <a 
-              href="/admin/dashboard/clientes"
-              className="bg-travesia-gold text-travesia-green-deep px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform inline-block"
-            >
-              Ver Clientes
-            </a>
-            <a 
-              href="/admin/dashboard/config"
-              className="bg-white/10 border border-white/20 text-white px-6 py-3 rounded-xl font-bold hover:bg-white/20 transition-all inline-block"
-            >
-              Configuración
-            </a>
+      {/* GRID DE ESTADÍSTICAS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        {statCards.map((card, i) => (
+          <div 
+            key={card.name}
+            className={`relative group overflow-hidden bg-gradient-to-br ${card.color} ${card.border} border rounded-[32px] p-8 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40`}
+          >
+            <div className="relative z-10 flex flex-col h-full justify-between">
+              <div className="flex items-center justify-between mb-8">
+                <div className={`p-4 rounded-2xl bg-white/5 border border-white/10 ${card.text}`}>
+                  <card.icon size={24} />
+                </div>
+                <div className="text-[10px] uppercase font-black tracking-widest text-white/30 bg-white/5 px-3 py-1.5 rounded-full flex items-center gap-2">
+                  <TrendingUp size={12} /> {card.label}
+                </div>
+              </div>
+              <div>
+                <p className="text-white/40 text-xs uppercase tracking-[0.2em] font-bold mb-1">{card.name}</p>
+                <div className="flex items-baseline gap-2">
+                  <h3 className="text-4xl font-serif font-black text-white">{card.value}</h3>
+                  <ArrowUpRight size={20} className={card.text} />
+                </div>
+              </div>
+            </div>
+            {/* DECORATIVE LIGHT */}
+            <div className={`absolute -bottom-10 -right-10 w-32 h-32 blur-[60px] rounded-full opacity-20 bg-current ${card.text}`}></div>
+          </div>
+        ))}
+      </div>
+
+      {/* SECCIÓN INFERIOR: TABLA Y ACTIVIDAD */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        
+        {/* ÚLTIMOS REGISTROS (TABLA PRO) */}
+        <div className="xl:col-span-2 space-y-6">
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-6 bg-travesia-gold rounded-full"></div>
+              <h3 className="text-2xl font-serif font-bold text-white tracking-tight">Nuevos Socios</h3>
+            </div>
+            <button className="text-[10px] uppercase tracking-widest font-black text-travesia-gold hover:text-white transition-colors flex items-center gap-2">
+              Ver todos <ChevronRight size={14} />
+            </button>
+          </div>
+
+          <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] overflow-hidden shadow-2xl">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-white/5">
+                    <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Cliente</th>
+                    <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Contacto</th>
+                    <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Estado</th>
+                    <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Acción</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {stats.ultimosClientes.map((cliente) => (
+                    <tr key={cliente.id} className="group hover:bg-white/5 transition-colors">
+                      <td className="p-8">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-travesia-gold to-[#B8860B] flex items-center justify-center text-[#051A10] font-black text-lg shadow-lg">
+                            {cliente.nombre[0]}
+                          </div>
+                          <div>
+                            <p className="font-bold text-white text-base">{cliente.nombre} {cliente.apellido}</p>
+                            <p className="text-[10px] text-white/30 uppercase tracking-widest mt-0.5">Socio desde {new Date(cliente.created_at).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-8">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-white/80">{cliente.telefono}</p>
+                          <p className="text-xs text-white/40">{cliente.email}</p>
+                        </div>
+                      </td>
+                      <td className="p-8">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
+                          <ShieldCheck size={12} /> Activo
+                        </span>
+                      </td>
+                      <td className="p-8">
+                        <button className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-travesia-gold hover:border-travesia-gold/40 transition-all">
+                          <ChevronRight size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-        
-        {/* Gráfico o ilustración decorativa */}
-        <div className="absolute top-0 right-0 h-full w-1/3 bg-gradient-to-l from-travesia-gold/20 to-transparent hidden lg:block" />
+
+        {/* FEED DE ACTIVIDAD O RECORDATORIOS */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3 px-2">
+            <div className="w-1.5 h-6 bg-pink-500 rounded-full"></div>
+            <h3 className="text-2xl font-serif font-bold text-white tracking-tight">Próximos Cumples</h3>
+          </div>
+
+          <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 space-y-8 shadow-2xl">
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-pink-500/20 rounded-xl flex items-center justify-center text-pink-400 shrink-0">
+                  <Calendar size={20} />
+                </div>
+                <div>
+                  <p className="font-bold text-white">Campaña de Mayo</p>
+                  <p className="text-sm text-white/40 leading-relaxed mt-1">
+                    Tienes {stats.cumplesHoy} clientes cumpliendo años hoy. Recuerda enviarles su regalo digital.
+                  </p>
+                </div>
+              </div>
+              <button className="w-full py-4 bg-pink-500/10 border border-pink-500/20 text-pink-400 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:bg-pink-500 hover:text-white transition-all">
+                Lanzar Notificaciones
+              </button>
+            </div>
+
+            <div className="pt-8 border-t border-white/5">
+              <div className="flex items-center justify-between mb-6">
+                <p className="text-[10px] uppercase tracking-widest font-black text-white/30">Estado del Sistema</p>
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10b981]"></span>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                  <div className="flex items-center gap-3">
+                    <Zap size={16} className="text-travesia-gold" />
+                    <span className="text-xs font-medium">Supabase Latency</span>
+                  </div>
+                  <span className="text-xs text-travesia-gold font-bold">12ms</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );

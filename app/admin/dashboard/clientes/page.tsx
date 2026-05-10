@@ -1,39 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { 
   Users, 
   Search, 
-  Phone, 
-  Calendar, 
-  Star, 
-  Loader2,
-  ChevronRight,
-  Filter,
+  Filter, 
+  MoreVertical, 
+  Mail, 
+  Smartphone, 
+  MapPin, 
   Download,
-  Cake
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
+  Star,
+  Trash2,
+  Edit2
 } from 'lucide-react';
 
-interface Cliente {
-  id: string;
-  nombre: string;
-  apellido: string;
-  telefono: string;
-  email: string;
-  total_visitas: number;
-  fecha_nacimiento: string;
-  fecha_ultima_visita: string;
-  created_at: string;
-}
-
 export default function ClientesPage() {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [clientes, setClientes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // const supabase = createClientComponentClient();
 
   useEffect(() => {
     fetchClientes();
@@ -48,154 +37,154 @@ export default function ClientesPage() {
 
       if (error) throw error;
       setClientes(data || []);
-    } catch (error) {
-      console.error('Error fetching clientes:', error);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
   }
 
-  const filteredClientes = clientes.filter(cliente => {
-    const searchStr = `${cliente.nombre} ${cliente.apellido} ${cliente.telefono} ${cliente.email || ''} ${cliente.fecha_nacimiento || ''}`.toLowerCase();
-    return searchStr.includes(searchTerm.toLowerCase());
-  });
+  const filteredClientes = clientes.filter(c => 
+    c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.telefono.includes(searchTerm)
+  );
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-serif text-[#4A5D4E] flex items-center gap-2">
-            <Users className="w-8 h-8" />
-            Base de Datos de Clientes
-          </h1>
-          <p className="text-gray-600 mt-1">Gestiona y conoce a los visitantes de La Travesía.</p>
+    <div className="space-y-8">
+      
+      {/* HEADER DE SECCIÓN */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-travesia-gold/10 border border-travesia-gold/20 rounded-xl flex items-center justify-center text-travesia-gold">
+              <Users size={20} />
+            </div>
+            <h2 className="text-3xl font-serif font-bold text-white tracking-tight">Directorio de Socios</h2>
+          </div>
+          <p className="text-white/40 text-sm ml-13">Administra y segmenta a tus clientes frecuentes.</p>
         </div>
-        
-        <div className="flex gap-2">
-          <button className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-all text-sm font-medium">
-            <Download className="w-4 h-4" /> Exportar
+
+        <div className="flex items-center gap-3">
+          <button className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-2xl text-white/60 text-xs font-black uppercase tracking-widest hover:text-travesia-gold hover:border-travesia-gold/40 transition-all">
+            <Download size={16} /> Exportar CSV
+          </button>
+          <button className="flex items-center gap-2 px-6 py-3 bg-travesia-gold text-[#051A10] rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-[1.02] transition-all shadow-xl shadow-travesia-gold/10">
+            + Nuevo Socio
           </button>
         </div>
       </div>
 
-      {/* Barra de Búsqueda y Filtros */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+      {/* BARRA DE BÚSQUEDA Y FILTROS */}
+      <div className="flex flex-col md:flex-row items-center gap-4 p-4 bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[32px]">
+        <div className="relative flex-1 group">
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-travesia-gold transition-colors" size={18} />
           <input 
-            type="text"
-            placeholder="Buscar por nombre, apellido o teléfono..."
+            type="text" 
+            placeholder="Buscar por nombre, correo o teléfono..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#4A5D4E] outline-none transition-all"
+            className="w-full bg-white/5 border border-white/10 p-4 pl-14 rounded-2xl outline-none focus:border-travesia-gold transition-all text-sm"
           />
         </div>
-        <button className="flex items-center gap-2 px-6 py-3 rounded-xl border border-gray-100 text-gray-600 hover:bg-gray-50 transition-all">
-          <Filter className="w-5 h-5" /> Filtros
+        <button className="p-4 bg-white/5 border border-white/10 rounded-2xl text-white/60 hover:text-white transition-colors flex items-center gap-3">
+          <Filter size={18} /> <span className="text-xs font-black uppercase tracking-widest">Filtros</span>
         </button>
       </div>
 
-      {/* Tabla / Lista */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        {loading ? (
-          <div className="p-12 flex flex-col items-center gap-4">
-            <Loader2 className="w-10 h-10 animate-spin text-[#4A5D4E]" />
-            <p className="text-gray-500">Cargando base de datos...</p>
-          </div>
-        ) : filteredClientes.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            {searchTerm ? 'No se encontraron clientes con esa búsqueda.' : 'Aún no hay clientes registrados.'}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-gray-50 text-gray-400 text-xs uppercase font-bold tracking-wider">
-                <tr>
-                  <th className="px-6 py-4">Cliente</th>
-                  <th className="px-6 py-4">Contacto</th>
-                  <th className="px-6 py-4">Cumpleaños</th>
-                  <th className="px-6 py-4">Fidelidad</th>
-                  <th className="px-6 py-4">Última Visita</th>
-                  <th className="px-6 py-4"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredClientes.map((cliente) => (
-                  <tr key={cliente.id} className="hover:bg-gray-50/50 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#4A5D4E]/10 flex items-center justify-center text-[#4A5D4E] font-bold">
-                          {cliente.nombre[0]}{cliente.apellido[0]}
+      {/* TABLA DE CLIENTES (CRM STYLE) */}
+      <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] overflow-hidden shadow-2xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-white/5 bg-white/[0.02]">
+                <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Socio</th>
+                <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Contacto</th>
+                <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30 text-center">Visitas</th>
+                <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30 text-center">Estado</th>
+                <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {filteredClientes.map((cliente) => (
+                <tr key={cliente.id} className="group hover:bg-white/5 transition-all duration-300">
+                  <td className="p-8">
+                    <div className="flex items-center gap-5">
+                      <div className="relative">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1A3A2A] to-[#051A10] border border-white/10 flex items-center justify-center text-travesia-gold font-serif text-2xl font-bold shadow-lg group-hover:rotate-3 transition-transform">
+                          {cliente.nombre[0]}
                         </div>
-                        <div>
-                          <div className="font-bold text-gray-900">{cliente.nombre} {cliente.apellido}</div>
-                          <div className="text-xs text-gray-500">Miembro desde {new Date(cliente.created_at).toLocaleDateString()}</div>
+                        {cliente.visitas >= 5 && (
+                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-travesia-gold rounded-full flex items-center justify-center border-2 border-[#051A10] shadow-lg">
+                            <Star size={10} className="text-[#051A10] fill-current" />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-bold text-white text-lg tracking-tight">{cliente.nombre} {cliente.apellido}</p>
+                        <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black mt-1 flex items-center gap-2">
+                          <MapPin size={10} className="text-travesia-gold" /> Registro: {new Date(cliente.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-8">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 group/item cursor-pointer">
+                        <div className="p-2 bg-white/5 rounded-lg text-white/20 group-hover/item:text-travesia-gold transition-colors">
+                          <Smartphone size={14} />
                         </div>
+                        <span className="text-sm font-medium text-white/60 group-hover/item:text-white transition-colors">{cliente.telefono}</span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2 text-sm text-gray-700">
-                          <Phone className="w-3 h-3" /> 
-                          <span className="font-mono">+{cliente.telefono}</span>
+                      <div className="flex items-center gap-3 group/item cursor-pointer">
+                        <div className="p-2 bg-white/5 rounded-lg text-white/20 group-hover/item:text-blue-400 transition-colors">
+                          <Mail size={14} />
                         </div>
-                        <div className="text-xs text-gray-500 lowercase">{cliente.email || 'Sin email'}</div>
+                        <span className="text-sm font-medium text-white/60 group-hover/item:text-white transition-colors">{cliente.email}</span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <Cake className="w-3 h-3 text-pink-500" />
-                        {cliente.fecha_nacimiento ? new Date(cliente.fecha_nacimiento).toLocaleDateString() : 'No reg.'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-1 rounded-lg text-xs font-bold">
-                          <Star className="w-3 h-3 fill-amber-700" /> {cliente.total_visitas || 0}
-                        </div>
-                        <span className="text-xs text-gray-400 font-medium">visitas</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Calendar className="w-4 h-4" />
-                        {cliente.fecha_ultima_visita ? new Date(cliente.fecha_ultima_visita).toLocaleDateString() : 'Nunca'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="p-2 text-gray-400 hover:text-[#4A5D4E] hover:bg-green-50 rounded-lg transition-all">
-                        <ChevronRight className="w-5 h-5" />
+                    </div>
+                  </td>
+                  <td className="p-8 text-center">
+                    <div className="inline-flex flex-col items-center gap-1">
+                      <span className="text-2xl font-serif font-black text-travesia-gold">{cliente.visitas || 0}</span>
+                      <span className="text-[8px] uppercase tracking-widest font-bold text-white/20">Check-ins</span>
+                    </div>
+                  </td>
+                  <td className="p-8 text-center">
+                    <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
+                      <ShieldCheck size={12} /> Verificado
+                    </span>
+                  </td>
+                  <td className="p-8">
+                    <div className="flex items-center justify-end gap-3">
+                      <button className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-travesia-gold hover:border-travesia-gold/40 transition-all">
+                        <Edit2 size={16} />
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                      <button className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-red-400 hover:border-red-400/40 transition-all">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-      {/* Resumen Rápido */}
-      {!loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="bg-[#4A5D4E] p-6 rounded-2xl text-white shadow-lg">
-            <p className="text-white/60 text-sm font-medium uppercase tracking-wider">Total Clientes</p>
-            <p className="text-4xl font-bold mt-1">{clientes.length}</p>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-            <p className="text-gray-400 text-sm font-medium uppercase tracking-wider">Clientes Activos Hoy</p>
-            <p className="text-4xl font-bold text-gray-900 mt-1">
-              {clientes.filter(c => c.fecha_ultima_visita === new Date().toISOString().split('T')[0]).length}
-            </p>
-          </div>
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-            <p className="text-gray-400 text-sm font-medium uppercase tracking-wider">Tasa de Fidelidad</p>
-            <p className="text-4xl font-bold text-gray-900 mt-1">
-              {clientes.length > 0 ? (clientes.filter(c => c.total_visitas > 2).length / clientes.length * 100).toFixed(0) : 0}%
-            </p>
+        {/* PAGINACIÓN */}
+        <div className="p-8 border-t border-white/5 flex items-center justify-between">
+          <p className="text-xs text-white/30">Mostrando <span className="text-white font-bold">{filteredClientes.length}</span> socios de <span className="text-white font-bold">{clientes.length}</span></p>
+          <div className="flex gap-2">
+            <button className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/20 cursor-not-allowed">
+              <ChevronLeft size={18} />
+            </button>
+            <button className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-travesia-gold hover:border-travesia-gold/40 transition-all">
+              <ChevronRight size={18} />
+            </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
