@@ -37,7 +37,12 @@ export default function CheckInPage() {
 
   async function fetchGoogleLink() {
     const { data } = await supabase.from('config').select('*').eq('clave', 'google_maps_link').single();
-    if (data) setGoogleLink(data.valor);
+    // Prioridad al link que me pasaste, si no hay en DB usamos este por defecto
+    if (data && data.valor) {
+      setGoogleLink(data.valor);
+    } else {
+      setGoogleLink('https://share.google/yGsbHgktdSzFzW1e8');
+    }
   }
 
   async function fetchCliente(id: string) {
