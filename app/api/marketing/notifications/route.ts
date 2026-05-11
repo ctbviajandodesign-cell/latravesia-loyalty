@@ -2,20 +2,7 @@ import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-const formatImageUrl = (url: string) => {
-  if (!url) return '';
-  const unsplashPageRegex = /unsplash\.com\/.*?(?:fotos|photos)\/([a-zA-Z0-9_-]+)/;
-  const match = url.match(unsplashPageRegex);
-  if (match && match[1]) {
-    return `https://unsplash.com/photos/${match[1]}/download?w=1000`;
-  }
-  const fileRegex = /([a-zA-Z0-9_-]{11})-unsplash/;
-  const fileMatch = url.match(fileRegex);
-  if (fileMatch && fileMatch[1]) {
-    return `https://unsplash.com/photos/${fileMatch[1]}/download?w=1000`;
-  }
-  return url;
-};
+import { formatUnsplashUrl } from '@/lib/unsplash';
 
 export async function POST(request: Request) {
   try {
@@ -38,7 +25,7 @@ export async function POST(request: Request) {
         subject: config.email_asunto,
         html: `
           <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden;">
-            <img src="${formatImageUrl(config.email_foto_url)}" style="width: 100%; height: auto; display: block;" />
+            <img src="${formatUnsplashUrl(config.email_foto_url)}" style="width: 100%; height: auto; display: block;" />
             <div style="padding: 40px; text-align: center; background-color: #ffffff;">
               <h1 style="color: #4A5D4E;">¡Bienvenido y Feliz Cumpleaños!</h1>
               <p style="color: #666; font-size: 18px;">${config.email_mensaje.replace('{nombre}', cliente.nombre)}</p>
@@ -59,7 +46,7 @@ export async function POST(request: Request) {
         subject: config.email_premio_asunto || '¡Felicidades por tu fidelidad! 🏆',
         html: `
           <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden; text-align: center;">
-            <img src="${formatImageUrl(config.email_premio_foto_url)}" style="width: 100%; height: auto; display: block;" />
+            <img src="${formatUnsplashUrl(config.email_premio_foto_url)}" style="width: 100%; height: auto; display: block;" />
             <div style="padding: 40px;">
               <h1 style="color: #4A5D4E;">¡META CUMPLIDA!</h1>
               <p style="font-size: 18px; color: #666;">${(config.email_premio_mensaje || '').replace('{nombre}', cliente.nombre)}</p>

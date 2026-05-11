@@ -14,14 +14,14 @@ import {
   Tag,
   Gift,
   Heart,
-  Palette,
-  Users,
   Trophy,
   Filter,
   CheckCircle2,
   Image as LucideImage,
-  ExternalLink
+  ExternalLink,
+  Users
 } from 'lucide-react';
+import { formatUnsplashUrl } from '@/lib/unsplash';
 
 export default function MarketingPage() {
   const [activeTab, setActiveTab] = useState<'birthday' | 'welcome' | 'loyalty' | 'mass'>('birthday');
@@ -94,44 +94,64 @@ export default function MarketingPage() {
   // DETECTOR INTELIGENTE DE UNSPLASH
   const updatePreview = (url: string) => {
     if (!url) {
-      setPreviewImage('https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80');
+      setPreviewImage('');
       return;
     }
-
-    let finalUrl = url;
-    // Si es un link de la página de Unsplash (ej: unsplash.com/photos/ABC)
-    if (url.includes('unsplash.com/photos/')) {
-      const id = url.split('photos/')[1]?.split('/')[0]?.split('?')[0];
-      if (id) finalUrl = `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=800&q=80`;
-    } 
-    // Si es un link directo pero sin parámetros de optimización
-    else if (url.includes('images.unsplash.com/') && !url.includes('?')) {
-      finalUrl = `${url}?auto=format&fit=crop&w=800&q=80`;
-    }
-
-    setPreviewImage(finalUrl);
+    setPreviewImage(formatUnsplashUrl(url));
   };
 
-  const handleSaveAll = async () => {
-    setSaving(true);
-    const prefix = getPrefix(activeTab);
+  const handleLaunch = async () => {
+    const isMass = activeTab === 'mass';
+    const confirmMsg = isMass 
+      ? "¿Estás seguro de que quieres enviar este correo MASIVO a todos los clientes registrados?"
+      : "¿Quieres enviar una prueba de este diseño a tu correo de administrador?";
     
-    const subjectKey = activeTab === 'loyalty' ? 'email_premio_asunto' : `${prefix}email_subject`;
-    const bodyKey = activeTab === 'loyalty' ? 'email_premio_mensaje' : `${prefix}email_body`;
-    const imgKey = activeTab === 'loyalty' ? 'email_foto_url' : 
-                   activeTab === 'mass' ? 'broadcast_foto_url' : `${prefix}image_url`;
-
+    if (!confirm(confirmMsg)) return;
+    
+    setSaving(true);
     try {
-      await Promise.all([
-        supabase.from('config').update({ valor: marketingData.asunto }).eq('clave', subjectKey),
-        supabase.from('config').update({ valor: marketingData.mensaje }).eq('clave', bodyKey),
-        supabase.from('config').update({ valor: marketingData.image_url }).eq('clave', imgKey)
-      ]);
-      
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      let recipients: string[] = [];
+      let targetTo = '';
+
+      if (isMass) {
+        const { data: clients } = await supabase.from('clientes').select('email');
+        recipients = clients?.map(c => c.email).filter(Boolean) || [];
+        targetTo = 'BROADCAST';
+        
+        if (recipients.length === 0) {
+          alert("No hay clientes con email registrado para enviar la campaña.");
+          return;
+        }
+      } else {
+        const { data: config } = await supabase.from('config').select('valor').eq('clave', 'admin_email').single();
+        targetTo = config?.valor || '';
+        if (!targetTo) {
+          alert("Configura el 'admin_email' en la sección de Configuración para recibir pruebas.");
+          return;
+        }
+      }
+
+      const response = await fetch('/api/marketing/test-send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: marketingData.asunto,
+          message: marketingData.mensaje,
+          imageUrl: formatUnsplashUrl(marketingData.image_url),
+          to: targetTo,
+          recipients: isMass ? recipients : undefined
+        })
+      });
+
+      if (response.ok) {
+        alert(isMass ? "¡Campaña masiva enviada con éxito!" : "Prueba enviada a " + targetTo);
+      } else {
+        const err = await response.json();
+        alert("Error al enviar: " + (err.error || "Error desconocido"));
+      }
     } catch (e) {
-      alert("Error al guardar cambios");
+      console.error(e);
+      alert("Error crítico en el envío");
     } finally {
       setSaving(false);
     }
@@ -145,7 +165,7 @@ export default function MarketingPage() {
         <div className="space-y-1">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-travesia-gold/10 border border-travesia-gold/20 rounded-xl flex items-center justify-center text-travesia-gold">
-              <Palette size={20} />
+              <Zap size={20} />
             </div>
             <h2 className="text-3xl font-serif font-bold text-white tracking-tight">Centro de Campañas Hub</h2>
           </div>
@@ -240,9 +260,11 @@ export default function MarketingPage() {
               </button>
               
               <button 
-                className={`w-full py-5 rounded-[24px] font-black text-[10px] tracking-[0.3em] uppercase shadow-2xl transition-all flex items-center justify-center gap-3 ${activeTab === 'mass' ? 'bg-blue-500 text-white shadow-blue-500/20' : 'bg-travesia-gold text-[#051A10]'}`}
+                onClick={handleLaunch}
+                disabled={saving}
+                className={`w-full py-5 rounded-[24px] font-black text-[10px] tracking-[0.3em] uppercase shadow-2xl transition-all flex items-center justify-center gap-3 ${activeTab === 'mass' ? 'bg-blue-600 text-white shadow-blue-500/20 hover:bg-blue-500' : 'bg-travesia-gold text-[#051A10] hover:bg-travesia-gold/90'}`}
               >
-                <Zap size={16} /> {activeTab === 'mass' ? 'LANZAR MASIVO' : 'LANZAR FORZADO'}
+                {saving ? <RefreshCw className="animate-spin" size={16} /> : <Zap size={16} />} {activeTab === 'mass' ? 'LANZAR MASIVO' : 'ENVIAR PRUEBA'}
               </button>
             </div>
           </div>
@@ -265,13 +287,19 @@ export default function MarketingPage() {
                 </div>
               </div>
 
-              <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-xl border-4 border-white bg-gray-50">
-                <img 
-                  src={previewImage} 
-                  className="w-full h-full object-cover transition-opacity duration-500" 
-                  alt="Visual"
-                  onError={(e) => { (e.target as any).src = 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80'; }}
-                />
+              <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-xl border-4 border-white bg-gray-100 flex items-center justify-center">
+                {previewImage ? (
+                  <img 
+                    src={previewImage} 
+                    className="w-full h-full object-cover transition-opacity duration-500" 
+                    alt="Visual"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-2 text-gray-400">
+                    <ImageIcon size={32} strokeWidth={1} />
+                    <p className="text-[8px] font-black uppercase tracking-widest">Sin Imagen</p>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-3 pt-2">

@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { formatUnsplashUrl } from '@/lib/unsplash';
 
 export async function POST(request: Request) {
   try {
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
       subject: subject,
       html: `
         <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden;">
-          <img src="${imageUrl}" style="width: 100%; height: auto; display: block;" alt="Campaña" />
+          <img src="${formatUnsplashUrl(imageUrl)}" style="width: 100%; height: auto; display: block;" alt="Campaña" />
           <div style="padding: 40px; text-align: center; background-color: #ffffff;">
             <h1 style="color: #4A5D4E; margin-bottom: 20px;">¡Hola!</h1>
             <p style="color: #666; font-size: 18px; line-height: 1.6;">${message.replace('{nombre}', 'Amigo/a')}</p>
