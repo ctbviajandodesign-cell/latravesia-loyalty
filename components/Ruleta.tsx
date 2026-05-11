@@ -95,33 +95,30 @@ export default function Ruleta({ onWin }: RuletaProps) {
   const segmentSize = 360 / premios.length;
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-sm mx-auto overflow-visible px-4">
+    <div className="flex flex-col items-center justify-center w-full max-w-[300px] xs:max-w-[340px] mx-auto overflow-hidden px-2">
       
       {/* TÍTULO MINIMALISTA */}
-      <div className="mb-8 text-center space-y-1 animate-in fade-in slide-in-from-top-4">
-        <h3 className="text-2xl font-serif font-bold text-white tracking-tight">Tu Premio Especial</h3>
-        <div className="w-8 h-0.5 bg-travesia-gold mx-auto rounded-full opacity-50"></div>
+      <div className="mb-6 text-center space-y-1">
+        <h3 className="text-xl font-serif font-bold text-white tracking-tight">Tu Premio Especial</h3>
+        <div className="w-8 h-0.5 bg-travesia-gold mx-auto rounded-full opacity-30"></div>
       </div>
 
-      {/* CONTENEDOR DE LA RULETA - REDUCIDO PARA EVITAR DESBORDES */}
-      <div className="relative w-full aspect-square max-w-[280px] xs:max-w-[320px]">
+      {/* CONTENEDOR DE LA RULETA - ESTRUCTURA FIJA */}
+      <div className="relative w-full aspect-square">
         
-        {/* AURA SUTIL */}
-        <div className={`absolute -inset-6 bg-travesia-gold/5 blur-[60px] rounded-full transition-opacity duration-1000 ${spinning ? 'opacity-100' : 'opacity-30'}`}></div>
-
-        {/* PUNTERO MINIMALISTA */}
-        <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-50">
-          <div className="w-6 h-8 bg-travesia-gold rounded-b-full shadow-lg border border-white/20 flex items-center justify-center">
-             <div className="w-1 h-1 bg-white rounded-full"></div>
+        {/* PUNTERO MINIMALISTA FIJO */}
+        <div className="absolute -top-1 left-1/2 -translate-x-1/2 z-50">
+          <div className="w-5 h-7 bg-travesia-gold rounded-b-full shadow-xl border border-white/10 flex items-center justify-center">
+             <div className="w-1 h-1 bg-[#051A10] rounded-full"></div>
           </div>
         </div>
 
-        {/* MARCO ULTRAFINO PREMIUM */}
-        <div className="relative w-full h-full rounded-full border-[1px] border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.5)] bg-[#051A10] p-1 flex items-center justify-center overflow-hidden">
+        {/* CUERPO DE LA RULETA */}
+        <div className="relative w-full h-full rounded-full border border-white/5 bg-[#051A10] p-1 shadow-2xl flex items-center justify-center overflow-hidden">
           
           {/* RUEDA SVG */}
           <div 
-            className="relative w-full h-full rounded-full transition-transform duration-[4000ms] cubic-bezier overflow-hidden"
+            className="relative w-full h-full rounded-full transition-transform duration-[4000ms] cubic-bezier"
             style={{ 
               transform: `rotate(${rotation}deg)`,
             }}
