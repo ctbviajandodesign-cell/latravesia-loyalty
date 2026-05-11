@@ -190,6 +190,7 @@ export default function MarketingPage() {
           subject: marketingData.asunto,
           message: marketingData.mensaje,
           imageUrl: formatUnsplashUrl(marketingData.image_url),
+          to: 'BROADCAST',
           recipients: cumpleaneros.map(c => c.email),
           isBirthday: true
         })
@@ -239,6 +240,7 @@ export default function MarketingPage() {
           subject: marketingData.asunto,
           message: marketingData.mensaje,
           imageUrl: formatUnsplashUrl(marketingData.image_url),
+          to: 'BROADCAST',
           recipients: upcomingBirthdays.map(c => c.email),
           isBirthday: true,
           weeklyBroadcast: true
