@@ -68,9 +68,8 @@ export default function MarketingPage() {
   }
 
   const formatWhatsAppLink = (telefono: string, nombre: string) => {
-    // Intentar obtener la imagen actual de la configuración si el estado está vacío
-    const imgUrl = marketingData.image_url ? formatUnsplashUrl(marketingData.image_url) : '';
-    const msg = `¡Hola ${nombre}! 🥂 De parte de La Travesía te deseamos un muy feliz cumpleaños. Te hemos enviado una sorpresa a tu correo. ¡Te esperamos! \n\n${imgUrl}`;
+    // Hemos quitado el link de imagen por solicitud del usuario para un mensaje más limpio
+    const msg = `¡Hola ${nombre}! 🥂 De parte de La Travesía te deseamos un muy feliz cumpleaños. Te hemos enviado una sorpresa a tu correo. ¡Te esperamos!`;
     const num = telefono.replace(/\+/g, '');
     return `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
   };
@@ -495,8 +494,21 @@ export default function MarketingPage() {
                 <p className="text-[10px] font-black text-gray-900 tracking-tighter uppercase">La Travesía</p>
               </div>
 
-              <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden bg-gray-100">
-                {previewImage && <img src={previewImage} referrerPolicy="no-referrer" className="w-full h-full object-cover" alt="Visual" />}
+              <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center relative border border-gray-100">
+                {previewImage ? (
+                  <img 
+                    key={previewImage}
+                    src={previewImage} 
+                    referrerPolicy="no-referrer" 
+                    className="w-full h-full object-cover animate-in fade-in duration-500" 
+                    alt="Visual" 
+                  />
+                ) : (
+                  <div className="text-gray-300 flex flex-col items-center gap-2">
+                    <ImageIcon size={40} />
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Sin Imagen</p>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
