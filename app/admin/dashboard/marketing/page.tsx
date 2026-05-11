@@ -68,7 +68,8 @@ export default function MarketingPage() {
   }
 
   const formatWhatsAppLink = (telefono: string, nombre: string) => {
-    const msg = `¡Hola ${nombre}! 🥂 De parte de La Travesía te deseamos un muy feliz cumpleaños. Te hemos enviado una sorpresa a tu correo. ¡Te esperamos!`;
+    const imgUrl = marketingData.image_url ? formatUnsplashUrl(marketingData.image_url) : '';
+    const msg = `¡Hola ${nombre}! 🥂 De parte de La Travesía te deseamos un muy feliz cumpleaños. Te hemos enviado una sorpresa a tu correo. ¡Te esperamos! ${imgUrl}`;
     const num = telefono.replace(/\+/g, '');
     return `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
   };
