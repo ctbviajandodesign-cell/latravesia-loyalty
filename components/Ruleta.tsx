@@ -54,11 +54,18 @@ export default function Ruleta({ onWin }: RuletaProps) {
 
     setTimeout(() => {
       setSpinning(false);
+      
+      // Cálculo preciso del ganador
+      // El puntero está en el tope (0 grados)
+      // La rotación es horaria, así que el segmento que queda arriba es el que estaba a -rotación
       const actualDegrees = newRotation % 360;
       const segmentSize = 360 / premios.length;
       
-      // Cálculo del índice ganador (el puntero está arriba a 0/360 grados)
-      const index = Math.floor(((360 - actualDegrees + (segmentSize / 2)) % 360) / segmentSize);
+      // (360 - actualDegrees) nos da la posición original que ahora está en el tope
+      // % 360 para asegurar rango 0-359
+      const winDegrees = (360 - actualDegrees) % 360;
+      const index = Math.floor(winDegrees / segmentSize);
+      
       const premioGanado = premios[index % premios.length];
       
       setWinningLabel(premioGanado.nombre);
@@ -88,48 +95,31 @@ export default function Ruleta({ onWin }: RuletaProps) {
   const segmentSize = 360 / premios.length;
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-sm mx-auto">
+    <div className="flex flex-col items-center justify-center w-full max-w-sm mx-auto overflow-visible px-4">
       
-      {/* TÍTULO EMOCIONAL */}
-      <div className="mb-10 text-center space-y-2 animate-in fade-in slide-in-from-top-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-travesia-gold/10 border border-travesia-gold/20 rounded-full mb-2">
-          <Trophy size={12} className="text-travesia-gold" />
-          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-travesia-gold">Momento de Suerte</span>
-        </div>
-        <h3 className="text-3xl font-serif font-bold text-white leading-none">Gira la Ruleta</h3>
-        <p className="text-white/40 text-[10px] font-medium uppercase tracking-widest">Descubre tu beneficio exclusivo</p>
+      {/* TÍTULO MINIMALISTA */}
+      <div className="mb-8 text-center space-y-1 animate-in fade-in slide-in-from-top-4">
+        <h3 className="text-2xl font-serif font-bold text-white tracking-tight">Tu Premio Especial</h3>
+        <div className="w-8 h-0.5 bg-travesia-gold mx-auto rounded-full opacity-50"></div>
       </div>
 
-      {/* CONTENEDOR DE LA RULETA */}
-      <div className="relative w-full aspect-square max-w-[320px] xs:max-w-[360px] group">
+      {/* CONTENEDOR DE LA RULETA - REDUCIDO PARA EVITAR DESBORDES */}
+      <div className="relative w-full aspect-square max-w-[280px] xs:max-w-[320px]">
         
-        {/* AURA DE FONDO */}
-        <div className={`absolute -inset-10 bg-travesia-gold/5 blur-[80px] rounded-full transition-opacity duration-1000 ${spinning ? 'opacity-100' : 'opacity-40'}`}></div>
+        {/* AURA SUTIL */}
+        <div className={`absolute -inset-6 bg-travesia-gold/5 blur-[60px] rounded-full transition-opacity duration-1000 ${spinning ? 'opacity-100' : 'opacity-30'}`}></div>
 
-        {/* PUNTERO (INDICADOR SUPERIOR) - REDISEÑADO PREMIUM */}
-        <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center">
-          <div className="w-8 h-10 bg-gradient-to-b from-travesia-gold via-[#c5a96e] to-[#dac88c] rounded-b-lg shadow-[0_10px_20px_rgba(0,0,0,0.5)] flex items-center justify-center border-x border-white/20">
-             <div className="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_white]"></div>
+        {/* PUNTERO MINIMALISTA */}
+        <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-50">
+          <div className="w-6 h-8 bg-travesia-gold rounded-b-full shadow-lg border border-white/20 flex items-center justify-center">
+             <div className="w-1 h-1 bg-white rounded-full"></div>
           </div>
-          <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[12px] border-t-[#dac88c]"></div>
         </div>
 
-        {/* MARCO EXTERIOR TIPO RELOJ DE LUJO */}
-        <div className="relative w-full h-full rounded-full border-[12px] border-[#0A0A0A] shadow-[0_20px_80px_rgba(0,0,0,0.8),inset_0_0_40px_rgba(218,200,140,0.1)] bg-[#051A10] p-1.5 flex items-center justify-center overflow-hidden ring-1 ring-white/5">
+        {/* MARCO ULTRAFINO PREMIUM */}
+        <div className="relative w-full h-full rounded-full border-[1px] border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.5)] bg-[#051A10] p-1 flex items-center justify-center overflow-hidden">
           
-          {/* LUCES LED PERIMETRALES */}
-          {[...Array(24)].map((_, i) => (
-            <div 
-              key={i} 
-              className={`absolute w-1 h-1 rounded-full z-20 transition-all duration-300 ${spinning ? 'bg-white shadow-[0_0_10px_white] scale-125' : 'bg-travesia-gold/30 shadow-none scale-100'}`}
-              style={{
-                transform: `rotate(${i * 15}deg) translateY(-142px)`,
-                opacity: spinning ? (i % 2 === 0 ? 1 : 0.4) : 0.6
-              }}
-            />
-          ))}
-
-          {/* RUEDA SVG PARA MÁXIMA NITIDEZ */}
+          {/* RUEDA SVG */}
           <div 
             className="relative w-full h-full rounded-full transition-transform duration-[4000ms] cubic-bezier overflow-hidden"
             style={{ 
@@ -138,14 +128,10 @@ export default function Ruleta({ onWin }: RuletaProps) {
           >
             <svg viewBox="0 0 100 100" className="w-full h-full">
               <defs>
-                <radialGradient id="grad-gold" cx="50%" cy="50%" r="50%">
+                <linearGradient id="grad-gold" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#dac88c" />
-                  <stop offset="100%" stopColor="#c5a96e" />
-                </radialGradient>
-                <radialGradient id="grad-green" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#1e3320" />
-                  <stop offset="100%" stopColor="#051A10" />
-                </radialGradient>
+                  <stop offset="100%" stopColor="#b8a164" />
+                </linearGradient>
               </defs>
               {premios.map((premio, i) => {
                 const startAngle = i * segmentSize;
@@ -163,21 +149,20 @@ export default function Ruleta({ onWin }: RuletaProps) {
                   <g key={i}>
                     <path 
                       d={pathData} 
-                      fill={isEven ? "url(#grad-green)" : "url(#grad-gold)"}
-                      stroke={isEven ? "#dac88c44" : "#1e332022"}
-                      strokeWidth="0.2"
+                      fill={isEven ? "#1e3320" : "#051a10"}
+                      stroke="#dac88c22"
+                      strokeWidth="0.1"
                     />
-                    {/* TEXTO ORIENTADO AL CENTRO */}
                     <text
                       x="50"
-                      y="15"
-                      fill={isEven ? "#dac88c" : "#1e3320"}
-                      fontSize="3.8"
-                      fontWeight="900"
+                      y="12"
+                      fill="#dac88c"
+                      fontSize="3.2"
+                      fontWeight="700"
                       textAnchor="middle"
                       transform={`rotate(${startAngle + segmentSize / 2} 50 50)`}
-                      className="uppercase tracking-tight"
-                      style={{ fontFamily: 'var(--font-jost), sans-serif' }}
+                      className="uppercase tracking-tighter"
+                      style={{ opacity: 0.9 }}
                     >
                       {premio.nombre}
                     </text>
@@ -185,43 +170,32 @@ export default function Ruleta({ onWin }: RuletaProps) {
                 );
               })}
             </svg>
-
-            {/* OVERLAY DE TEXTURA Y BRILLO */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/10 pointer-events-none"></div>
           </div>
 
-          {/* CENTRO DE LA RULETA (HUB PREMIUM) */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 z-40">
-            <div className="absolute inset-0 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-2xl"></div>
-            <div className="absolute inset-2 bg-gradient-to-br from-[#1e3320] to-[#051A10] rounded-full flex items-center justify-center shadow-inner border border-travesia-gold/30">
-              <Sparkles size={20} className="text-travesia-gold animate-pulse" />
+          {/* HUB CENTRAL MINIMALISTA */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 z-40">
+            <div className="absolute inset-0 bg-white/5 backdrop-blur-md rounded-full border border-white/10 shadow-2xl"></div>
+            <div className="absolute inset-1.5 bg-[#051A10] rounded-full flex items-center justify-center border border-travesia-gold/20">
+              <div className="w-1.5 h-1.5 bg-travesia-gold rounded-full animate-pulse"></div>
             </div>
-            {/* ANILLO DECORATIVO */}
-            <div className="absolute -inset-1 border border-travesia-gold/10 rounded-full scale-110"></div>
           </div>
         </div>
       </div>
 
-      {/* BOTÓN DE ACCIÓN REDISEÑADO */}
-      <div className="relative w-full mt-16 px-4">
+      {/* BOTÓN MINIMALISTA */}
+      <div className="relative w-full mt-12 px-6">
         <button 
           onClick={handleSpin}
           disabled={spinning}
           className={`
-            w-full group relative overflow-hidden py-5 rounded-2xl font-black text-[11px] tracking-[0.5em] uppercase transition-all duration-700
+            w-full group relative py-5 rounded-full font-black text-[10px] tracking-[0.4em] uppercase transition-all duration-500
             ${spinning 
-              ? 'bg-white/5 text-white/20 cursor-not-allowed border border-white/5' 
-              : 'bg-travesia-gold text-[#051A10] shadow-[0_20px_40px_rgba(0,0,0,0.4),0_0_20px_rgba(218,200,140,0.2)] hover:scale-[1.02] active:scale-95'
+              ? 'bg-white/5 text-white/10 cursor-not-allowed' 
+              : 'bg-white text-[#051A10] hover:bg-travesia-gold transition-colors'
             }
           `}
         >
-          <span className="relative z-10 flex items-center justify-center gap-3">
-            {spinning ? 'GIRANDO...' : '¡GIRAR AHORA!'}
-          </span>
-          
-          {!spinning && (
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:animate-shimmer transition-transform duration-1000"></div>
-          )}
+          {spinning ? 'ESPERANDO...' : 'GIRAR RULETA'}
         </button>
         
         {!spinning && (

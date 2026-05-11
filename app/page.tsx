@@ -15,7 +15,9 @@ import {
   ArrowRight,
   ShieldCheck,
   Smartphone,
-  Globe
+  Globe,
+  Instagram,
+  Facebook
 } from 'lucide-react';
 import Ruleta from '@/components/Ruleta';
 import { useRouter } from 'next/navigation';
@@ -207,7 +209,19 @@ export default function Home() {
                 <p className="text-2xl font-black text-white">{premioFinal}</p>
               </div>
             </div>
-            <button onClick={() => router.push('/checkin')} className="w-full border border-travesia-gold text-travesia-gold py-4 rounded-xl font-black text-[10px] tracking-widest uppercase hover:bg-travesia-gold hover:text-[#051A10] transition-all">
+            <div className="space-y-4 w-full">
+              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 text-center">¡Síguenos para más sorpresas!</p>
+              <div className="grid grid-cols-2 gap-3">
+                <a href="https://instagram.com/latravesia.ec" target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
+                  <Instagram size={18} /> <span className="text-[9px] font-black uppercase tracking-widest">Instagram</span>
+                </a>
+                <a href="https://facebook.com/latravesia.ec" target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
+                  <Facebook size={18} /> <span className="text-[9px] font-black uppercase tracking-widest">Facebook</span>
+                </a>
+              </div>
+            </div>
+
+            <button onClick={() => router.push('/checkin?new=true')} className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:brightness-110 shadow-xl transition-all flex items-center justify-center gap-2">
               IR A MI PANEL <ArrowRight size={14} />
             </button>
           </div>

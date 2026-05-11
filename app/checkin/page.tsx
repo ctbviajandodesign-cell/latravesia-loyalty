@@ -12,9 +12,19 @@ import {
   Trophy,
   Star
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Instagram, Facebook } from 'lucide-react';
+import { Suspense } from 'react';
 
 export default function CheckInPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#051A10] flex items-center justify-center text-white">Cargando...</div>}>
+      <CheckInContent />
+    </Suspense>
+  );
+}
+
+function CheckInContent() {
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState<'identify' | 'pin' | 'success'>('identify');
   const [cliente, setCliente] = useState<any>(null);
@@ -23,6 +33,9 @@ export default function CheckInPage() {
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
   const router = useRouter();
+
+  const searchParams = useSearchParams();
+  const isNew = searchParams.get('new') === 'true';
 
   useEffect(() => {
     // Intentar recuperar cliente de localStorage
@@ -33,7 +46,7 @@ export default function CheckInPage() {
       setLoading(false);
     }
     fetchGoogleLink();
-  }, []);
+  }, [searchParams]);
 
   async function fetchGoogleLink() {
     const { data } = await supabase.from('config').select('*').eq('clave', 'google_maps_link').single();
@@ -49,7 +62,11 @@ export default function CheckInPage() {
     const { data } = await supabase.from('clientes').select('*').eq('id', id).single();
     if (data) {
       setCliente(data);
-      setStep('pin');
+      if (isNew) {
+        setStep('success'); // Skip PIN if they just registered
+      } else {
+        setStep('pin');
+      }
     }
     setLoading(false);
   }
@@ -59,10 +76,11 @@ export default function CheckInPage() {
     setError('');
     
     try {
-      // 1. Validar PIN (reusamos el de la configuración)
+      // 1. Validar PIN
       const { data: configData } = await supabase.from('config').select('*').eq('clave', 'pin_ruleta').single();
+      const correctPin = configData?.valor || '1234';
       
-      if (pin !== (configData?.valor || '1234')) {
+      if (pin.trim() !== correctPin.trim()) {
         throw new Error('PIN incorrecto. Pídelo en la caja.');
       }
 
@@ -199,6 +217,19 @@ export default function CheckInPage() {
                 </a>
               </div>
             )}
+
+            {/* REDES SOCIALES */}
+            <div className="space-y-4 pt-4 border-t border-white/5 w-full">
+              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 text-center">¡Síguenos para más sorpresas!</p>
+              <div className="grid grid-cols-2 gap-3 px-2">
+                <a href="https://instagram.com/latravesia.ec" target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
+                  <Instagram size={18} /> <span className="text-[9px] font-black uppercase tracking-widest font-sans">Instagram</span>
+                </a>
+                <a href="https://facebook.com/latravesia.ec" target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
+                  <Facebook size={18} /> <span className="text-[9px] font-black uppercase tracking-widest font-sans">Facebook</span>
+                </a>
+              </div>
+            </div>
 
             <button 
               onClick={() => router.push('/')}
