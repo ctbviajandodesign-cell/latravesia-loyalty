@@ -218,6 +218,25 @@ export default function Home() {
                     />
                   </div>
                 </div>
+
+                <div className="space-y-2 pt-1">
+                  <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5">Género</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: 'Masculino', label: 'Hombre' },
+                      { id: 'Femenino', label: 'Mujer' },
+                    ].map(g => (
+                      <button 
+                        key={g.id}
+                        type="button"
+                        onClick={() => setFormData({...formData, genero: g.id})}
+                        className={`py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${formData.genero === g.id ? 'bg-travesia-gold/10 border-travesia-gold text-travesia-gold' : 'bg-white/5 border-white/10 text-white/40'}`}
+                      >
+                        {g.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <button 
