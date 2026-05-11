@@ -100,6 +100,31 @@ export default function MarketingPage() {
     setPreviewImage(formatUnsplashUrl(url));
   };
 
+  const handleSaveAll = async () => {
+    setSaving(true);
+    const prefix = getPrefix(activeTab);
+    
+    const subjectKey = activeTab === 'loyalty' ? 'email_premio_asunto' : `${prefix}email_subject`;
+    const bodyKey = activeTab === 'loyalty' ? 'email_premio_mensaje' : `${prefix}email_body`;
+    const imgKey = activeTab === 'loyalty' ? 'email_foto_url' : 
+                   activeTab === 'mass' ? 'broadcast_foto_url' : `${prefix}image_url`;
+
+    try {
+      await Promise.all([
+        supabase.from('config').update({ valor: marketingData.asunto }).eq('clave', subjectKey),
+        supabase.from('config').update({ valor: marketingData.mensaje }).eq('clave', bodyKey),
+        supabase.from('config').update({ valor: marketingData.image_url }).eq('clave', imgKey)
+      ]);
+      
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (e) {
+      alert("Error al guardar cambios");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleLaunch = async () => {
     const isMass = activeTab === 'mass';
     const confirmMsg = isMass 
