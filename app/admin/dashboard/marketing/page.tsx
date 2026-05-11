@@ -471,7 +471,7 @@ export default function MarketingPage() {
                               <p className="text-[9px] text-white/30 uppercase font-black tracking-tighter mt-0.5">{c.fecha_nacimiento}</p>
                             </div>
                             <a 
-                              href={formatWhatsAppLink(c.telefono, c.nombre)}
+                              href={formatWhatsAppLink(c.telefono, c.nombre, whatsappGroupLink)}
                               target="_blank"
                               className="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl hover:bg-emerald-500 hover:text-white transition-all shadow-lg"
                               title="Enviar WhatsApp Personalizado"
