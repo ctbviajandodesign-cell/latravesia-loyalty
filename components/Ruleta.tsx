@@ -125,20 +125,20 @@ export default function Ruleta({ onWin }: RuletaProps) {
   const segmentSize = 360 / premios.length;
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-[300px] xs:max-w-[340px] mx-auto overflow-hidden px-2">
+    <div className="flex flex-col items-center justify-center w-full max-w-[320px] mx-auto px-4">
       
-      {/* TÍTULO MINIMALISTA */}
-      <div className="mb-6 text-center space-y-1">
-        <h3 className="text-xl font-serif font-bold text-white tracking-tight">Tu Premio Especial</h3>
-        <div className="w-8 h-0.5 bg-travesia-gold mx-auto rounded-full opacity-30"></div>
+      {/* TÍTULO MINIMALISTA - Reducido para ahorrar espacio */}
+      <div className="mb-4 text-center space-y-1">
+        <h3 className="text-lg font-serif font-bold text-white tracking-tight">Tu Premio Especial</h3>
+        <div className="w-6 h-0.5 bg-travesia-gold mx-auto rounded-full opacity-30"></div>
       </div>
 
-      {/* CONTENEDOR DE LA RULETA - ESTRUCTURA FIJA */}
-      <div className="relative w-full aspect-square">
+      {/* CONTENEDOR DE LA RULETA */}
+      <div className="relative w-full aspect-square max-h-[280px]">
         
-        {/* PUNTERO MINIMALISTA FIJO */}
+        {/* PUNTERO */}
         <div className="absolute -top-1 left-1/2 -translate-x-1/2 z-50">
-          <div className="w-5 h-7 bg-travesia-gold rounded-b-full shadow-xl border border-white/10 flex items-center justify-center">
+          <div className="w-4 h-6 bg-travesia-gold rounded-b-full shadow-xl border border-white/10 flex items-center justify-center">
              <div className="w-1 h-1 bg-[#051A10] rounded-full"></div>
           </div>
         </div>
@@ -146,20 +146,11 @@ export default function Ruleta({ onWin }: RuletaProps) {
         {/* CUERPO DE LA RULETA */}
         <div className="relative w-full h-full rounded-full border border-white/5 bg-[#051A10] p-1 shadow-2xl flex items-center justify-center overflow-hidden">
           
-          {/* RUEDA SVG */}
           <div 
             className="relative w-full h-full rounded-full transition-transform duration-[4000ms] cubic-bezier"
-            style={{ 
-              transform: `rotate(${rotation}deg)`,
-            }}
+            style={{ transform: `rotate(${rotation}deg)` }}
           >
             <svg viewBox="0 0 100 100" className="w-full h-full">
-              <defs>
-                <linearGradient id="grad-gold" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#dac88c" />
-                  <stop offset="100%" stopColor="#b8a164" />
-                </linearGradient>
-              </defs>
               {premios.map((premio, i) => {
                 const startAngle = i * segmentSize;
                 const endAngle = (i + 1) * segmentSize;
@@ -177,21 +168,20 @@ export default function Ruleta({ onWin }: RuletaProps) {
                     <path 
                       d={pathData} 
                       fill={isEven ? "#1e3320" : "#051a10"}
-                      stroke="#dac88c22"
-                      strokeWidth="0.1"
+                      stroke="#dac88c44"
+                      strokeWidth="0.2"
                     />
                     <text
                       x="50"
-                      y="12"
+                      y="15"
                       fill="#dac88c"
-                      fontSize="3.2"
-                      fontWeight="700"
+                      fontSize="2.8"
+                      fontWeight="800"
                       textAnchor="middle"
                       transform={`rotate(${startAngle + segmentSize / 2} 50 50)`}
                       className="uppercase tracking-tighter"
-                      style={{ opacity: 0.9 }}
                     >
-                      {premio.nombre}
+                      {premio.nombre.length > 15 ? premio.nombre.substring(0, 12) + '...' : premio.nombre}
                     </text>
                   </g>
                 );
@@ -199,8 +189,7 @@ export default function Ruleta({ onWin }: RuletaProps) {
             </svg>
           </div>
 
-          {/* HUB CENTRAL MINIMALISTA */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 z-40">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 z-40">
             <div className="absolute inset-0 bg-white/5 backdrop-blur-md rounded-full border border-white/10 shadow-2xl"></div>
             <div className="absolute inset-1.5 bg-[#051A10] rounded-full flex items-center justify-center border border-travesia-gold/20">
               <div className="w-1.5 h-1.5 bg-travesia-gold rounded-full animate-pulse"></div>
@@ -209,41 +198,32 @@ export default function Ruleta({ onWin }: RuletaProps) {
         </div>
       </div>
 
-      {/* BOTÓN MINIMALISTA */}
-      <div className="relative w-full mt-12 px-6">
+      <div className="relative w-full mt-8 px-4">
         <button 
           onClick={handleSpin}
           disabled={spinning}
           className={`
-            w-full group relative py-5 rounded-full font-black text-[10px] tracking-[0.4em] uppercase transition-all duration-500
+            w-full group relative py-4 rounded-2xl font-black text-[10px] tracking-[0.3em] uppercase transition-all duration-500
             ${spinning 
               ? 'bg-white/5 text-white/10 cursor-not-allowed' 
-              : 'bg-white text-[#051A10] hover:bg-travesia-gold transition-colors'
+              : 'bg-travesia-gold text-[#051A10] shadow-lg hover:brightness-110 active:scale-95'
             }
           `}
         >
-          {spinning ? 'ESPERANDO...' : 'GIRAR RULETA'}
+          {spinning ? 'ESPERANDO...' : 'GIRAR PARA GANAR'}
         </button>
-        
-        {!spinning && (
-          <div className="mt-5 flex flex-col items-center gap-2 animate-bounce opacity-40">
-            <p className="text-[7px] font-black uppercase tracking-[0.4em] text-white">Pulsa para jugar</p>
-          </div>
-        )}
       </div>
 
-      {/* MODAL DE VICTORIA (OPCIONAL/TEMPORAL) */}
       {mustShowWin && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#051A10]/90 backdrop-blur-xl animate-in fade-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#051A10]/95 backdrop-blur-2xl animate-in fade-in">
           <div className="text-center space-y-6 animate-in zoom-in duration-500">
-            <div className="w-24 h-24 bg-travesia-gold rounded-full mx-auto flex items-center justify-center shadow-[0_0_50px_rgba(218,200,140,0.5)]">
-               <Trophy size={48} className="text-[#051A10]" />
+            <div className="w-20 h-20 bg-travesia-gold rounded-[28px] mx-auto flex items-center justify-center shadow-[0_0_50px_rgba(218,200,140,0.3)]">
+               <Trophy size={40} className="text-[#051A10]" />
             </div>
-            <div className="space-y-2">
-              <p className="text-travesia-gold font-black uppercase tracking-[0.3em] text-[10px]">¡Felicidades!</p>
-              <h4 className="text-4xl font-serif font-bold text-white uppercase">{winningLabel}</h4>
+            <div className="space-y-1">
+              <p className="text-travesia-gold font-black uppercase tracking-[0.4em] text-[8px]">¡Excelente!</p>
+              <h4 className="text-3xl font-serif font-bold text-white uppercase leading-tight">{winningLabel}</h4>
             </div>
-            <p className="text-white/40 text-[10px] font-medium max-w-[200px] mx-auto uppercase tracking-widest">Tu premio se ha registrado en tu perfil.</p>
           </div>
         </div>
       )}

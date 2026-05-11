@@ -121,59 +121,59 @@ export default function Home() {
         <div className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] bg-travesia-gold/5 blur-[100px] rounded-full"></div>
       </div>
 
-      <div className="relative max-w-md mx-auto min-h-screen flex flex-col px-5 py-6">
+      <div className="relative max-w-md mx-auto min-h-screen flex flex-col px-6 py-6">
         
         {/* LOGO */}
         <div className="flex flex-col items-center mb-6 animate-in fade-in slide-in-from-top-4 duration-1000">
-          <div className="w-14 h-14 bg-gradient-to-br from-travesia-gold to-[#B8860B] rounded-2xl flex items-center justify-center shadow-xl">
-            <Sparkles className="w-7 h-7 text-[#051A10]" />
+          <div className="w-12 h-12 bg-gradient-to-br from-travesia-gold to-[#B8860B] rounded-2xl flex items-center justify-center shadow-xl">
+            <Sparkles className="w-6 h-6 text-[#051A10]" />
           </div>
-          <h1 className="mt-3 text-2xl font-serif font-bold text-travesia-gold">La Travesía</h1>
-          <p className="text-[7px] uppercase tracking-[0.4em] font-black text-white/30 italic">Loyalty Experience</p>
+          <h1 className="mt-2 text-xl font-serif font-bold text-travesia-gold">La Travesía</h1>
+          <p className="text-[6px] uppercase tracking-[0.4em] font-black text-white/30 italic">Loyalty Experience</p>
         </div>
 
         {step === 'welcome' && (
-          <div className="flex-1 flex flex-col justify-center space-y-8 animate-in fade-in slide-in-from-bottom-8">
-            <div className="space-y-3">
+          <div className="flex-1 flex flex-col justify-center space-y-6 animate-in fade-in slide-in-from-bottom-8">
+            <div className="space-y-2 text-center">
               <h2 className="text-3xl font-serif leading-tight font-bold text-white">Únete al Club.</h2>
               <p className="text-white/50 text-sm font-light">Registra tus datos y gana premios exclusivos desde hoy.</p>
             </div>
-            <button onClick={() => setStep('form')} className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-[20px] font-black text-xs tracking-widest uppercase shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+            <button onClick={() => setStep('form')} className="w-full bg-travesia-gold text-[#051A10] py-4 rounded-2xl font-black text-xs tracking-widest uppercase shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
               REGISTRARME AHORA <ArrowRight size={14} />
             </button>
           </div>
         )}
 
         {step === 'form' && (
-          <div className="animate-in fade-in slide-in-from-right-8">
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={10}/> Nombre</label>
-                    <input required type="text" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" placeholder="Juan" />
+          <div className="animate-in fade-in slide-in-from-right-8 pb-10">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={9}/> Nombre</label>
+                    <input required type="text" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" placeholder="Ej: Juan" />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={10}/> Apellido</label>
-                    <input required type="text" value={formData.apellido} onChange={(e) => setFormData({...formData, apellido: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" placeholder="Marca" />
+                  <div className="space-y-1">
+                    <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={9}/> Apellido</label>
+                    <input required type="text" value={formData.apellido} onChange={(e) => setFormData({...formData, apellido: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" placeholder="Ej: Marca" />
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Mail size={10}/> Correo</label>
-                  <input required type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" placeholder="juan@gmail.com" />
+                <div className="space-y-1">
+                  <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Mail size={9}/> Correo Electrónico</label>
+                  <input required type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" placeholder="tu@email.com" />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Globe size={10}/> País y WhatsApp</label>
+                <div className="space-y-1">
+                  <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Globe size={9}/> WhatsApp</label>
                   <div className="flex gap-2">
                     <select 
                       value={countryCode} 
                       onChange={(e) => setCountryCode(e.target.value)}
-                      className="w-[100px] bg-white/10 border border-white/10 px-2 rounded-xl text-travesia-gold font-bold text-xs outline-none focus:border-travesia-gold"
+                      className="w-[85px] bg-white/10 border border-white/10 px-1 rounded-xl text-travesia-gold font-bold text-[10px] outline-none focus:border-travesia-gold"
                     >
                       {COUNTRY_CODES.map(c => (
-                        <option key={c.code} value={c.code} className="bg-[#051A10] text-white">{c.name} ({c.code})</option>
+                        <option key={c.code} value={c.code} className="bg-[#051A10] text-white">{c.name} {c.code}</option>
                       ))}
                     </select>
                     <input 
@@ -181,24 +181,24 @@ export default function Home() {
                       type="tel" 
                       value={formData.telefono} 
                       onChange={(e) => setFormData({...formData, telefono: e.target.value.replace(/[^0-9]/g, '')})} 
-                      className="flex-1 bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" 
-                      placeholder="968460705"
+                      className="flex-1 bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" 
+                      placeholder="999 999 999"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Calendar size={10}/> Tu Cumpleaños</label>
-                  <input required type="date" value={formData.fecha_nacimiento} onChange={(e) => setFormData({...formData, fecha_nacimiento: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none focus:border-travesia-gold transition-all [color-scheme:dark] text-sm" />
+                <div className="space-y-1">
+                  <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Calendar size={9}/> Fecha de Cumpleaños</label>
+                  <input required type="date" value={formData.fecha_nacimiento} onChange={(e) => setFormData({...formData, fecha_nacimiento: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all [color-scheme:dark] text-xs" />
                 </div>
               </div>
 
               <button 
                 type="submit" 
                 disabled={formLoading}
-                className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-[20px] font-black text-xs tracking-[0.2em] uppercase shadow-xl hover:brightness-110 transition-all flex items-center justify-center gap-2"
+                className="w-full bg-travesia-gold text-[#051A10] py-4.5 rounded-2xl font-black text-[10px] tracking-[0.2em] uppercase shadow-xl hover:brightness-110 transition-all flex items-center justify-center gap-2 mt-4"
               >
-                {formLoading ? <Loader2 className="animate-spin w-5 h-5" /> : <>FINALIZAR Y JUGAR <ChevronRight size={14} /></>}
+                {formLoading ? <Loader2 className="animate-spin w-5 h-5" /> : <>LISTO PARA JUGAR <ChevronRight size={14} /></>}
               </button>
             </form>
           </div>
@@ -226,19 +226,23 @@ export default function Home() {
         )}
 
         {step === 'success' && (
-          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in zoom-in">
-            <div className="space-y-3">
+          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in zoom-in">
+            <div className="space-y-4">
               <div className="mx-auto w-16 h-16 bg-travesia-gold/20 rounded-2xl flex items-center justify-center border border-travesia-gold/30">
                 <CheckCircle2 className="w-8 h-8 text-travesia-gold" />
               </div>
               <h2 className="text-3xl font-serif font-bold">¡Bienvenido!</h2>
-              <div className="p-6 bg-white/5 border-2 border-travesia-gold/30 rounded-[30px] backdrop-blur-xl">
-                <p className="text-[8px] uppercase tracking-widest text-travesia-gold font-black mb-1">Premio Ganado</p>
-                <p className="text-2xl font-black text-white">{premioFinal}</p>
+              
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-travesia-gold/20 rounded-[32px] blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                <div className="relative p-6 bg-white/5 border border-travesia-gold/30 rounded-[32px] backdrop-blur-2xl">
+                  <p className="text-[9px] uppercase tracking-[0.4em] text-travesia-gold font-black mb-2">Premio Ganado</p>
+                  <p className="text-2xl font-black text-white leading-tight">{premioFinal}</p>
+                </div>
               </div>
             </div>
 
-            <button onClick={() => router.push('/checkin?new=true')} className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:brightness-110 shadow-xl transition-all flex items-center justify-center gap-2">
+            <button onClick={() => router.push('/checkin?new=true')} className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:brightness-110 shadow-2xl transition-all flex items-center justify-center gap-2">
               IR A MI PANEL <ArrowRight size={14} />
             </button>
           </div>

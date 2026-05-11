@@ -223,10 +223,10 @@ function CheckInContent() {
               </p>
             </div>
             
-            <div className="bg-gradient-to-br from-travesia-gold to-[#B8860B] p-6 rounded-[32px] shadow-2xl border border-white/20">
-              <p className="text-[10px] text-[#051A10]/60 uppercase font-black tracking-widest mb-1">Tu Progreso Actual</p>
-              <p className="text-6xl font-black text-[#051A10] tracking-tighter">{cliente.total_visitas} / 10</p>
-              <p className="text-[10px] text-[#051A10] font-bold mt-2 tracking-[0.2em] uppercase">¡Vas por muy buen camino!</p>
+            <div className="bg-gradient-to-br from-travesia-gold to-[#B8860B] p-5 rounded-[32px] shadow-2xl border border-white/20">
+              <p className="text-[9px] text-[#051A10]/60 uppercase font-black tracking-widest mb-1">Tu Progreso Actual</p>
+              <p className="text-5xl font-black text-[#051A10] tracking-tighter">{cliente.total_visitas} / 10</p>
+              <p className="text-[10px] text-[#051A10] font-bold mt-2 tracking-[0.2em] uppercase opacity-80">¡Vas por muy buen camino!</p>
             </div>
 
             {/* CTA GOOGLE REVIEWS */}
