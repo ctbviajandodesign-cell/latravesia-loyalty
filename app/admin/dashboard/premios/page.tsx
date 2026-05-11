@@ -172,6 +172,10 @@ export default function PremiosPage() {
             <label className="text-[10px] uppercase font-black text-gray-400 ml-1">Nombre del Premio</label>
             <input required value={nombre} onChange={e => setNombre(e.target.value)} className="w-full p-4 rounded-xl border bg-gray-50 focus:border-[#4A5D4E] outline-none transition-all" />
           </div>
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-[10px] uppercase font-black text-gray-400 ml-1">Descripción del Regalo (Instrucciones para canje)</label>
+            <textarea rows={2} value={descripcion} onChange={e => setDescripcion(e.target.value)} className="w-full p-4 rounded-xl border bg-gray-50 focus:border-[#4A5D4E] outline-none transition-all resize-none" placeholder="Ej: Presenta este código en caja para obtener un 10% de descuento..." />
+          </div>
           <div className="space-y-2">
             <label className="text-[10px] uppercase font-black text-gray-400 ml-1">Probabilidad de Salida (%)</label>
             <input type="number" required value={probabilidad} onChange={e => setProbabilidad(e.target.value)} className="w-full p-4 rounded-xl border bg-gray-50 focus:border-[#4A5D4E] outline-none transition-all" />

@@ -172,17 +172,17 @@ export default function Home() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1 overflow-hidden">
                     <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={9}/> Nombre</label>
-                    <input required type="text" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" placeholder="Ej: Juan" />
+                    <input required type="text" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" />
                   </div>
                   <div className="space-y-1 overflow-hidden">
                     <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={9}/> Apellido</label>
-                    <input required type="text" value={formData.apellido} onChange={(e) => setFormData({...formData, apellido: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" placeholder="Ej: Marca" />
+                    <input required type="text" value={formData.apellido} onChange={(e) => setFormData({...formData, apellido: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" />
                   </div>
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Mail size={9}/> Correo Electrónico</label>
-                  <input required type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" placeholder="tu@email.com" />
+                  <input required type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" />
                 </div>
 
                 <div className="space-y-1">
@@ -203,7 +203,6 @@ export default function Home() {
                       value={formData.telefono} 
                       onChange={(e) => setFormData({...formData, telefono: e.target.value.replace(/[^0-9]/g, '')})} 
                       className="flex-1 bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" 
-                      placeholder="999 999 999"
                     />
                   </div>
                 </div>
