@@ -5,6 +5,9 @@ export const formatUnsplashUrl = (url: string) => {
 
   // Si ya es un link de imágenes (CDN) de unsplash, lo usamos tal cual
   if (url.includes('images.unsplash.com')) {
+    if (!url.includes('?')) {
+      return `${url}?auto=format&fit=crop&w=1200&q=80`;
+    }
     return url;
   }
 
@@ -23,8 +26,9 @@ export const formatUnsplashUrl = (url: string) => {
   }
 
   if (id) {
-    // Formato de alta compatibilidad para CDN de Unsplash
-    return `https://images.unsplash.com/photo-1519681393784-d120267933ba?ixid=${id}&auto=format&fit=crop&w=1200&q=80`;
+    // Formato DIRECTO con el ID en el path. Esto asegura que cargue la imagen correcta.
+    // Si el ID es e4kmTGIQFIw, el link será https://images.unsplash.com/photo-e4kmTGIQFIw?...
+    return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1200&q=80`;
   }
 
   return url;
