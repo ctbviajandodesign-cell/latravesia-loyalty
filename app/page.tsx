@@ -98,7 +98,7 @@ export default function Home() {
 
       localStorage.setItem('travesia_cliente_id', data.id);
       setClienteId(data.id);
-      setStep('social');
+      setStep('game');
       
       fetch('/api/marketing/notifications', {
         method: 'POST',
@@ -204,50 +204,7 @@ export default function Home() {
           </div>
         )}
 
-        {step === 'social' && (
-          <div className="flex-1 flex flex-col items-center justify-center space-y-10 animate-in fade-in slide-in-from-right-8">
-            <div className="text-center space-y-3">
-              <div className="mx-auto w-12 h-12 bg-travesia-gold/10 rounded-2xl flex items-center justify-center text-travesia-gold mb-2">
-                <Sparkles className="animate-pulse" size={24} />
-              </div>
-              <h2 className="text-3xl font-serif font-bold text-white">¡Paso Final!</h2>
-              <p className="text-white/40 text-[10px] uppercase tracking-widest font-black italic">Síguenos para activar tu premio</p>
-            </div>
 
-            <div className="w-full space-y-3 px-2">
-              <a href={socialLinks.instagram} target="_blank" className="flex items-center justify-between p-5 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-gradient-to-tr from-[#833ab4] via-[#fd1d1d] to-[#fcb045] rounded-xl flex items-center justify-center text-white shadow-lg"><Instagram size={20} /></div>
-                  <span className="text-xs font-black uppercase tracking-widest">Instagram</span>
-                </div>
-                <ArrowRight size={14} className="text-white/20 group-hover:text-travesia-gold" />
-              </a>
-
-              <a href={socialLinks.facebook} target="_blank" className="flex items-center justify-between p-5 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-[#1877F2] rounded-xl flex items-center justify-center text-white shadow-lg"><Facebook size={20} /></div>
-                  <span className="text-xs font-black uppercase tracking-widest">Facebook</span>
-                </div>
-                <ArrowRight size={14} className="text-white/20 group-hover:text-travesia-gold" />
-              </a>
-
-              <a href={socialLinks.tiktok} target="_blank" className="flex items-center justify-between p-5 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-[#000000] border border-white/10 rounded-xl flex items-center justify-center text-white shadow-lg"><Music2 size={20} /></div>
-                  <span className="text-xs font-black uppercase tracking-widest">TikTok</span>
-                </div>
-                <ArrowRight size={14} className="text-white/20 group-hover:text-travesia-gold" />
-              </a>
-            </div>
-
-            <button 
-              onClick={() => setStep('game')} 
-              className="w-full bg-travesia-gold text-[#051A10] py-6 rounded-3xl font-black text-[10px] tracking-[0.3em] uppercase shadow-2xl hover:scale-[1.02] active:scale-95 transition-all"
-            >
-              CONTINUAR A JUGAR
-            </button>
-          </div>
-        )}
 
         {step === 'game' && (
           <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in h-full overflow-hidden py-10">
