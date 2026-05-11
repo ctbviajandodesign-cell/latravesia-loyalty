@@ -1,0 +1,78 @@
+[
+  {
+    "clave": "filtro_genero",
+    "valor": "Todos"
+  },
+  {
+    "clave": "link_instagram",
+    "valor": "https://www.instagram.com/latravesia_cue/"
+  },
+  {
+    "clave": "link_facebook",
+    "valor": "https://www.facebook.com/latravesiacampina.cue/"
+  },
+  {
+    "clave": "link_tiktok",
+    "valor": "https://www.tiktok.com/@vivelatravesia_ec"
+  },
+  {
+    "clave": "link_whatsapp",
+    "valor": "https://chat.whatsapp.com/HCAXeXfDk871EUEYzkiwNn?mode=gi_t"
+  },
+  {
+    "clave": "visitas_para_premio",
+    "valor": "10"
+  },
+  {
+    "clave": "admin_password",
+    "valor": "latravesia@1215"
+  },
+  {
+    "clave": "pin_validacion",
+    "valor": "1234"
+  },
+  {
+    "clave": "resend_api_key",
+    "valor": "re_bTZpd7w1_FS5g2KqwK42PySeHsSobRfy1"
+  },
+  {
+    "clave": "email_asunto",
+    "valor": "¡Feliz Semana de tu Cumpleaños! 🎂"
+  },
+  {
+    "clave": "email_mensaje",
+    "valor": "Hola {nombre}, queremos invitarte a celebrar tu semana especial con nosotros...y con la travesia por tu semaa de cumpleaños tienes en tu pedido el 50% de Dscto, en el plato para el cumpleañero del día..!!"
+  },
+  {
+    "clave": "email_foto_url",
+    "valor": "https://unsplash.com/es/fotos/e4kmTGIQFIw"
+  },
+  {
+    "clave": "email_premio_asunto",
+    "valor": "¡Felicidades por tu fidelidad! 🏆"
+  },
+  {
+    "clave": "email_premio_mensaje",
+    "valor": "Has completado tus visitas. ¡Tu fidelidad tiene premio!"
+  },
+  {
+    "clave": "email_premio_foto_url",
+    "valor": "https://unsplash.com/es/fotos/ufVY1y3_F-M"
+  },
+  {
+    "clave": "broadcast_asunto",
+    "valor": "¡Nueva Sorpresa en La Travesía! 🎁"
+  },
+  {
+    "clave": "broadcast_mensaje",
+    "valor": "Hola {nombre}, tenemos algo especial..."
+  },
+  {
+    "clave": "broadcast_foto_url",
+    "valor": "https://unsplash.com/es/fotos/7-0PEaiAelc"
+  },
+  {
+    "clave": "admin_email",
+    "valor": "juanmarcav@gmail.com"
+  }
+]

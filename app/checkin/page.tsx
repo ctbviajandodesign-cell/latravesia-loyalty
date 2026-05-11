@@ -32,6 +32,11 @@ function CheckInContent() {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [socialLinks, setSocialLinks] = useState({
+    instagram: 'https://instagram.com/latravesia.ec',
+    facebook: 'https://facebook.com/latravesia.ec',
+    tiktok: 'https://tiktok.com/@latravesia.ec'
+  });
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -46,7 +51,21 @@ function CheckInContent() {
       setLoading(false);
     }
     fetchGoogleLink();
+    fetchSocialLinks();
   }, [searchParams]);
+
+  async function fetchSocialLinks() {
+    const { data } = await supabase.from('config').select('*');
+    if (data) {
+      const links = { ...socialLinks };
+      data.forEach(c => {
+        if (c.clave === 'link_instagram' && c.valor) links.instagram = c.valor;
+        if (c.clave === 'link_facebook' && c.valor) links.facebook = c.valor;
+        if (c.clave === 'link_tiktok' && c.valor) links.tiktok = c.valor;
+      });
+      setSocialLinks(links);
+    }
+  }
 
   async function fetchGoogleLink() {
     const { data } = await supabase.from('config').select('*').eq('clave', 'google_maps_link').single();
@@ -77,7 +96,7 @@ function CheckInContent() {
     
     try {
       // 1. Validar PIN
-      const { data: configData } = await supabase.from('config').select('*').eq('clave', 'pin_ruleta').single();
+      const { data: configData } = await supabase.from('config').select('*').eq('clave', 'pin_validacion').single();
       const correctPin = configData?.valor || '1234';
       
       if (pin.trim() !== correctPin.trim()) {
@@ -222,10 +241,10 @@ function CheckInContent() {
             <div className="space-y-4 pt-4 border-t border-white/5 w-full">
               <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 text-center">¡Síguenos para más sorpresas!</p>
               <div className="grid grid-cols-2 gap-3 px-2">
-                <a href="https://instagram.com/latravesia.ec" target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
+                <a href={socialLinks.instagram} target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
                   <Instagram size={18} /> <span className="text-[9px] font-black uppercase tracking-widest font-sans">Instagram</span>
                 </a>
-                <a href="https://facebook.com/latravesia.ec" target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
+                <a href={socialLinks.facebook} target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
                   <Facebook size={18} /> <span className="text-[9px] font-black uppercase tracking-widest font-sans">Facebook</span>
                 </a>
               </div>

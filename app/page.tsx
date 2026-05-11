@@ -49,11 +49,34 @@ export default function Home() {
   });
   const [clienteId, setClienteId] = useState<string | null>(null);
   const [premioFinal, setPremioFinal] = useState<string | null>(null);
+  const [socialLinks, setSocialLinks] = useState({
+    instagram: 'https://instagram.com/latravesia.ec',
+    facebook: 'https://facebook.com/latravesia.ec',
+    tiktok: 'https://tiktok.com/@latravesia.ec'
+  });
   const router = useRouter();
 
   useEffect(() => {
     validarSesion();
+    fetchConfigs();
   }, []);
+
+  async function fetchConfigs() {
+    try {
+      const { data } = await supabase.from('config').select('*');
+      if (data) {
+        const links = { ...socialLinks };
+        data.forEach(c => {
+          if (c.clave === 'link_instagram' && c.valor) links.instagram = c.valor;
+          if (c.clave === 'link_facebook' && c.valor) links.facebook = c.valor;
+          if (c.clave === 'link_tiktok' && c.valor) links.tiktok = c.valor;
+        });
+        setSocialLinks(links);
+      }
+    } catch (e) {
+      console.error("Error fetching social links:", e);
+    }
+  }
 
   async function validarSesion() {
     const savedId = localStorage.getItem('travesia_cliente_id');
@@ -203,7 +226,7 @@ export default function Home() {
             </div>
 
             <div className="w-full space-y-3 px-2">
-              <a href="https://instagram.com/latravesia.ec" target="_blank" className="flex items-center justify-between p-5 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
+              <a href={socialLinks.instagram} target="_blank" className="flex items-center justify-between p-5 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-gradient-to-tr from-[#833ab4] via-[#fd1d1d] to-[#fcb045] rounded-xl flex items-center justify-center text-white shadow-lg"><Instagram size={20} /></div>
                   <span className="text-xs font-black uppercase tracking-widest">Instagram</span>
@@ -211,7 +234,7 @@ export default function Home() {
                 <ArrowRight size={14} className="text-white/20 group-hover:text-travesia-gold" />
               </a>
 
-              <a href="https://facebook.com/latravesia.ec" target="_blank" className="flex items-center justify-between p-5 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
+              <a href={socialLinks.facebook} target="_blank" className="flex items-center justify-between p-5 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-[#1877F2] rounded-xl flex items-center justify-center text-white shadow-lg"><Facebook size={20} /></div>
                   <span className="text-xs font-black uppercase tracking-widest">Facebook</span>
@@ -219,7 +242,7 @@ export default function Home() {
                 <ArrowRight size={14} className="text-white/20 group-hover:text-travesia-gold" />
               </a>
 
-              <a href="https://tiktok.com/@latravesia.ec" target="_blank" className="flex items-center justify-between p-5 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
+              <a href={socialLinks.tiktok} target="_blank" className="flex items-center justify-between p-5 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-[#000000] border border-white/10 rounded-xl flex items-center justify-center text-white shadow-lg"><Music2 size={20} /></div>
                   <span className="text-xs font-black uppercase tracking-widest">TikTok</span>
@@ -260,10 +283,10 @@ export default function Home() {
             <div className="space-y-4 w-full">
               <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 text-center">¡Síguenos para más sorpresas!</p>
               <div className="grid grid-cols-2 gap-3">
-                <a href="https://instagram.com/latravesia.ec" target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
+                <a href={socialLinks.instagram} target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
                   <Instagram size={18} /> <span className="text-[9px] font-black uppercase tracking-widest">Instagram</span>
                 </a>
-                <a href="https://facebook.com/latravesia.ec" target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
+                <a href={socialLinks.facebook} target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
                   <Facebook size={18} /> <span className="text-[9px] font-black uppercase tracking-widest">Facebook</span>
                 </a>
               </div>
