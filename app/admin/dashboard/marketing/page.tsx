@@ -496,7 +496,7 @@ export default function MarketingPage() {
               </div>
 
               <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden bg-gray-100">
-                {previewImage && <img src={previewImage} className="w-full h-full object-cover" alt="Visual" />}
+                {previewImage && <img src={previewImage} referrerPolicy="no-referrer" className="w-full h-full object-cover" alt="Visual" />}
               </div>
 
               <div className="space-y-2">
