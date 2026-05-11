@@ -12,7 +12,8 @@ import {
   Package,
   Percent,
   Wifi,
-  WifiOff
+  WifiOff,
+  Settings2
 } from 'lucide-react';
 
 interface Premio {

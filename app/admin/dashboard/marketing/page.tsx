@@ -4,22 +4,20 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { 
   Mail, 
-  ImageIcon, 
-  Save, 
-  Sparkles, 
-  Eye, 
-  MessageSquare, 
   Zap, 
-  RefreshCw,
-  Tag,
-  Gift,
-  Heart,
-  Trophy,
-  Filter,
-  CheckCircle2,
-  Image as LucideImage,
+  Gift, 
+  Heart, 
+  Trophy, 
+  Users, 
+  Save, 
+  CheckCircle2, 
+  Image as ImageIcon, 
+  RefreshCw, 
+  Eye, 
+  Sparkles, 
+  Smartphone,
   ExternalLink,
-  Users
+  Image as LucideImage
 } from 'lucide-react';
 import { formatUnsplashUrl } from '@/lib/unsplash';
 
