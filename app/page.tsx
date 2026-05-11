@@ -44,10 +44,15 @@ export default function Home() {
     email: '',
     telefono: '',
     fecha_nacimiento: '',
-    genero: 'Otro'
+    genero: 'Otro',
+    joinWhatsApp: true
   });
   const [clienteId, setClienteId] = useState<string | null>(null);
   const [premioFinal, setPremioFinal] = useState<string | null>(null);
+  const [whatsappConfig, setWhatsappConfig] = useState({
+    enabled: true,
+    label: 'Unirme al grupo de WhatsApp de la comunidad'
+  });
   const [socialLinks, setSocialLinks] = useState({
     instagram: 'https://instagram.com',
     facebook: 'https://facebook.com',
@@ -65,13 +70,17 @@ export default function Home() {
     const { data } = await supabase.from('config').select('*');
     if (data) {
       const links = { ...socialLinks };
+      const wConfig = { ...whatsappConfig };
       data.forEach(item => {
         if (item.clave === 'instagram_link') links.instagram = item.valor;
         if (item.clave === 'facebook_link') links.facebook = item.valor;
         if (item.clave === 'tiktok_link') links.tiktok = item.valor;
         if (item.clave === 'whatsapp_group_link') links.whatsapp_group = item.valor;
+        if (item.clave === 'whatsapp_join_label') wConfig.label = item.valor;
+        if (item.clave === 'whatsapp_join_enabled') wConfig.enabled = item.valor === 'true';
       });
       setSocialLinks(links);
+      setWhatsappConfig(wConfig);
     }
   }
 
@@ -236,6 +245,19 @@ export default function Home() {
                         {g.label}
                       </button>
                     ))}
+                    {whatsappConfig.enabled && (
+                      <div 
+                        onClick={() => setFormData({...formData, joinWhatsApp: !formData.joinWhatsApp})}
+                        className="col-span-2 mt-2 p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-4 cursor-pointer hover:bg-white/10 transition-all select-none"
+                      >
+                        <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${formData.joinWhatsApp ? 'bg-travesia-gold border-travesia-gold shadow-[0_0_15px_rgba(212,175,55,0.4)]' : 'border-white/20'}`}>
+                          {formData.joinWhatsApp && <CheckCircle2 size={14} className="text-[#051A10]" />}
+                        </div>
+                        <span className="text-[10px] font-medium text-white/70 leading-tight flex-1">
+                          {whatsappConfig.label}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
