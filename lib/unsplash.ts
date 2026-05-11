@@ -8,22 +8,24 @@ export const formatUnsplashUrl = (url: string) => {
     return url;
   }
 
-  // Si es un link de página, intentamos extraer el ID y convertirlo a link de imagen directo
-  // Formato: unsplash.com/photos/ID o unsplash.com/fotos/ID
+  // Extraer ID de links tipo unsplash.com/photos/ID o unsplash.com/fotos/ID
   const idRegex = /(?:photos|fotos)\/([a-zA-Z0-9_-]+)/;
   const match = url.match(idRegex);
   
+  let id = '';
   if (match && match[1]) {
-    const id = match[1];
-    // Formato de imagen directo más compatible
-    return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1200&q=80`;
+    id = match[1];
+  } else if (/^[a-zA-Z0-9_-]{11,12}$/.test(url)) {
+    id = url;
+  } else if (url.includes('-unsplash')) {
+    const fileMatch = url.match(/([a-zA-Z0-9_-]+)-unsplash/);
+    if (fileMatch) id = fileMatch[1];
   }
 
-  // Si pegaron solo el ID
-  if (/^[a-zA-Z0-9_-]{11,12}$/.test(url)) {
-    return `https://images.unsplash.com/photo-${url}?auto=format&fit=crop&w=1200&q=80`;
+  if (id) {
+    // Formato de alta compatibilidad para CDN de Unsplash
+    return `https://images.unsplash.com/photo-1519681393784-d120267933ba?ixid=${id}&auto=format&fit=crop&w=1200&q=80`;
   }
 
-  // Fallback: si no es nada de lo anterior, devolvemos el original
   return url;
 };

@@ -99,7 +99,13 @@ export default function MarketingPage() {
       setPreviewImage('');
       return;
     }
-    setPreviewImage(formatUnsplashUrl(url));
+    const formatted = formatUnsplashUrl(url);
+    console.log("Updating preview to:", formatted);
+    setPreviewImage(formatted);
+  };
+
+  const handleRefreshPreview = () => {
+    updatePreview(marketingData.image_url);
   };
 
   async function fetchMarketingConfig() {
@@ -494,15 +500,34 @@ export default function MarketingPage() {
                 <p className="text-[10px] font-black text-gray-900 tracking-tighter uppercase">La Travesía</p>
               </div>
 
-              <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center relative border border-gray-100">
+              <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center relative border border-gray-100 group">
                 {previewImage ? (
-                  <img 
-                    key={previewImage}
-                    src={previewImage} 
-                    referrerPolicy="no-referrer" 
-                    className="w-full h-full object-cover animate-in fade-in duration-500" 
-                    alt="Visual" 
-                  />
+                  <>
+                    <img 
+                      key={previewImage}
+                      src={previewImage} 
+                      referrerPolicy="no-referrer" 
+                      className="w-full h-full object-cover animate-in fade-in duration-500" 
+                      alt="Visual" 
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-4">
+                      <button 
+                        onClick={handleRefreshPreview}
+                        className="p-3 bg-white rounded-full text-[#051A10] shadow-xl hover:scale-110 transition-transform"
+                        title="Refrescar Previsualización"
+                      >
+                        <RefreshCw size={20} />
+                      </button>
+                      <a 
+                        href={previewImage} 
+                        target="_blank" 
+                        className="p-3 bg-white rounded-full text-[#051A10] shadow-xl hover:scale-110 transition-transform"
+                        title="Ver Link Directo"
+                      >
+                        <ExternalLink size={20} />
+                      </a>
+                    </div>
+                  </>
                 ) : (
                   <div className="text-gray-300 flex flex-col items-center gap-2">
                     <ImageIcon size={40} />
