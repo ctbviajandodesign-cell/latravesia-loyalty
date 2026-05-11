@@ -125,26 +125,26 @@ export default function Ruleta({ onWin }: RuletaProps) {
   const segmentSize = 360 / premios.length;
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-[320px] mx-auto px-4">
+    <div className="flex flex-col items-center justify-center w-full max-w-[340px] mx-auto px-2">
       
-      {/* TÍTULO MINIMALISTA - Reducido para ahorrar espacio */}
-      <div className="mb-4 text-center space-y-1">
-        <h3 className="text-lg font-serif font-bold text-white tracking-tight">Tu Premio Especial</h3>
-        <div className="w-6 h-0.5 bg-travesia-gold mx-auto rounded-full opacity-30"></div>
+      {/* TÍTULO */}
+      <div className="mb-6 text-center space-y-1">
+        <h3 className="text-xl font-serif font-bold text-white tracking-tight">Tu Premio Especial</h3>
+        <div className="w-8 h-0.5 bg-travesia-gold mx-auto rounded-full opacity-30"></div>
       </div>
 
       {/* CONTENEDOR DE LA RULETA */}
-      <div className="relative w-full aspect-square max-h-[280px]">
+      <div className="relative w-full aspect-square max-w-[300px] mx-auto">
         
-        {/* PUNTERO */}
-        <div className="absolute -top-1 left-1/2 -translate-x-1/2 z-50">
-          <div className="w-4 h-6 bg-travesia-gold rounded-b-full shadow-xl border border-white/10 flex items-center justify-center">
-             <div className="w-1 h-1 bg-[#051A10] rounded-full"></div>
+        {/* PUNTERO - Más grande y centrado */}
+        <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-50">
+          <div className="w-6 h-8 bg-travesia-gold rounded-b-full shadow-[0_0_20px_rgba(218,200,140,0.4)] border border-white/20 flex items-center justify-center">
+             <div className="w-1.5 h-1.5 bg-[#051A10] rounded-full shadow-inner"></div>
           </div>
         </div>
 
         {/* CUERPO DE LA RULETA */}
-        <div className="relative w-full h-full rounded-full border border-white/5 bg-[#051A10] p-1 shadow-2xl flex items-center justify-center overflow-hidden">
+        <div className="relative w-full h-full rounded-full border-4 border-white/5 bg-[#051A10] p-1.5 shadow-[0_0_60px_rgba(0,0,0,0.8)] flex items-center justify-center overflow-hidden">
           
           <div 
             className="relative w-full h-full rounded-full transition-transform duration-[4000ms] cubic-bezier"
@@ -163,25 +163,30 @@ export default function Ruleta({ onWin }: RuletaProps) {
                 const pathData = `M 50 50 L ${x1} ${y1} A 50 50 0 ${largeArc} 1 ${x2} ${y2} Z`;
                 const isEven = i % 2 === 0;
 
+                // Ajuste de fuente dinámico según longitud del texto
+                const textLength = premio.nombre.length;
+                const fontSize = textLength > 15 ? 2.4 : 3.0;
+
                 return (
                   <g key={i}>
                     <path 
                       d={pathData} 
                       fill={isEven ? "#1e3320" : "#051a10"}
-                      stroke="#dac88c44"
-                      strokeWidth="0.2"
+                      stroke="#dac88c55"
+                      strokeWidth="0.25"
                     />
                     <text
                       x="50"
-                      y="15"
+                      y="14"
                       fill="#dac88c"
-                      fontSize="2.8"
+                      fontSize={fontSize}
                       fontWeight="800"
                       textAnchor="middle"
                       transform={`rotate(${startAngle + segmentSize / 2} 50 50)`}
                       className="uppercase tracking-tighter"
+                      style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }}
                     >
-                      {premio.nombre.length > 15 ? premio.nombre.substring(0, 12) + '...' : premio.nombre}
+                      {premio.nombre}
                     </text>
                   </g>
                 );
@@ -189,24 +194,24 @@ export default function Ruleta({ onWin }: RuletaProps) {
             </svg>
           </div>
 
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 z-40">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 z-40">
             <div className="absolute inset-0 bg-white/5 backdrop-blur-md rounded-full border border-white/10 shadow-2xl"></div>
-            <div className="absolute inset-1.5 bg-[#051A10] rounded-full flex items-center justify-center border border-travesia-gold/20">
-              <div className="w-1.5 h-1.5 bg-travesia-gold rounded-full animate-pulse"></div>
+            <div className="absolute inset-2 bg-[#051A10] rounded-full flex items-center justify-center border border-travesia-gold/30">
+              <div className="w-2 h-2 bg-travesia-gold rounded-full animate-pulse shadow-[0_0_10px_rgba(218,200,140,0.8)]"></div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="relative w-full mt-8 px-4">
+      <div className="relative w-full mt-12 px-2">
         <button 
           onClick={handleSpin}
           disabled={spinning}
           className={`
-            w-full group relative py-4 rounded-2xl font-black text-[10px] tracking-[0.3em] uppercase transition-all duration-500
+            w-full group relative py-5 rounded-2xl font-black text-[11px] tracking-[0.4em] uppercase transition-all duration-500
             ${spinning 
               ? 'bg-white/5 text-white/10 cursor-not-allowed' 
-              : 'bg-travesia-gold text-[#051A10] shadow-lg hover:brightness-110 active:scale-95'
+              : 'bg-travesia-gold text-[#051A10] shadow-[0_10px_30px_rgba(218,200,140,0.3)] hover:brightness-110 active:scale-95'
             }
           `}
         >
@@ -217,12 +222,12 @@ export default function Ruleta({ onWin }: RuletaProps) {
       {mustShowWin && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#051A10]/95 backdrop-blur-2xl animate-in fade-in">
           <div className="text-center space-y-6 animate-in zoom-in duration-500">
-            <div className="w-20 h-20 bg-travesia-gold rounded-[28px] mx-auto flex items-center justify-center shadow-[0_0_50px_rgba(218,200,140,0.3)]">
-               <Trophy size={40} className="text-[#051A10]" />
+            <div className="w-24 h-24 bg-travesia-gold rounded-[32px] mx-auto flex items-center justify-center shadow-[0_0_50px_rgba(218,200,140,0.4)]">
+               <Trophy size={48} className="text-[#051A10]" />
             </div>
-            <div className="space-y-1">
-              <p className="text-travesia-gold font-black uppercase tracking-[0.4em] text-[8px]">¡Excelente!</p>
-              <h4 className="text-3xl font-serif font-bold text-white uppercase leading-tight">{winningLabel}</h4>
+            <div className="space-y-2">
+              <p className="text-travesia-gold font-black uppercase tracking-[0.4em] text-[10px]">¡Felicidades!</p>
+              <h4 className="text-4xl font-serif font-bold text-white uppercase leading-tight">{winningLabel}</h4>
             </div>
           </div>
         </div>

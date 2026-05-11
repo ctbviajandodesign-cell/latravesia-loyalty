@@ -48,11 +48,30 @@ export default function Home() {
   });
   const [clienteId, setClienteId] = useState<string | null>(null);
   const [premioFinal, setPremioFinal] = useState<string | null>(null);
+  const [socialLinks, setSocialLinks] = useState({
+    instagram: 'https://instagram.com',
+    facebook: 'https://facebook.com',
+    tiktok: 'https://tiktok.com'
+  });
   const router = useRouter();
 
   useEffect(() => {
     validarSesion();
+    fetchSocialLinks();
   }, []);
+
+  async function fetchSocialLinks() {
+    const { data } = await supabase.from('config').select('*');
+    if (data) {
+      const links = { ...socialLinks };
+      data.forEach(item => {
+        if (item.clave === 'instagram_link') links.instagram = item.valor;
+        if (item.clave === 'facebook_link') links.facebook = item.valor;
+        if (item.clave === 'tiktok_link') links.tiktok = item.valor;
+      });
+      setSocialLinks(links);
+    }
+  }
 
   async function validarSesion() {
     const savedId = localStorage.getItem('travesia_cliente_id');
@@ -98,7 +117,7 @@ export default function Home() {
 
       localStorage.setItem('travesia_cliente_id', data.id);
       setClienteId(data.id);
-      setStep('game');
+      setStep('social');
       
       fetch('/api/marketing/notifications', {
         method: 'POST',
@@ -149,11 +168,11 @@ export default function Home() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
+                  <div className="space-y-1 overflow-hidden">
                     <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={9}/> Nombre</label>
                     <input required type="text" value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" placeholder="Ej: Juan" />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1 overflow-hidden">
                     <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={9}/> Apellido</label>
                     <input required type="text" value={formData.apellido} onChange={(e) => setFormData({...formData, apellido: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" placeholder="Ej: Marca" />
                   </div>
@@ -189,7 +208,15 @@ export default function Home() {
 
                 <div className="space-y-1">
                   <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Calendar size={9}/> Fecha de Cumpleaños</label>
-                  <input required type="date" value={formData.fecha_nacimiento} onChange={(e) => setFormData({...formData, fecha_nacimiento: e.target.value})} className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all [color-scheme:dark] text-xs" />
+                  <div className="relative w-full overflow-hidden rounded-xl">
+                    <input 
+                      required 
+                      type="date" 
+                      value={formData.fecha_nacimiento} 
+                      onChange={(e) => setFormData({...formData, fecha_nacimiento: e.target.value})} 
+                      className="w-full bg-white/5 border border-white/10 p-3 outline-none focus:border-travesia-gold transition-all [color-scheme:dark] text-xs appearance-none" 
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -204,7 +231,50 @@ export default function Home() {
           </div>
         )}
 
+        {step === 'social' && (
+          <div className="flex-1 flex flex-col items-center justify-center space-y-6 animate-in fade-in slide-in-from-right-8">
+            <div className="text-center space-y-2">
+              <div className="mx-auto w-12 h-12 bg-travesia-gold/10 rounded-2xl flex items-center justify-center text-travesia-gold mb-1">
+                <Sparkles size={20} className="animate-pulse" />
+              </div>
+              <h2 className="text-2xl font-serif font-bold text-white">¡Paso Final!</h2>
+              <p className="text-white/40 text-[8px] uppercase tracking-widest font-black italic">Síguenos para activar tu premio</p>
+            </div>
 
+            <div className="w-full space-y-2 px-2">
+              <a href={socialLinks.instagram} target="_blank" className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-tr from-[#833ab4] via-[#fd1d1d] to-[#fcb045] rounded-lg flex items-center justify-center text-white shadow-lg"><Instagram size={16} /></div>
+                  <span className="text-[10px] font-black uppercase tracking-widest">Instagram</span>
+                </div>
+                <ArrowRight size={12} className="text-white/20 group-hover:text-travesia-gold" />
+              </a>
+
+              <a href={socialLinks.facebook} target="_blank" className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-[#1877F2] rounded-lg flex items-center justify-center text-white shadow-lg"><Facebook size={16} /></div>
+                  <span className="text-[10px] font-black uppercase tracking-widest">Facebook</span>
+                </div>
+                <ArrowRight size={12} className="text-white/20 group-hover:text-travesia-gold" />
+              </a>
+
+              <a href={socialLinks.tiktok} target="_blank" className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-[#000000] border border-white/10 rounded-lg flex items-center justify-center text-white shadow-lg"><Music2 size={16} /></div>
+                  <span className="text-[10px] font-black uppercase tracking-widest">TikTok</span>
+                </div>
+                <ArrowRight size={12} className="text-white/20 group-hover:text-travesia-gold" />
+              </a>
+            </div>
+
+            <button 
+              onClick={() => setStep('game')} 
+              className="w-full bg-travesia-gold text-[#051A10] py-4 rounded-2xl font-black text-[9px] tracking-[0.3em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all mt-4"
+            >
+              CONTINUAR A JUGAR
+            </button>
+          </div>
+        )}
 
         {step === 'game' && (
           <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in h-full overflow-hidden py-10">
