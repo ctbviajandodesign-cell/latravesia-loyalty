@@ -21,43 +21,53 @@ export async function GET(request: Request) {
     const resend = new Resend(config.resend_api_key);
 
     const today = new Date();
-    const endOfWeek = new Date(today);
-    endOfWeek.setDate(today.getDate() + 6);
+    const mes = String(today.getMonth() + 1).padStart(2, '0');
+    const dia = String(today.getDate()).padStart(2, '0');
+    const target = `-${mes}-${dia}`;
 
     const { data: clientes } = await supabase.from('clientes').select('nombre, email, fecha_nacimiento');
     
-    const cumpleañeros = clientes?.filter(c => {
-      if (!c.fecha_nacimiento || !c.email) return false;
-      const [, m, d] = c.fecha_nacimiento.split('-').map(Number);
-      const bday = new Date(today.getFullYear(), m - 1, d);
-      return bday >= today && bday <= endOfWeek;
-    }) || [];
+    // Filtrar solo los que cumplen años HOY
+    const cumpleaneros = clientes?.filter(c => c.fecha_nacimiento?.endsWith(target)) || [];
 
-    if (cumpleañeros.length === 0) {
-      return NextResponse.json({ message: 'No hay cumpleaños esta semana' });
+    if (cumpleaneros.length === 0) {
+      return NextResponse.json({ message: 'No hay cumpleaños hoy' });
     }
 
-    const results = await Promise.all(cumpleañeros.map(cliente => 
+    // Usar las nuevas llaves de configuración del Marketing Hub
+    const subject = config.birthday_email_subject || '¡Feliz Cumpleaños! 🥂';
+    const body = config.birthday_email_body || 'Hola {nombre}, te deseamos lo mejor en tu día.';
+    const imageUrl = formatUnsplashUrl(config.birthday_image_url || '');
+
+    const results = await Promise.all(cumpleaneros.map(cliente => 
       resend.emails.send({
         from: 'La Travesía <onboarding@resend.dev>',
         to: [cliente.email],
-        subject: config.email_asunto,
+        subject: subject,
         html: `
-          <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden;">
-            <img src="${formatUnsplashUrl(config.email_foto_url)}" style="width: 100%; height: auto; display: block;" alt="Cumpleaños" />
-            <div style="padding: 40px; text-align: center; background-color: #ffffff;">
-              <h1 style="color: #4A5D4E; margin-bottom: 20px;">¡Hola, ${cliente.nombre}!</h1>
-              <p style="color: #666; font-size: 18px; line-height: 1.6;">${config.email_mensaje.replace('{nombre}', cliente.nombre)}</p>
+          <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden; background-color: #ffffff;">
+            ${imageUrl ? `<img src="${imageUrl}" style="width: 100%; height: auto; display: block;" alt="Cumpleaños" />` : ''}
+            <div style="padding: 40px; text-align: center;">
+              <h1 style="color: #4A5D4E; margin-bottom: 20px; font-size: 28px;">¡Feliz Cumpleaños, ${cliente.nombre}!</h1>
+              <p style="color: #666; font-size: 18px; line-height: 1.6; margin-bottom: 30px;">
+                ${body.replace('{nombre}', cliente.nombre)}
+              </p>
               <div style="margin-top: 40px;">
-                <a href="https://latravesia-loyalty82.vercel.app" style="background-color: #D4AF37; color: #4A5D4E; padding: 15px 30px; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 14px; letter-spacing: 2px;">RESERVAR MI MESA</a>
+                <a href="https://wa.me/${(config.admin_whatsapp || '').replace(/\D/g, '')}?text=Hola, deseo reservar para mi cumpleaños" 
+                   style="background-color: #D4AF37; color: #ffffff; padding: 18px 35px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 14px; letter-spacing: 2px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);">
+                  RESERVAR MI MESA
+                </a>
               </div>
+              <p style="margin-top: 40px; font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 2px;">
+                Hostería La Travesía • Solo Sábados y Domingos
+              </p>
             </div>
           </div>
         `
       })
     ));
 
-    return NextResponse.json({ success: true, sent_to: cumpleañeros.length });
+    return NextResponse.json({ success: true, sent_to: cumpleaneros.length });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
