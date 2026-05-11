@@ -93,6 +93,14 @@ export default function MarketingPage() {
     }
   };
 
+  const updatePreview = (url: string) => {
+    if (!url) {
+      setPreviewImage('');
+      return;
+    }
+    setPreviewImage(formatUnsplashUrl(url));
+  };
+
   async function fetchMarketingConfig() {
     setLoading(true);
     try {
