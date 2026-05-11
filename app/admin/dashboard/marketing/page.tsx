@@ -56,11 +56,10 @@ export default function MarketingPage() {
       const prefix = getPrefix(activeTab);
       const { data } = await supabase.from('config').select('*');
       if (data) {
-        // En metas de fidelidad las claves son algo distintas según el screenshot previo
-        const subjectKey = activeTab === 'loyalty' ? 'email_premio_asunto' : `${prefix}email_subject`;
-        const bodyKey = activeTab === 'loyalty' ? 'email_premio_mensaje' : `${prefix}email_body`;
-        const imgKey = activeTab === 'loyalty' ? 'email_foto_url' : 
-                       activeTab === 'mass' ? 'broadcast_foto_url' : `${prefix}image_url`;
+        // Usar prefijos consistentes para todas las pestañas
+        const subjectKey = `${prefix}email_subject`;
+        const bodyKey = `${prefix}email_body`;
+        const imgKey = `${prefix}image_url`;
 
         const asunto = data.find(c => c.clave === subjectKey)?.valor;
         const mensaje = data.find(c => c.clave === bodyKey)?.valor;
@@ -104,22 +103,23 @@ export default function MarketingPage() {
     setSaving(true);
     const prefix = getPrefix(activeTab);
     
-    const subjectKey = activeTab === 'loyalty' ? 'email_premio_asunto' : `${prefix}email_subject`;
-    const bodyKey = activeTab === 'loyalty' ? 'email_premio_mensaje' : `${prefix}email_body`;
-    const imgKey = activeTab === 'loyalty' ? 'email_foto_url' : 
-                   activeTab === 'mass' ? 'broadcast_foto_url' : `${prefix}image_url`;
+    const subjectKey = `${prefix}email_subject`;
+    const bodyKey = `${prefix}email_body`;
+    const imgKey = `${prefix}image_url`;
 
     try {
-      await Promise.all([
-        supabase.from('config').update({ valor: marketingData.asunto }).eq('clave', subjectKey),
-        supabase.from('config').update({ valor: marketingData.mensaje }).eq('clave', bodyKey),
-        supabase.from('config').update({ valor: marketingData.image_url }).eq('clave', imgKey)
-      ]);
+      // Usar upsert para asegurar que se cree si no existe
+      const { error: err1 } = await supabase.from('config').upsert({ clave: subjectKey, valor: marketingData.asunto }, { onConflict: 'clave' });
+      const { error: err2 } = await supabase.from('config').upsert({ clave: bodyKey, valor: marketingData.mensaje }, { onConflict: 'clave' });
+      const { error: err3 } = await supabase.from('config').upsert({ clave: imgKey, valor: marketingData.image_url }, { onConflict: 'clave' });
       
+      if (err1 || err2 || err3) throw new Error("Error en sincronización");
+
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (e) {
-      alert("Error al guardar cambios");
+      console.error(e);
+      alert("Error al guardar cambios en la base de datos");
     } finally {
       setSaving(false);
     }

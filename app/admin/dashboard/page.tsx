@@ -35,8 +35,8 @@ export default function AdminOverview() {
       const { data: clientesData } = await supabase.from('clientes').select('*').order('created_at', { ascending: false }).limit(5);
       
       // Sumar visitas reales desde la tabla clientes
-      const { data: allClientes } = await supabase.from('clientes').select('visitas');
-      const visitasTotal = allClientes?.reduce((acc, c) => acc + (c.visitas || 0), 0) || 0;
+      const { data: allClientes } = await supabase.from('clientes').select('total_visitas');
+      const visitasTotal = allClientes?.reduce((acc, c) => acc + (c.total_visitas || 0), 0) || 0;
 
       const hoy = new Date().toISOString().split('T')[0].slice(5); // MM-DD
       const { count: cumplesCount } = await supabase.from('clientes').select('*', { count: 'exact', head: true }).like('fecha_nacimiento', `%${hoy}`);

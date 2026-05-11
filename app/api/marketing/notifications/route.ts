@@ -22,13 +22,13 @@ export async function POST(request: Request) {
       await resend.emails.send({
         from: 'La Travesía <onboarding@resend.dev>',
         to: [cliente.email],
-        subject: config.email_asunto,
+        subject: config.welcome_email_subject || '¡Bienvenido al Club! ✨',
         html: `
           <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden;">
-            <img src="${formatUnsplashUrl(config.email_foto_url)}" style="width: 100%; height: auto; display: block;" />
+            <img src="${formatUnsplashUrl(config.welcome_image_url || config.welcome_email_image_url || config.email_foto_url)}" style="width: 100%; height: auto; display: block;" />
             <div style="padding: 40px; text-align: center; background-color: #ffffff;">
-              <h1 style="color: #4A5D4E;">¡Bienvenido y Feliz Cumpleaños!</h1>
-              <p style="color: #666; font-size: 18px;">${config.email_mensaje.replace('{nombre}', cliente.nombre)}</p>
+              <h1 style="color: #4A5D4E;">¡Hola ${cliente.nombre}!</h1>
+              <p style="color: #666; font-size: 18px;">${(config.welcome_email_body || config.email_mensaje || '').replace('{nombre}', cliente.nombre)}</p>
               <div style="margin-top: 40px;">
                 <a href="https://latravesia-loyalty82.vercel.app" style="background-color: #D4AF37; color: #4A5D4E; padding: 15px 30px; text-decoration: none; border-radius: 10px; font-weight: bold;">RESERVAR AHORA</a>
               </div>
@@ -43,13 +43,13 @@ export async function POST(request: Request) {
       await resend.emails.send({
         from: 'La Travesía <onboarding@resend.dev>',
         to: [cliente.email],
-        subject: config.email_premio_asunto || '¡Felicidades por tu fidelidad! 🏆',
+        subject: config.loyalty_email_subject || '¡Felicidades por tu fidelidad! 🏆',
         html: `
           <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden; text-align: center;">
-            <img src="${formatUnsplashUrl(config.email_premio_foto_url)}" style="width: 100%; height: auto; display: block;" />
+            <img src="${formatUnsplashUrl(config.loyalty_image_url || config.email_foto_url || config.email_premio_foto_url)}" style="width: 100%; height: auto; display: block;" />
             <div style="padding: 40px;">
               <h1 style="color: #4A5D4E;">¡META CUMPLIDA!</h1>
-              <p style="font-size: 18px; color: #666;">${(config.email_premio_mensaje || '').replace('{nombre}', cliente.nombre)}</p>
+              <p style="font-size: 18px; color: #666;">${(config.loyalty_email_body || config.email_premio_mensaje || '').replace('{nombre}', cliente.nombre)}</p>
               <p style="margin-top: 30px; font-size: 12px; color: #999;">Muestra este correo en tu próxima visita para validarlo.</p>
             </div>
           </div>

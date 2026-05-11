@@ -115,7 +115,7 @@ export default function ClientesPage() {
                         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1A3A2A] to-[#051A10] border border-white/10 flex items-center justify-center text-travesia-gold font-serif text-2xl font-bold shadow-lg group-hover:rotate-3 transition-transform">
                           {cliente.nombre[0]}
                         </div>
-                        {cliente.visitas >= 5 && (
+                        {cliente.total_visitas >= 5 && (
                           <div className="absolute -top-2 -right-2 w-6 h-6 bg-travesia-gold rounded-full flex items-center justify-center border-2 border-[#051A10] shadow-lg">
                             <Star size={10} className="text-[#051A10] fill-current" />
                           </div>
@@ -147,7 +147,7 @@ export default function ClientesPage() {
                   </td>
                   <td className="p-8 text-center">
                     <div className="inline-flex flex-col items-center gap-1">
-                      <span className="text-2xl font-serif font-black text-travesia-gold">{cliente.visitas || 0}</span>
+                      <span className="text-2xl font-serif font-black text-travesia-gold">{cliente.total_visitas || 0}</span>
                       <span className="text-[8px] uppercase tracking-widest font-bold text-white/20">Check-ins</span>
                     </div>
                   </td>

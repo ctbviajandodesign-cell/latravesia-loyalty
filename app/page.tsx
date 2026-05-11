@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase';
 import { 
   CheckCircle2, 
   Sparkles, 
-  Gift, 
   ChevronRight, 
   Star, 
   User, 
@@ -49,34 +48,11 @@ export default function Home() {
   });
   const [clienteId, setClienteId] = useState<string | null>(null);
   const [premioFinal, setPremioFinal] = useState<string | null>(null);
-  const [socialLinks, setSocialLinks] = useState({
-    instagram: 'https://instagram.com/latravesia.ec',
-    facebook: 'https://facebook.com/latravesia.ec',
-    tiktok: 'https://tiktok.com/@latravesia.ec'
-  });
   const router = useRouter();
 
   useEffect(() => {
     validarSesion();
-    fetchConfigs();
   }, []);
-
-  async function fetchConfigs() {
-    try {
-      const { data } = await supabase.from('config').select('*');
-      if (data) {
-        const links = { ...socialLinks };
-        data.forEach(c => {
-          if (c.clave === 'link_instagram' && c.valor) links.instagram = c.valor;
-          if (c.clave === 'link_facebook' && c.valor) links.facebook = c.valor;
-          if (c.clave === 'link_tiktok' && c.valor) links.tiktok = c.valor;
-        });
-        setSocialLinks(links);
-      }
-    } catch (e) {
-      console.error("Error fetching social links:", e);
-    }
-  }
 
   async function validarSesion() {
     const savedId = localStorage.getItem('travesia_cliente_id');
@@ -102,11 +78,24 @@ export default function Home() {
     try {
       const { data, error } = await supabase
         .from('clientes')
-        .insert([{ ...formData, telefono: telefonoFinal, visitas: 1 }])
+        .insert([{ 
+          ...formData, 
+          telefono: telefonoFinal, 
+          total_visitas: 1,
+          visitas: 1, // Mantener ambos en sincronía
+          fecha_ultima_visita: new Date().toISOString().split('T')[0]
+        }])
         .select().single();
 
       if (error) throw error;
       
+      // Log de la primera visita
+      await supabase.from('visitas').insert([{
+        cliente_id: data.id,
+        fecha: new Date().toISOString().split('T')[0],
+        premio_ganado: premioFinal // Se actualizará si ya ganó algo
+      }]);
+
       localStorage.setItem('travesia_cliente_id', data.id);
       setClienteId(data.id);
       setStep('social');
@@ -263,13 +252,24 @@ export default function Home() {
         {step === 'game' && (
           <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in h-full overflow-hidden py-10">
             <div className="w-full max-w-[320px] mx-auto">
-              <Ruleta onWin={(p) => { setPremioFinal(p); setStep('success'); }} />
+              <Ruleta onWin={async (p) => { 
+                setPremioFinal(p); 
+                // Actualizar log de visita con el premio
+                if (clienteId) {
+                  const hoy = new Date().toISOString().split('T')[0];
+                  await supabase.from('visitas')
+                    .update({ premio_ganado: p })
+                    .eq('cliente_id', clienteId)
+                    .eq('fecha', hoy);
+                }
+                setStep('success'); 
+              }} />
             </div>
           </div>
         )}
 
         {step === 'success' && (
-          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in zoom-in">
+          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in zoom-in">
             <div className="space-y-3">
               <div className="mx-auto w-16 h-16 bg-travesia-gold/20 rounded-2xl flex items-center justify-center border border-travesia-gold/30">
                 <CheckCircle2 className="w-8 h-8 text-travesia-gold" />
@@ -278,17 +278,6 @@ export default function Home() {
               <div className="p-6 bg-white/5 border-2 border-travesia-gold/30 rounded-[30px] backdrop-blur-xl">
                 <p className="text-[8px] uppercase tracking-widest text-travesia-gold font-black mb-1">Premio Ganado</p>
                 <p className="text-2xl font-black text-white">{premioFinal}</p>
-              </div>
-            </div>
-            <div className="space-y-4 w-full">
-              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 text-center">¡Síguenos para más sorpresas!</p>
-              <div className="grid grid-cols-2 gap-3">
-                <a href={socialLinks.instagram} target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
-                  <Instagram size={18} /> <span className="text-[9px] font-black uppercase tracking-widest">Instagram</span>
-                </a>
-                <a href={socialLinks.facebook} target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
-                  <Facebook size={18} /> <span className="text-[9px] font-black uppercase tracking-widest">Facebook</span>
-                </a>
               </div>
             </div>
 

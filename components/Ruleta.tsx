@@ -22,22 +22,37 @@ export default function Ruleta({ onWin }: RuletaProps) {
 
   async function fetchPremios() {
     try {
-      const { data } = await supabase.from('premios').select('*').eq('activo', true);
+      // 1. Buscar la ruleta activa
+      const { data: activeRuleta } = await supabase
+        .from('ruletas')
+        .select('*')
+        .eq('activa', true)
+        .single();
+
+      let query = supabase.from('premios').select('*').eq('activo', true);
+
+      // 2. Si hay ruleta activa y tiene premios seleccionados, filtrar por esos IDs
+      if (activeRuleta?.configuracion?.premiosIds?.length > 0) {
+        query = query.in('id', activeRuleta.configuracion.premiosIds);
+      }
+
+      const { data } = await query;
+
       if (data && data.length > 0) {
         setPremios(data);
       } else {
-        // Fallback en caso de que no haya premios en la DB para no romper la UI
+        // Fallback en caso de que no haya premios configurados
         setPremios([
-          { id: 1, nombre: '5% DESCUENTO' },
-          { id: 2, nombre: 'CÓCTEL CASA' },
-          { id: 3, nombre: 'SORPRESA' },
-          { id: 4, nombre: 'POSTRE GRATIS' },
-          { id: 5, nombre: '10% DESCUENTO' },
-          { id: 6, nombre: 'LA TRAVESÍA' }
+          { id: 1, nombre: 'SORPRESA 🎁', probabilidad: 10 },
+          { id: 2, nombre: 'DESCUENTO %', probabilidad: 20 },
+          { id: 3, nombre: 'CÓCTEL 🥂', probabilidad: 15 },
+          { id: 4, nombre: 'POSTRE 🍰', probabilidad: 25 },
+          { id: 5, nombre: 'ESPECIAL ✨', probabilidad: 10 },
+          { id: 6, nombre: 'TRAVESÍA 🏆', probabilidad: 20 }
         ]);
       }
     } catch (e) {
-      console.error(e);
+      console.error('Error fetching premios:', e);
     }
   }
 
@@ -46,28 +61,43 @@ export default function Ruleta({ onWin }: RuletaProps) {
 
     setSpinning(true);
     setMustShowWin(false);
+
+    // 1. Selección ponderada por probabilidad
+    const totalProbabilidad = premios.reduce((acc, p) => acc + (parseFloat(p.probabilidad) || 0), 0);
+    let ganadorIndex = 0;
     
-    // Rotación: Mínimo 5 vueltas (1800 deg) + random
-    const extraDegrees = Math.floor(Math.random() * 360) + 1800; 
+    if (totalProbabilidad > 0) {
+      let random = Math.random() * totalProbabilidad;
+      for (let i = 0; i < premios.length; i++) {
+        random -= (parseFloat(premios[i].probabilidad) || 0);
+        if (random <= 0) {
+          ganadorIndex = i;
+          break;
+        }
+      }
+    } else {
+      // Si no hay probabilidades configuradas, azar puro
+      ganadorIndex = Math.floor(Math.random() * premios.length);
+    }
+
+    const premioGanado = premios[ganadorIndex];
+    
+    // 2. Calcular rotación para caer en ese índice
+    const segmentSize = 360 / premios.length;
+    // El centro del segmento ganador
+    const winDegrees = (ganadorIndex * segmentSize) + (segmentSize / 2);
+    // Para que el tope (0 deg) coincida con winDegrees, la ruleta debe rotar (360 - winDegrees)
+    const actualDegrees = (360 - winDegrees) % 360;
+    
+    // Mínimo 5 vueltas + el ajuste para el ganador + un pequeño random dentro del segmento para que no sea siempre al centro exacto
+    const randomPadding = (Math.random() - 0.5) * (segmentSize * 0.6);
+    const extraDegrees = 1800 + actualDegrees + randomPadding;
+    
     const newRotation = rotation + extraDegrees;
     setRotation(newRotation);
 
     setTimeout(() => {
       setSpinning(false);
-      
-      // Cálculo preciso del ganador
-      // El puntero está en el tope (0 grados)
-      // La rotación es horaria, así que el segmento que queda arriba es el que estaba a -rotación
-      const actualDegrees = newRotation % 360;
-      const segmentSize = 360 / premios.length;
-      
-      // (360 - actualDegrees) nos da la posición original que ahora está en el tope
-      // % 360 para asegurar rango 0-359
-      const winDegrees = (360 - actualDegrees) % 360;
-      const index = Math.floor(winDegrees / segmentSize);
-      
-      const premioGanado = premios[index % premios.length];
-      
       setWinningLabel(premioGanado.nombre);
       setMustShowWin(true);
 

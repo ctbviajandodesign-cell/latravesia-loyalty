@@ -5,20 +5,19 @@ import { supabase } from '@/lib/supabase';
 import { 
   CheckCircle2, 
   UserPlus, 
-  KeyRound, 
   Loader2, 
   MapPin, 
   Sparkles,
   Trophy,
-  Star
+  Star,
+  AlertCircle
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Instagram, Facebook } from 'lucide-react';
 import { Suspense } from 'react';
 
 export default function CheckInPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#051A10] flex items-center justify-center text-white">Cargando...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#051A10] flex items-center justify-center text-white font-serif">Cargando...</div>}>
       <CheckInContent />
     </Suspense>
   );
@@ -32,18 +31,13 @@ function CheckInContent() {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
-  const [socialLinks, setSocialLinks] = useState({
-    instagram: 'https://instagram.com/latravesia.ec',
-    facebook: 'https://facebook.com/latravesia.ec',
-    tiktok: 'https://tiktok.com/@latravesia.ec'
-  });
+  const [alreadyCheckedInToday, setAlreadyCheckedInToday] = useState(false);
+  
   const router = useRouter();
-
   const searchParams = useSearchParams();
   const isNew = searchParams.get('new') === 'true';
 
   useEffect(() => {
-    // Intentar recuperar cliente de localStorage
     const savedId = localStorage.getItem('travesia_cliente_id');
     if (savedId) {
       fetchCliente(savedId);
@@ -51,25 +45,10 @@ function CheckInContent() {
       setLoading(false);
     }
     fetchGoogleLink();
-    fetchSocialLinks();
   }, [searchParams]);
-
-  async function fetchSocialLinks() {
-    const { data } = await supabase.from('config').select('*');
-    if (data) {
-      const links = { ...socialLinks };
-      data.forEach(c => {
-        if (c.clave === 'link_instagram' && c.valor) links.instagram = c.valor;
-        if (c.clave === 'link_facebook' && c.valor) links.facebook = c.valor;
-        if (c.clave === 'link_tiktok' && c.valor) links.tiktok = c.valor;
-      });
-      setSocialLinks(links);
-    }
-  }
 
   async function fetchGoogleLink() {
     const { data } = await supabase.from('config').select('*').eq('clave', 'google_maps_link').single();
-    // Prioridad al link que me pasaste, si no hay en DB usamos este por defecto
     if (data && data.valor) {
       setGoogleLink(data.valor);
     } else {
@@ -78,16 +57,27 @@ function CheckInContent() {
   }
 
   async function fetchCliente(id: string) {
-    const { data } = await supabase.from('clientes').select('*').eq('id', id).single();
-    if (data) {
-      setCliente(data);
-      if (isNew) {
-        setStep('success'); // Skip PIN if they just registered
-      } else {
-        setStep('pin');
+    try {
+      const { data } = await supabase.from('clientes').select('*').eq('id', id).single();
+      if (data) {
+        setCliente(data);
+        
+        // Verificar si ya registró hoy (solo si no viene de registro nuevo)
+        const hoy = new Date().toISOString().split('T')[0];
+        if (data.fecha_ultima_visita === hoy && !isNew) {
+          setAlreadyCheckedInToday(true);
+          setStep('success');
+        } else if (isNew) {
+          setStep('success');
+        } else {
+          setStep('pin');
+        }
       }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function handleCheckIn() {
@@ -95,6 +85,12 @@ function CheckInContent() {
     setError('');
     
     try {
+      // 0. Verificar si ya registró hoy
+      const hoy = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      if (cliente.fecha_ultima_visita === hoy) {
+        throw new Error('Ya has registrado tu visita de hoy. ¡Vuelve pronto!');
+      }
+
       // 1. Validar PIN
       const { data: configData } = await supabase.from('config').select('*').eq('clave', 'pin_validacion').single();
       const correctPin = configData?.valor || '1234';
@@ -104,13 +100,23 @@ function CheckInContent() {
       }
 
       // 2. Sumar visita
-      const nuevasVisitas = (cliente.visitas || 0) + 1;
+      const nuevasVisitas = (cliente.total_visitas || 0) + 1;
       const { error: updateError } = await supabase
         .from('clientes')
-        .update({ visitas: nuevasVisitas, ultima_visita: new Date().toISOString() })
+        .update({ 
+          total_visitas: nuevasVisitas,
+          visitas: nuevasVisitas, // Mantener ambos en sincronía
+          fecha_ultima_visita: hoy 
+        })
         .eq('id', cliente.id);
 
       if (updateError) throw updateError;
+
+      // Log de la visita para analíticas
+      await supabase.from('visitas').insert([{
+        cliente_id: cliente.id,
+        fecha: hoy
+      }]);
 
       // 3. Verificar si llegó a la meta (ej: 10 visitas)
       const { data: configVisitas } = await supabase.from('config').select('*').eq('clave', 'visitas_para_premio').single();
@@ -121,13 +127,13 @@ function CheckInContent() {
         await fetch('/api/marketing/notifications', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'LOYALTY_REWARD', cliente: { ...cliente, visitas: nuevasVisitas } })
+          body: JSON.stringify({ type: 'LOYALTY_REWARD', cliente: { ...cliente, total_visitas: nuevasVisitas } })
         });
       }
 
       setStep('success');
       // Actualizar cliente local
-      setCliente({ ...cliente, visitas: nuevasVisitas });
+      setCliente({ ...cliente, total_visitas: nuevasVisitas, fecha_ultima_visita: hoy });
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -176,7 +182,7 @@ function CheckInContent() {
               <h2 className="text-2xl text-white font-bold">{cliente.nombre} {cliente.apellido}</h2>
               <div className="mt-3 flex items-center justify-center gap-2">
                 <Trophy className="w-4 h-4 text-travesia-gold" />
-                <span className="text-xs font-bold text-white/40 tracking-widest uppercase">Puntos: {cliente.visitas || 0}</span>
+                <span className="text-xs font-bold text-white/40 tracking-widest uppercase">Puntos: {cliente.total_visitas || 0}</span>
               </div>
             </div>
 
@@ -184,7 +190,6 @@ function CheckInContent() {
               <p className="text-center text-xs text-white/60 uppercase tracking-wider font-bold">Ingresa el PIN del Local</p>
               <input 
                 type="password" 
-                maxLength={4}
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
                 placeholder="****"
@@ -195,7 +200,7 @@ function CheckInContent() {
 
             <button 
               onClick={handleCheckIn}
-              disabled={processing || pin.length < 4}
+              disabled={processing || !pin}
               className="w-full bg-travesia-gold text-[#051A10] py-6 rounded-3xl font-black text-xs tracking-[0.2em] shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-30 uppercase"
             >
               {processing ? <Loader2 className="animate-spin w-6 h-6" /> : <><CheckCircle2 className="w-6 h-6" /> VALIDAR VISITA</>}
@@ -204,55 +209,47 @@ function CheckInContent() {
         )}
 
         {step === 'success' && (
-          <div className="text-center space-y-8 py-4 animate-in zoom-in duration-700">
-            <div className="mx-auto w-24 h-24 bg-travesia-gold/20 rounded-[32px] flex items-center justify-center border-2 border-travesia-gold/30 shadow-2xl">
-              <Sparkles className="w-12 h-12 text-travesia-gold" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold text-white tracking-tight">¡Visita Registrada!</h2>
-              <p className="text-white/40 italic text-sm font-light">Un paso más cerca de tu próximo premio.</p>
+          <div className="text-center space-y-6 py-2 animate-in zoom-in duration-700">
+            <div className="mx-auto w-20 h-20 bg-travesia-gold/20 rounded-[32px] flex items-center justify-center border-2 border-travesia-gold/30 shadow-2xl">
+              {alreadyCheckedInToday ? <AlertCircle className="w-10 h-10 text-travesia-gold" /> : <Sparkles className="w-10 h-10 text-travesia-gold" />}
             </div>
             
-            <div className="bg-gradient-to-br from-travesia-gold to-[#B8860B] p-8 rounded-[40px] shadow-2xl border border-white/20">
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold text-white tracking-tight">
+                {alreadyCheckedInToday ? '¡Hola de nuevo!' : '¡Visita Registrada!'}
+              </h2>
+              <p className="text-white/40 italic text-sm font-light">
+                {alreadyCheckedInToday ? 'Ya registraste tu visita de hoy.' : 'Un paso más cerca de tu próximo premio.'}
+              </p>
+            </div>
+            
+            <div className="bg-gradient-to-br from-travesia-gold to-[#B8860B] p-6 rounded-[32px] shadow-2xl border border-white/20">
               <p className="text-[10px] text-[#051A10]/60 uppercase font-black tracking-widest mb-1">Tu Progreso Actual</p>
-              <p className="text-6xl font-black text-[#051A10] tracking-tighter">{cliente.visitas} / 10</p>
+              <p className="text-6xl font-black text-[#051A10] tracking-tighter">{cliente.total_visitas} / 10</p>
               <p className="text-[10px] text-[#051A10] font-bold mt-2 tracking-[0.2em] uppercase">¡Vas por muy buen camino!</p>
             </div>
 
             {/* CTA GOOGLE REVIEWS */}
-            {cliente.visitas >= 2 && googleLink && (
-              <div className="bg-white/5 p-6 rounded-[32px] border border-white/10 space-y-4">
+            {cliente.total_visitas >= 2 && googleLink && !alreadyCheckedInToday && (
+              <div className="bg-white/5 p-5 rounded-[28px] border border-white/10 space-y-3">
                 <div className="flex items-center justify-center gap-1 text-travesia-gold">
-                  <Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" />
+                  <Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" /><Star className="w-3 h-3 fill-current" />
                 </div>
-                <p className="text-xs font-bold text-white tracking-widest uppercase">¿Te gusta la experiencia?</p>
+                <p className="text-[10px] font-bold text-white tracking-widest uppercase">¿Te gusta la experiencia?</p>
                 <a 
                   href={googleLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block w-full border border-travesia-gold text-travesia-gold py-3 rounded-xl font-black text-[10px] tracking-[0.3em] uppercase hover:bg-travesia-gold hover:text-[#051A10] transition-all"
+                  className="inline-block w-full border border-travesia-gold text-travesia-gold py-3 rounded-xl font-black text-[9px] tracking-[0.3em] uppercase hover:bg-travesia-gold hover:text-[#051A10] transition-all"
                 >
                   DEJAR MI RESEÑA ⭐
                 </a>
               </div>
             )}
 
-            {/* REDES SOCIALES */}
-            <div className="space-y-4 pt-4 border-t border-white/5 w-full">
-              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 text-center">¡Síguenos para más sorpresas!</p>
-              <div className="grid grid-cols-2 gap-3 px-2">
-                <a href={socialLinks.instagram} target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
-                  <Instagram size={18} /> <span className="text-[9px] font-black uppercase tracking-widest font-sans">Instagram</span>
-                </a>
-                <a href={socialLinks.facebook} target="_blank" className="flex items-center justify-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl text-travesia-gold hover:bg-white/10 transition-all">
-                  <Facebook size={18} /> <span className="text-[9px] font-black uppercase tracking-widest font-sans">Facebook</span>
-                </a>
-              </div>
-            </div>
-
             <button 
               onClick={() => router.push('/')}
-              className="text-travesia-gold/60 font-bold text-xs uppercase tracking-widest hover:text-travesia-gold transition-colors"
+              className="text-travesia-gold/60 font-bold text-xs uppercase tracking-widest hover:text-travesia-gold transition-colors pt-2"
             >
               Volver al inicio
             </button>
