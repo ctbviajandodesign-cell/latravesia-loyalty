@@ -277,7 +277,7 @@ export default function Home() {
         )}
 
         {step === 'game' && (
-          <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in h-full overflow-hidden py-10">
+          <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in h-full overflow-hidden select-none touch-none">
             <div className="w-full max-w-[320px] mx-auto">
               <Ruleta onWin={async (p) => { 
                 setPremioFinal(p); 
@@ -296,7 +296,7 @@ export default function Home() {
         )}
 
         {step === 'success' && (
-          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in zoom-in">
+          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in zoom-in select-none touch-none">
             <div className="space-y-4">
               <div className="mx-auto w-16 h-16 bg-travesia-gold/20 rounded-2xl flex items-center justify-center border border-travesia-gold/30">
                 <CheckCircle2 className="w-8 h-8 text-travesia-gold" />
@@ -319,6 +319,14 @@ export default function Home() {
         )}
 
       </div>
+
+      <style jsx global>{`
+        html, body {
+          touch-action: manipulation;
+          overscroll-behavior-y: contain;
+          -webkit-tap-highlight-color: transparent;
+        }
+      `}</style>
     </main>
   );
 }
