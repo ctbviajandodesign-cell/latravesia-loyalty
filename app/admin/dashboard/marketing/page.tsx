@@ -83,6 +83,16 @@ export default function MarketingPage() {
     }
   };
 
+  const getDefaultAsunto = (tab: string) => {
+    switch(tab) {
+      case 'birthday': return '¡Feliz Cumpleaños! 🥂';
+      case 'welcome': return '¡Bienvenido al Club! ✨';
+      case 'loyalty': return '¡Has alcanzado una meta! 🏆';
+      case 'mass': return '¡Nueva Sorpresa en La Travesía! 🎁';
+      default: return '';
+    }
+  };
+
   async function fetchMarketingConfig() {
     setLoading(true);
     try {
