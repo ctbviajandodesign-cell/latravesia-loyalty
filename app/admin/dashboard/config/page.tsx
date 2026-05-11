@@ -30,8 +30,9 @@ export default function ConfigPage() {
     try {
       const { data } = await supabase.from('config').select('*');
       if (data) {
-        // Filtramos para quitar las variables que ya están en la zona de Marketing
-        const filtered = data.filter(c => !c.clave.startsWith('birthday_'));
+        // Filtramos para quitar TODAS las variables que ya están en la zona de Marketing
+        const marketingPrefixes = ['birthday_', 'welcome_', 'loyalty_', 'mass_'];
+        const filtered = data.filter(c => !marketingPrefixes.some(prefix => c.clave.startsWith(prefix)));
         setConfig(filtered);
       }
     } catch (e) {
