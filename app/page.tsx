@@ -51,7 +51,8 @@ export default function Home() {
   const [socialLinks, setSocialLinks] = useState({
     instagram: 'https://instagram.com',
     facebook: 'https://facebook.com',
-    tiktok: 'https://tiktok.com'
+    tiktok: 'https://tiktok.com',
+    whatsapp_group: ''
   });
   const router = useRouter();
 
@@ -68,6 +69,7 @@ export default function Home() {
         if (item.clave === 'instagram_link') links.instagram = item.valor;
         if (item.clave === 'facebook_link') links.facebook = item.valor;
         if (item.clave === 'tiktok_link') links.tiktok = item.valor;
+        if (item.clave === 'whatsapp_group_link') links.whatsapp_group = item.valor;
       });
       setSocialLinks(links);
     }
@@ -283,6 +285,15 @@ export default function Home() {
                   <span className="text-[10px] font-black uppercase tracking-widest">TikTok</span>
                 </div>
                 <ArrowRight size={12} className="text-white/20 group-hover:text-travesia-gold" />
+              </a>
+
+              {/* WHATSAPP GROUP */}
+              <a href={socialLinks.whatsapp_group || '#'} target="_blank" className="flex items-center justify-between p-4 bg-white/5 border border-emerald-500/20 rounded-2xl group hover:border-emerald-500/50 transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-lg"><Smartphone size={16} /></div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Grupo WhatsApp</span>
+                </div>
+                <ArrowRight size={12} className="text-emerald-500/20 group-hover:text-emerald-500" />
               </a>
             </div>
 

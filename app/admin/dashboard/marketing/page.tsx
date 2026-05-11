@@ -67,10 +67,9 @@ export default function MarketingPage() {
     setUpcomingList(list);
   }
 
-  const formatWhatsAppLink = (telefono: string, nombre: string) => {
-    // Hemos quitado el link de imagen por solicitud del usuario para un mensaje más limpio
-    const msg = `¡Hola ${nombre}! 🥂 De parte de La Travesía te deseamos un muy feliz cumpleaños. Te hemos enviado una sorpresa a tu correo. ¡Te esperamos!`;
-    const num = telefono.replace(/\+/g, '');
+  const formatWhatsAppLink = (telefono: string, nombre: string, groupLink: string) => {
+    const msg = `¡Hola ${nombre}! 🥂 Consulta tus beneficios aquí: ${groupLink || 'https://chat.whatsapp.com/...'}`;
+    const num = telefono.replace(/\+/g, '').replace(/\s+/g, '');
     return `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
   };
 
@@ -100,13 +99,11 @@ export default function MarketingPage() {
       return;
     }
     const formatted = formatUnsplashUrl(url);
-    console.log("Updating preview to:", formatted);
     setPreviewImage(formatted);
   };
 
-  const handleRefreshPreview = () => {
-    updatePreview(marketingData.image_url);
-  };
+  const [whatsappGroupLink, setWhatsappGroupLink] = useState('');
+  const [adminWhatsapp, setAdminWhatsapp] = useState('');
 
   async function fetchMarketingConfig() {
     setLoading(true);
@@ -118,7 +115,11 @@ export default function MarketingPage() {
         const mensaje = data.find(c => c.clave === `${prefix}email_body`)?.valor;
         const img = data.find(c => c.clave === `${prefix}image_url`)?.valor;
         const link = data.find(c => c.clave === `${prefix}roulette_link`)?.valor;
+        const groupLink = data.find(c => c.clave === 'whatsapp_group_link')?.valor;
+        const adminWA = data.find(c => c.clave === 'admin_whatsapp')?.valor;
         
+        setWhatsappGroupLink(groupLink || '');
+        setAdminWhatsapp(adminWA || '');
         setMarketingData({
           asunto: asunto || getDefaultAsunto(activeTab),
           mensaje: mensaje || 'Hola {nombre}, un mensaje especial para ti.',
@@ -166,10 +167,12 @@ export default function MarketingPage() {
     setSaving(true);
     try {
       const hoy = new Date();
-      const mesDia = `${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+      const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+      const dia = String(hoy.getDate()).padStart(2, '0');
+      const target = `-${mes}-${dia}`; // Formato que coincide con el final de YYYY-MM-DD
       
       const { data: clients } = await supabase.from('clientes').select('email, nombre, fecha_nacimiento');
-      const cumpleaneros = clients?.filter(c => c.fecha_nacimiento?.includes(mesDia)) || [];
+      const cumpleaneros = clients?.filter(c => c.fecha_nacimiento?.endsWith(target)) || [];
 
       if (cumpleaneros.length === 0) {
         alert("No hay socios que cumplan años hoy.");
@@ -543,8 +546,14 @@ export default function MarketingPage() {
                 </p>
               </div>
 
-              <button className="w-full py-4 bg-[#051A10] rounded-2xl text-white text-[9px] font-black uppercase tracking-[0.3em] mt-2">
-                {marketingData.roulette_link ? 'GIRAR MI RULETA 🎡' : 'OBTENER BENEFICIO'}
+              <button 
+                onClick={() => {
+                  const num = adminWhatsapp.replace(/\+/g, '').replace(/\s+/g, '');
+                  window.open(`https://wa.me/${num}?text=${encodeURIComponent('Hola La Travesía, deseo consultar mis beneficios.')}`, '_blank');
+                }}
+                className="w-full py-4 bg-[#051A10] rounded-2xl text-white text-[9px] font-black uppercase tracking-[0.3em] mt-2 active:scale-95 transition-all"
+              >
+                CONSULTAR BENEFICIOS 🎡
               </button>
             </div>
           </div>
