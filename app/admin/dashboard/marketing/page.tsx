@@ -102,6 +102,10 @@ export default function MarketingPage() {
     setPreviewImage(formatted);
   };
 
+  const handleRefreshPreview = () => {
+    updatePreview(marketingData.image_url);
+  };
+
   const [whatsappGroupLink, setWhatsappGroupLink] = useState('');
   const [adminWhatsapp, setAdminWhatsapp] = useState('');
 
