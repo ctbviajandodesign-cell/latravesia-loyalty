@@ -106,10 +106,11 @@ export default function Home() {
     const telefonoFinal = `${countryCode}${numLimpio}`;
 
     try {
+      const { joinWhatsApp, ...dbData } = formData;
       const { data, error } = await supabase
         .from('clientes')
         .insert([{ 
-          ...formData, 
+          ...dbData, 
           telefono: telefonoFinal, 
           total_visitas: 1,
           visitas: 1, // Mantener ambos en sincronía
@@ -245,19 +246,6 @@ export default function Home() {
                         {g.label}
                       </button>
                     ))}
-                    {whatsappConfig.enabled && (
-                      <div 
-                        onClick={() => setFormData({...formData, joinWhatsApp: !formData.joinWhatsApp})}
-                        className="col-span-2 mt-2 p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-4 cursor-pointer hover:bg-white/10 transition-all select-none"
-                      >
-                        <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${formData.joinWhatsApp ? 'bg-travesia-gold border-travesia-gold shadow-[0_0_15px_rgba(212,175,55,0.4)]' : 'border-white/20'}`}>
-                          {formData.joinWhatsApp && <CheckCircle2 size={14} className="text-[#051A10]" />}
-                        </div>
-                        <span className="text-[10px] font-medium text-white/70 leading-tight flex-1">
-                          {whatsappConfig.label}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -308,14 +296,22 @@ export default function Home() {
                 <ArrowRight size={12} className="text-white/20 group-hover:text-travesia-gold" />
               </a>
 
-              {/* WHATSAPP GROUP */}
-              <a href={socialLinks.whatsapp_group || '#'} target="_blank" className="flex items-center justify-between p-4 bg-white/5 border border-emerald-500/20 rounded-2xl group hover:border-emerald-500/50 transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-lg"><Smartphone size={16} /></div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Grupo WhatsApp</span>
-                </div>
-                <ArrowRight size={12} className="text-emerald-500/20 group-hover:text-emerald-500" />
-              </a>
+              {/* WHATSAPP GROUP (Configurable) */}
+              {whatsappConfig.enabled && (
+                <a 
+                  href={socialLinks.whatsapp_group || '#'} 
+                  target="_blank" 
+                  className="flex items-center justify-between p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl group hover:bg-emerald-500/20 transition-all shadow-[0_0_20px_rgba(16,185,129,0.1)]"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-lg"><Smartphone size={16} /></div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                      {whatsappConfig.label}
+                    </span>
+                  </div>
+                  <ArrowRight size={12} className="text-emerald-500/40 group-hover:text-emerald-500 animate-pulse" />
+                </a>
+              )}
             </div>
 
             <button 
