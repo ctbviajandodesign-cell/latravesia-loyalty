@@ -7,18 +7,18 @@ export async function POST(request: Request) {
   try {
     const { subject, message, imageUrl, to, recipients } = await request.json();
 
-    // 1. Obtener la API Key de Supabase
-    const { data: configData } = await supabase
-      .from('config')
-      .select('valor')
-      .eq('clave', 'resend_api_key')
-      .single();
+    // 1. Obtener Configuración completa
+    const { data: configRows } = await supabase.from('config').select('clave, valor');
+    const config = configRows?.reduce((acc: any, item: any) => {
+      acc[item.clave] = item.valor;
+      return acc;
+    }, {});
 
-    if (!configData?.valor) {
+    if (!config?.resend_api_key) {
       return NextResponse.json({ error: 'No se encontró la API Key de Resend en Configuración' }, { status: 400 });
     }
 
-    const resend = new Resend(configData.valor);
+    const resend = new Resend(config.resend_api_key);
 
     // 2. Determinar destinatarios
     let targetEmails: string[] = [];
@@ -32,20 +32,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No hay destinatarios' }, { status: 400 });
     }
 
-    // 3. Enviar correos (Resend permite enviar a varios en un solo llamado si es el mismo mensaje)
-    // Nota: Para grandes volúmenes se recomienda usar lotes o una cola de tareas.
+    // 3. Enviar correos
     const { data, error } = await resend.emails.send({
       from: 'La Travesía <onboarding@resend.dev>',
       to: targetEmails,
       subject: subject,
       html: `
-        <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden;">
+        <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden; background-color: #ffffff;">
           <img src="${formatUnsplashUrl(imageUrl)}" style="width: 100%; height: auto; display: block;" alt="Campaña" />
-          <div style="padding: 40px; text-align: center; background-color: #ffffff;">
-            <h1 style="color: #4A5D4E; margin-bottom: 20px;">¡Hola!</h1>
+          <div style="padding: 40px; text-align: center;">
+            <h1 style="color: #4A5D4E; margin-bottom: 20px; font-size: 28px;">¡Hola!</h1>
             <p style="color: #666; font-size: 18px; line-height: 1.6;">${message.replace('{nombre}', 'Amigo/a')}</p>
             <div style="margin-top: 40px;">
-              <a href="https://latravesia-loyalty82.vercel.app" style="background-color: #D4AF37; color: #4A5D4E; padding: 15px 30px; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 14px; letter-spacing: 2px;">RESERVAR MI MESA</a>
+              <a href="https://wa.me/${(config.admin_whatsapp || '').replace(/\D/g, '')}?text=Hola, deseo consultar mi premio de la promocion" 
+                 style="background-color: #D4AF37; color: #ffffff; padding: 18px 35px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 14px; letter-spacing: 2px;">
+                CONSULTAR MI BENEFICIO
+              </a>
             </div>
             <p style="margin-top: 40px; font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 2px;">Hostería La Travesía • Solo Sábados y Domingos</p>
           </div>

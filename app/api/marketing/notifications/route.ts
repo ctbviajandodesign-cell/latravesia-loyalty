@@ -24,13 +24,16 @@ export async function POST(request: Request) {
         to: [cliente.email],
         subject: config.welcome_email_subject || '¡Bienvenido al Club! ✨',
         html: `
-          <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden;">
+          <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden; background-color: #ffffff;">
             <img src="${formatUnsplashUrl(config.welcome_image_url || config.welcome_email_image_url || config.email_foto_url)}" style="width: 100%; height: auto; display: block;" />
-            <div style="padding: 40px; text-align: center; background-color: #ffffff;">
-              <h1 style="color: #4A5D4E;">¡Hola ${cliente.nombre}!</h1>
-              <p style="color: #666; font-size: 18px;">${(config.welcome_email_body || config.email_mensaje || '').replace('{nombre}', cliente.nombre)}</p>
+            <div style="padding: 40px; text-align: center;">
+              <h1 style="color: #4A5D4E; font-size: 28px;">¡Hola ${cliente.nombre}!</h1>
+              <p style="color: #666; font-size: 18px; line-height: 1.6;">${(config.welcome_email_body || config.email_mensaje || '').replace('{nombre}', cliente.nombre)}</p>
               <div style="margin-top: 40px;">
-                <a href="https://latravesia-loyalty82.vercel.app" style="background-color: #D4AF37; color: #4A5D4E; padding: 15px 30px; text-decoration: none; border-radius: 10px; font-weight: bold;">RESERVAR AHORA</a>
+                <a href="https://wa.me/${(config.admin_whatsapp || '').replace(/\D/g, '')}?text=Hola, acabo de registrarme y deseo consultar mis beneficios" 
+                   style="background-color: #D4AF37; color: #ffffff; padding: 18px 35px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 14px; letter-spacing: 2px;">
+                  CONSULTAR MIS BENEFICIOS
+                </a>
               </div>
             </div>
           </div>
@@ -45,12 +48,18 @@ export async function POST(request: Request) {
         to: [cliente.email],
         subject: config.loyalty_email_subject || '¡Felicidades por tu fidelidad! 🏆',
         html: `
-          <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden; text-align: center;">
+          <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden; text-align: center; background-color: #ffffff;">
             <img src="${formatUnsplashUrl(config.loyalty_image_url || config.email_foto_url || config.email_premio_foto_url)}" style="width: 100%; height: auto; display: block;" />
             <div style="padding: 40px;">
-              <h1 style="color: #4A5D4E;">¡META CUMPLIDA!</h1>
-              <p style="font-size: 18px; color: #666;">${(config.loyalty_email_body || config.email_premio_mensaje || '').replace('{nombre}', cliente.nombre)}</p>
-              <p style="margin-top: 30px; font-size: 12px; color: #999;">Muestra este correo en tu próxima visita para validarlo.</p>
+              <h1 style="color: #4A5D4E; font-size: 28px;">¡META CUMPLIDA!</h1>
+              <p style="font-size: 18px; color: #666; line-height: 1.6;">${(config.loyalty_email_body || config.email_premio_mensaje || '').replace('{nombre}', cliente.nombre)}</p>
+              <div style="margin-top: 40px;">
+                <a href="https://wa.me/${(config.admin_whatsapp || '').replace(/\D/g, '')}?text=Hola, he completado mis visitas y deseo consultar mi premio" 
+                   style="background-color: #D4AF37; color: #ffffff; padding: 18px 35px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 14px; letter-spacing: 2px;">
+                  RECLAMAR MI PREMIO
+                </a>
+              </div>
+              <p style="margin-top: 30px; font-size: 12px; color: #999;">Hostería La Travesía • Solo Sábados y Domingos</p>
             </div>
           </div>
         `
