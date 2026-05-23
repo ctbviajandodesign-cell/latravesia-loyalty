@@ -73,7 +73,7 @@ export default function ConfigPage() {
         
         {saved && (
           <div className="flex items-center gap-2 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl animate-in fade-in slide-in-from-right-4">
-            <CheckCircle2 size={16} /> <span className="text-[10px] font-black uppercase tracking-widest">Cambios sincronizados</span>
+            <CheckCircle2 size={16} /> <span className="text-xs font-black uppercase tracking-widest">Cambios sincronizados</span>
           </div>
         )}
       </div>
@@ -85,8 +85,8 @@ export default function ConfigPage() {
           <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 space-y-8 shadow-2xl">
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] uppercase tracking-widest font-black text-white/30">Infraestructura</p>
-                <span className="flex items-center gap-2 text-travesia-gold text-[10px] font-black uppercase tracking-widest"><Zap size={12}/> Online</span>
+                <p className="text-xs uppercase tracking-widest font-black text-white/30">Infraestructura</p>
+                <span className="flex items-center gap-2 text-travesia-gold text-xs font-black uppercase tracking-widest"><Zap size={12}/> Online</span>
               </div>
               
               <div className="space-y-4">
@@ -96,7 +96,7 @@ export default function ConfigPage() {
                   </div>
                   <div>
                     <p className="text-xs font-bold">Base de Datos</p>
-                    <p className="text-[10px] text-white/30">Supabase SQL</p>
+                    <p className="text-xs text-white/30">Supabase SQL</p>
                   </div>
                 </div>
               </div>
@@ -105,7 +105,7 @@ export default function ConfigPage() {
             <div className="pt-8 border-t border-white/5">
               <div className="flex items-center gap-3 mb-4">
                 <Star size={16} className="text-travesia-gold" />
-                <p className="text-[10px] uppercase tracking-widest font-black text-white/30">SEO & Reputación</p>
+                <p className="text-xs uppercase tracking-widest font-black text-white/30">SEO & Reputación</p>
               </div>
               <p className="text-xs text-white/50 leading-relaxed italic">
                 El link de Google Maps es fundamental para que el sistema de Check-In invite a los clientes frecuentes a dejar una reseña.
@@ -124,7 +124,7 @@ export default function ConfigPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`w-1.5 h-6 rounded-full transition-colors ${isGoogle ? 'bg-travesia-gold' : 'bg-white/20 group-hover:bg-white/40'}`}></div>
-                      <label className={`text-[11px] font-black uppercase tracking-[0.2em] transition-colors ${isGoogle ? 'text-travesia-gold' : 'text-white/60 group-hover:text-white'}`}>
+                      <label className={`text-xs font-black uppercase tracking-[0.2em] transition-colors ${isGoogle ? 'text-travesia-gold' : 'text-white/60 group-hover:text-white'}`}>
                         {item.clave === 'google_maps_link' ? 'LINK DE OPINIONES GOOGLE' : item.clave.replace(/_/g, ' ')}
                       </label>
                     </div>
@@ -152,7 +152,7 @@ export default function ConfigPage() {
                     </button>
                   </div>
                   {isGoogle && (
-                    <p className="text-[10px] text-travesia-gold/60 italic ml-4 font-bold">
+                    <p className="text-xs text-travesia-gold/60 italic ml-4 font-bold">
                       ⚠️ Este enlace aparecerá a los clientes frecuentes después de su segunda visita.
                     </p>
                   )}

@@ -157,12 +157,12 @@ export default function AnalyticsPage() {
                       style={{ height: `${height}%` }}
                       className="w-full max-w-[40px] bg-[#4A5D4E]/10 group-hover:bg-[#4A5D4E]/30 transition-all rounded-t-lg relative"
                     >
-                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                         {dia.count} visitas
                       </div>
                     </div>
                   </div>
-                  <span className="text-[10px] text-gray-400 font-bold uppercase overflow-hidden whitespace-nowrap">
+                  <span className="text-xs text-gray-400 font-bold uppercase overflow-hidden whitespace-nowrap">
                     {new Date(dia.fecha).toLocaleDateString('es', { weekday: 'short' })}
                   </span>
                 </div>

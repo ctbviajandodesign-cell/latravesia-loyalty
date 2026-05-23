@@ -173,7 +173,7 @@ export default function RegistroPage() {
             <Sparkles className="w-6 h-6 text-[#051A10]" />
           </div>
           <h1 className="mt-2 text-xl font-serif font-bold text-travesia-gold">La Travesía</h1>
-          <p className="text-[10px] uppercase tracking-[0.4em] font-black text-white/30 italic">Loyalty Experience</p>
+          <p className="text-xs uppercase tracking-[0.4em] font-black text-white/30 italic">Loyalty Experience</p>
         </div>
 
         {/* WELCOME */}
@@ -281,13 +281,13 @@ export default function RegistroPage() {
                 <Sparkles size={20} className="animate-pulse" />
               </div>
               <h2 className="text-2xl font-serif font-bold text-white">Síguenos</h2>
-              <p className="text-white/40 text-[11px] uppercase tracking-widest font-black italic">Activa tu acceso a la ruleta</p>
+              <p className="text-white/40 text-xs uppercase tracking-widest font-black italic">Activa tu acceso a la ruleta</p>
             </div>
 
             <div className="w-full px-2">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] uppercase font-black tracking-widest text-white/30">Progreso</span>
-                <span className="text-[11px] uppercase font-black tracking-widest text-travesia-gold">{visitedCount} / {requiredSocials.length}</span>
+                <span className="text-xs uppercase font-black tracking-widest text-white/30">Progreso</span>
+                <span className="text-xs uppercase font-black tracking-widest text-travesia-gold">{visitedCount} / {requiredSocials.length}</span>
               </div>
               <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                 <div className="h-full bg-travesia-gold rounded-full transition-all duration-700"
@@ -308,7 +308,7 @@ export default function RegistroPage() {
                   className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${visitedSocials.has(key) ? 'bg-travesia-gold/10 border border-travesia-gold/50' : 'bg-white/5 border border-white/10 active:scale-[0.98]'}`}>
                   <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center text-white shadow-lg`}>{icon}</div>
-                    <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
+                    <span className="text-xs font-black uppercase tracking-widest">{label}</span>
                   </div>
                   {visitedSocials.has(key)
                     ? <CheckCircle2 size={16} className="text-travesia-gold" />
@@ -321,7 +321,7 @@ export default function RegistroPage() {
                   className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${visitedSocials.has('whatsapp') ? 'bg-emerald-500/20 border border-emerald-500/50' : 'bg-emerald-500/10 border border-emerald-500/30'}`}>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-lg"><Smartphone size={16} /></div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">{whatsappConfig.label}</span>
+                    <span className="text-xs font-black uppercase tracking-widest text-emerald-400">{whatsappConfig.label}</span>
                   </div>
                   {visitedSocials.has('whatsapp')
                     ? <CheckCircle2 size={16} className="text-emerald-400" />
@@ -331,7 +331,7 @@ export default function RegistroPage() {
             </div>
 
             <button onClick={() => setStep('review')}
-              className={`w-full py-4 rounded-2xl font-black text-[11px] tracking-[0.3em] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 ${allSocialsVisited ? 'bg-travesia-gold text-[#051A10] hover:brightness-110' : 'bg-white/10 text-white/50 border border-white/10'}`}>
+              className={`w-full py-4 rounded-2xl font-black text-xs tracking-[0.3em] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 ${allSocialsVisited ? 'bg-travesia-gold text-[#051A10] hover:brightness-110' : 'bg-white/10 text-white/50 border border-white/10'}`}>
               {allSocialsVisited
                 ? <><CheckCircle2 size={14} /> CONTINUANDO...</>
                 : `SEGUIR (${visitedCount}/${requiredSocials.length})`}
@@ -367,13 +367,13 @@ export default function RegistroPage() {
                     setReviewOpened(true);
                     window.open(googleReviewLink, '_blank', 'noopener,noreferrer');
                   }}
-                  className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-[10px] tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
                   <Star size={14} className="fill-current" /> DEJAR MI RESEÑA EN GOOGLE
                 </button>
               ) : (
                 <button onClick={() => setStep('game')}
-                  className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-[10px] tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
+                  className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
                   <CheckCircle2 size={14} /> ¡GRACIAS! GIRAR LA RULETA →
                 </button>
               )}
@@ -410,13 +410,13 @@ export default function RegistroPage() {
               <div className="relative">
                 <div className="absolute -inset-0.5 bg-travesia-gold/20 rounded-[32px] blur opacity-75" />
                 <div className="relative p-6 bg-white/5 border border-travesia-gold/30 rounded-[32px] backdrop-blur-2xl">
-                  <p className="text-[11px] uppercase tracking-[0.4em] text-travesia-gold font-black mb-2">Premio Ganado</p>
+                  <p className="text-xs uppercase tracking-[0.4em] text-travesia-gold font-black mb-2">Premio Ganado</p>
                   <p className="text-2xl font-black text-white leading-tight">{premioFinal}</p>
                 </div>
               </div>
             </div>
             <button onClick={() => router.push('/checkin?new=true')}
-              className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:brightness-110 shadow-2xl transition-all flex items-center justify-center gap-2">
+              className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-widest uppercase hover:brightness-110 shadow-2xl transition-all flex items-center justify-center gap-2">
               IR A MI PANEL <ArrowRight size={14} />
             </button>
           </div>

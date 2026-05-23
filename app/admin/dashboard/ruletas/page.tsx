@@ -166,7 +166,7 @@ export default function RuletasPage() {
           <h3 className="text-2xl font-serif font-bold text-[#4A5D4E]">{isEditing ? 'Configurar Ruleta' : 'Nueva Configuración'}</h3>
           <form onSubmit={handleCreateOrUpdate} className="space-y-8">
             <div className="space-y-2">
-              <label className="text-[10px] uppercase font-black text-gray-400 ml-2">Nombre Identificador</label>
+              <label className="text-xs uppercase font-black text-gray-400 ml-2">Nombre Identificador</label>
               <input 
                 required
                 value={nombre}
@@ -177,7 +177,7 @@ export default function RuletasPage() {
             </div>
 
             <div className="space-y-4">
-              <label className="text-[10px] uppercase font-black text-gray-400 ml-2">Selecciona los Premios que aparecerán (Máx 8 recomendados)</label>
+              <label className="text-xs uppercase font-black text-gray-400 ml-2">Selecciona los Premios que aparecerán (Máx 8 recomendados)</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {premiosDisponibles.map(p => {
                   const isSelected = selectedPremios.includes(p.id);
@@ -190,7 +190,7 @@ export default function RuletasPage() {
                       <span className="text-3xl">{p.emoji || '🎁'}</span>
                       <div className="flex-1">
                         <p className="font-black text-gray-800 text-sm leading-tight">{p.nombre}</p>
-                        <p className="text-[10px] text-gray-400 uppercase font-bold mt-1">Prob: {p.probabilidad}%</p>
+                        <p className="text-xs text-gray-400 uppercase font-bold mt-1">Prob: {p.probabilidad}%</p>
                       </div>
                       <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-[#4A5D4E] border-[#4A5D4E]' : 'border-gray-200'}`}>
                         {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
@@ -214,7 +214,7 @@ export default function RuletasPage() {
             <div className="flex justify-between items-start mb-6">
                <div className="space-y-1">
                   <h3 className="text-xl font-black text-gray-800 leading-tight">{r.nombre}</h3>
-                  <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest">{r.configuracion?.premiosIds?.length || 0} Premios configurados</p>
+                  <p className="text-xs text-gray-400 uppercase font-bold tracking-widest">{r.configuracion?.premiosIds?.length || 0} Premios configurados</p>
                </div>
                {r.activa && <div className="p-2 bg-[#4A5D4E] text-white rounded-lg animate-pulse"><Play size={14} fill="currentColor" /></div>}
             </div>
@@ -230,7 +230,7 @@ export default function RuletasPage() {
                     );
                   })}
                   {(r.configuracion?.premiosIds?.length || 0) > 5 && (
-                    <div className="w-10 h-10 rounded-xl bg-gray-200 border-2 border-white flex items-center justify-center text-[10px] font-black text-gray-500">
+                    <div className="w-10 h-10 rounded-xl bg-gray-200 border-2 border-white flex items-center justify-center text-xs font-black text-gray-500">
                       +{(r.configuracion?.premiosIds?.length || 0) - 5}
                     </div>
                   )}
@@ -240,7 +240,7 @@ export default function RuletasPage() {
             <div className="flex gap-2">
               <button 
                 onClick={() => toggleStatus(r.id, r.activa)}
-                className={`flex-1 py-4 rounded-2xl font-black text-[10px] tracking-widest uppercase transition-all ${r.activa ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-[#4A5D4E] text-white shadow-lg shadow-[#4A5D4E]/20 hover:brightness-110'}`}
+                className={`flex-1 py-4 rounded-2xl font-black text-xs tracking-widest uppercase transition-all ${r.activa ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-[#4A5D4E] text-white shadow-lg shadow-[#4A5D4E]/20 hover:brightness-110'}`}
               >
                 {r.activa ? 'DESACTIVAR' : 'ACTIVAR AHORA'}
               </button>

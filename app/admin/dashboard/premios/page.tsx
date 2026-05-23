@@ -136,7 +136,7 @@ export default function PremiosPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-20">
-      <div className={`text-[10px] uppercase font-black px-4 py-1 rounded-full w-fit flex items-center gap-2 ${
+      <div className={`text-xs uppercase font-black px-4 py-1 rounded-full w-fit flex items-center gap-2 ${
         dbStatus === 'connected' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
       }`}>
         {dbStatus === 'connected' ? <><Wifi size={12} /> Sistema Activo</> : <><WifiOff size={12} /> Error de Base de Datos</>}
@@ -169,23 +169,23 @@ export default function PremiosPage() {
         >
           <h3 className="md:col-span-2 text-xl font-bold text-[#4A5D4E]">{isEditing ? 'Editar Premio' : 'Nuevo Premio'}</h3>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase font-black text-gray-400 ml-1">Emoji / Icono</label>
+            <label className="text-xs uppercase font-black text-gray-400 ml-1">Emoji / Icono</label>
             <input required value={emoji} onChange={e => setEmoji(e.target.value)} className="w-full p-4 rounded-xl border bg-gray-50 focus:border-[#4A5D4E] outline-none transition-all text-gray-900 font-medium" />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase font-black text-gray-400 ml-1">Nombre del Premio</label>
+            <label className="text-xs uppercase font-black text-gray-400 ml-1">Nombre del Premio</label>
             <input required value={nombre} onChange={e => setNombre(e.target.value)} className="w-full p-4 rounded-xl border bg-gray-50 focus:border-[#4A5D4E] outline-none transition-all text-gray-900 font-medium" />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <label className="text-[10px] uppercase font-black text-gray-400 ml-1">Descripción del Regalo (Instrucciones para canje)</label>
+            <label className="text-xs uppercase font-black text-gray-400 ml-1">Descripción del Regalo (Instrucciones para canje)</label>
             <textarea rows={2} value={descripcion} onChange={e => setDescripcion(e.target.value)} className="w-full p-4 rounded-xl border bg-gray-50 focus:border-[#4A5D4E] outline-none transition-all resize-none text-gray-900 font-medium" placeholder="Ej: Presenta este código en caja para obtener un 10% de descuento..." />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase font-black text-gray-400 ml-1">Probabilidad de Salida (%)</label>
+            <label className="text-xs uppercase font-black text-gray-400 ml-1">Probabilidad de Salida (%)</label>
             <input type="number" required value={probabilidad} onChange={e => setProbabilidad(e.target.value)} className="w-full p-4 rounded-xl border bg-gray-50 focus:border-[#4A5D4E] outline-none transition-all text-gray-900 font-medium" />
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] uppercase font-black text-gray-400 ml-1">Stock Disponible</label>
+            <label className="text-xs uppercase font-black text-gray-400 ml-1">Stock Disponible</label>
             <input type="number" required value={stock} onChange={e => setStock(e.target.value)} className="w-full p-4 rounded-xl border bg-gray-50 focus:border-[#4A5D4E] outline-none transition-all text-gray-900 font-medium" />
           </div>
           <button disabled={actionLoading} className="md:col-span-2 bg-[#4A5D4E] text-white p-5 rounded-2xl font-black tracking-widest hover:brightness-110 transition-all shadow-lg">
@@ -204,7 +204,7 @@ export default function PremiosPage() {
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-50 text-gray-400 text-[10px] font-black uppercase tracking-widest">
+            <thead className="bg-gray-50 text-gray-400 text-xs font-black uppercase tracking-widest">
               <tr>
                 <th className="p-8">Detalle del Premio</th>
                 <th className="p-8">Probabilidad</th>

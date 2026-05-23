@@ -154,7 +154,7 @@ function CheckInContent() {
             <MapPin className="w-7 h-7 text-travesia-gold" />
           </div>
           <h1 className="text-2xl font-bold text-travesia-gold tracking-tight">Check-In</h1>
-          <p className="text-white/30 text-[11px] uppercase tracking-[0.4em] font-black mt-1">La Travesía Loyalty</p>
+          <p className="text-white/30 text-xs uppercase tracking-[0.4em] font-black mt-1">La Travesía Loyalty</p>
         </div>
 
         <div className="bg-white/5 border border-white/10 rounded-[40px] p-8 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in duration-500">
@@ -181,10 +181,10 @@ function CheckInContent() {
                   className="flex-1 bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm font-sans" />
               </div>
 
-              {error && <p className="text-red-400 text-[10px] text-center font-bold uppercase tracking-widest">{error}</p>}
+              {error && <p className="text-red-400 text-xs text-center font-bold uppercase tracking-widest">{error}</p>}
 
               <button type="submit" disabled={processing || !phone}
-                className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-[10px] tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-30">
+                className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-30">
                 {processing ? <Loader2 className="animate-spin w-5 h-5" /> : 'BUSCAR MI CUENTA →'}
               </button>
 
@@ -205,7 +205,7 @@ function CheckInContent() {
           {step === 'code' && cliente && (
             <form onSubmit={handleCodeSubmit} className="space-y-6 animate-in slide-in-from-bottom-4">
               <div className="text-center p-5 bg-white/5 border border-white/10 rounded-2xl">
-                <p className="text-travesia-gold/60 text-[11px] uppercase font-black tracking-widest mb-1">Bienvenido de vuelta</p>
+                <p className="text-travesia-gold/60 text-xs uppercase font-black tracking-widest mb-1">Bienvenido de vuelta</p>
                 <h2 className="text-xl text-white font-bold">{cliente.nombre} {cliente.apellido}</h2>
                 <div className="flex items-center justify-center gap-2 mt-2">
                   <Trophy className="w-4 h-4 text-travesia-gold" />
@@ -214,20 +214,20 @@ function CheckInContent() {
               </div>
 
               <div className="space-y-3">
-                <p className="text-center text-[11px] text-white/50 uppercase tracking-wider font-bold">Código del día (pídelo al personal)</p>
+                <p className="text-center text-xs text-white/50 uppercase tracking-wider font-bold">Código del día (pídelo al personal)</p>
                 <input type="password" inputMode="numeric" value={code}
                   onChange={e => setCode(e.target.value)} placeholder="••••" required
                   className="w-full text-center text-4xl tracking-[1em] py-5 bg-white/5 border-2 border-white/10 rounded-2xl outline-none focus:border-travesia-gold transition-all font-mono" />
-                {error && <p className="text-red-400 text-[10px] text-center font-bold uppercase tracking-widest animate-pulse">{error}</p>}
+                {error && <p className="text-red-400 text-xs text-center font-bold uppercase tracking-widest animate-pulse">{error}</p>}
               </div>
 
               <button type="submit" disabled={processing || !code}
-                className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-[10px] tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-30">
+                className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-30">
                 {processing ? <Loader2 className="animate-spin w-5 h-5" /> : <><CheckCircle2 className="w-5 h-5" /> VALIDAR VISITA</>}
               </button>
 
               <button type="button" onClick={() => { setStep('phone'); setCode(''); setError(''); }}
-                className="w-full text-white/30 text-[11px] uppercase tracking-widest font-black hover:text-white/50 transition-colors flex items-center justify-center gap-1.5">
+                className="w-full text-white/30 text-xs uppercase tracking-widest font-black hover:text-white/50 transition-colors flex items-center justify-center gap-1.5">
                 <ArrowLeft size={11} /> Cambiar número
               </button>
             </form>
@@ -237,7 +237,7 @@ function CheckInContent() {
           {step === 'review' && visitData && (
             <div className="space-y-6 text-center animate-in zoom-in duration-500">
               <div className="space-y-2">
-                <p className="text-[11px] uppercase font-black tracking-widest text-travesia-gold/60">
+                <p className="text-xs uppercase font-black tracking-widest text-travesia-gold/60">
                   {visitData.nuevasVisitas === visitData.meta ? '¡Meta cumplida!' : `¡Visita ${visitData.nuevasVisitas}!`}
                 </p>
                 <h2 className="text-2xl font-bold text-white">
@@ -262,12 +262,12 @@ function CheckInContent() {
 
               {!reviewOpened ? (
                 <button onClick={() => { setReviewOpened(true); window.open(googleReviewLink, '_blank', 'noopener,noreferrer'); }}
-                  className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-[10px] tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
+                  className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
                   <Star size={14} className="fill-current" /> DEJAR MI RESEÑA ⭐
                 </button>
               ) : (
                 <button onClick={() => setStep('success')}
-                  className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-[10px] tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
+                  className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
                   <CheckCircle2 size={14} /> YA DEJÉ MI RESEÑA →
                 </button>
               )}
@@ -298,12 +298,12 @@ function CheckInContent() {
               </div>
 
               <div className="bg-gradient-to-br from-travesia-gold to-[#B8860B] p-5 rounded-[28px] shadow-2xl border border-white/10">
-                <p className="text-[11px] text-[#051A10]/60 uppercase font-black tracking-widest mb-1">Tu Progreso</p>
+                <p className="text-xs text-[#051A10]/60 uppercase font-black tracking-widest mb-1">Tu Progreso</p>
                 <p className="text-5xl font-black text-[#051A10] tracking-tighter">
                   {visitData.nuevasVisitas} / {visitData.meta}
                 </p>
                 {visitData.nuevasVisitas >= visitData.meta && (
-                  <p className="text-[10px] text-[#051A10] font-black mt-2 uppercase tracking-widest opacity-80">¡Premio disponible!</p>
+                  <p className="text-xs text-[#051A10] font-black mt-2 uppercase tracking-widest opacity-80">¡Premio disponible!</p>
                 )}
               </div>
 

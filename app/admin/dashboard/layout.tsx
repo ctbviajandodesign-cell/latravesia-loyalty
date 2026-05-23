@@ -68,7 +68,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
             <div>
               <h1 className="font-serif font-bold text-xl text-travesia-gold tracking-tight leading-none">La Travesía</h1>
-              <p className="text-[7px] uppercase tracking-[0.4em] font-black text-white/40 mt-1 italic">Loyalty Admin</p>
+              <p className="text-xs uppercase tracking-[0.4em] font-black text-white/40 mt-1 italic">Loyalty Admin</p>
             </div>
           </div>
 
@@ -102,7 +102,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <div className="w-10 h-10 rounded-full bg-travesia-gold/10 border border-travesia-gold/20 flex items-center justify-center text-travesia-gold font-bold">A</div>
               <div className="overflow-hidden">
                 <p className="text-sm font-bold truncate">Administrador</p>
-                <p className="text-[10px] text-white/40 uppercase tracking-widest truncate">Master Access</p>
+                <p className="text-xs text-white/40 uppercase tracking-widest truncate">Master Access</p>
               </div>
             </div>
             <button className="w-full flex items-center gap-4 px-6 py-4 text-red-400/60 hover:text-red-400 hover:bg-red-400/5 rounded-2xl transition-all group">

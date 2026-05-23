@@ -105,7 +105,7 @@ export default function AdminOverview() {
               <KeyRound className="w-8 h-8 text-travesia-gold" />
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-[0.4em] font-black text-white/30 mb-1">Código de Visita • {today}</p>
+              <p className="text-xs uppercase tracking-[0.4em] font-black text-white/30 mb-1">Código de Visita • {today}</p>
               <div className="flex items-baseline gap-4">
                 <span className="text-7xl font-mono font-black text-travesia-gold tracking-[0.2em] leading-none select-all">
                   {dailyCode}
@@ -165,7 +165,7 @@ export default function AdminOverview() {
               <div className="w-1.5 h-6 bg-travesia-gold rounded-full"></div>
               <h3 className="text-2xl font-serif font-bold text-white tracking-tight">Nuevos Socios</h3>
             </div>
-            <button className="text-[10px] uppercase tracking-widest font-black text-travesia-gold hover:text-white transition-colors flex items-center gap-2">
+            <button className="text-xs uppercase tracking-widest font-black text-travesia-gold hover:text-white transition-colors flex items-center gap-2">
               Ver todos <ChevronRight size={14} />
             </button>
           </div>
@@ -175,10 +175,10 @@ export default function AdminOverview() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-white/5">
-                    <th className="p-4 md:p-6 lg:p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Cliente</th>
-                    <th className="p-4 md:p-6 lg:p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Contacto</th>
-                    <th className="p-4 md:p-6 lg:p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Estado</th>
-                    <th className="p-4 md:p-6 lg:p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Acción</th>
+                    <th className="p-4 md:p-6 lg:p-8 text-xs uppercase tracking-[0.3em] font-black text-white/30">Cliente</th>
+                    <th className="p-4 md:p-6 lg:p-8 text-xs uppercase tracking-[0.3em] font-black text-white/30">Contacto</th>
+                    <th className="p-4 md:p-6 lg:p-8 text-xs uppercase tracking-[0.3em] font-black text-white/30">Estado</th>
+                    <th className="p-4 md:p-6 lg:p-8 text-xs uppercase tracking-[0.3em] font-black text-white/30">Acción</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
@@ -191,7 +191,7 @@ export default function AdminOverview() {
                           </div>
                           <div>
                             <p className="font-bold text-white text-base">{cliente.nombre} {cliente.apellido}</p>
-                            <p className="text-[10px] text-white/30 uppercase tracking-widest mt-0.5">Socio desde {new Date(cliente.created_at).toLocaleDateString()}</p>
+                            <p className="text-xs text-white/30 uppercase tracking-widest mt-0.5">Socio desde {new Date(cliente.created_at).toLocaleDateString()}</p>
                           </div>
                         </div>
                       </td>
@@ -202,7 +202,7 @@ export default function AdminOverview() {
                         </div>
                       </td>
                       <td className="p-4 md:p-6 lg:p-8">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black uppercase tracking-widest">
                           <ShieldCheck size={12} /> Activo
                         </span>
                       </td>
@@ -239,14 +239,14 @@ export default function AdminOverview() {
                   </p>
                 </div>
               </div>
-              <button className="w-full py-4 bg-pink-500/10 border border-pink-500/20 text-pink-400 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:bg-pink-500 hover:text-white transition-all">
+              <button className="w-full py-4 bg-pink-500/10 border border-pink-500/20 text-pink-400 rounded-2xl font-black text-xs tracking-widest uppercase hover:bg-pink-500 hover:text-white transition-all">
                 Lanzar Notificaciones
               </button>
             </div>
 
             <div className="pt-8 border-t border-white/5">
               <div className="flex items-center justify-between mb-6">
-                <p className="text-[10px] uppercase tracking-widest font-black text-white/30">Estado del Sistema</p>
+                <p className="text-xs uppercase tracking-widest font-black text-white/30">Estado del Sistema</p>
                 <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10b981]"></span>
               </div>
               <div className="space-y-4">

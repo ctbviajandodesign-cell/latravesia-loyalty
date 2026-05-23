@@ -175,9 +175,9 @@ export default function ClientesPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-white/5 bg-white/[0.02]">
-                <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Socio</th>
-                <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30 text-center">Visitas</th>
-                <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30 text-right">Acciones</th>
+                <th className="p-8 text-xs uppercase tracking-[0.3em] font-black text-white/30">Socio</th>
+                <th className="p-8 text-xs uppercase tracking-[0.3em] font-black text-white/30 text-center">Visitas</th>
+                <th className="p-8 text-xs uppercase tracking-[0.3em] font-black text-white/30 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -194,7 +194,7 @@ export default function ClientesPage() {
                             <p className="font-bold text-white text-lg tracking-tight">
                               {cliente.nombre} {cliente.apellido}
                             </p>
-                            <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-black mt-1 flex items-center gap-4">
+                            <p className="text-xs text-white/30 uppercase tracking-[0.2em] font-black mt-1 flex items-center gap-4">
                               <span>
                                 <Smartphone size={10} className="inline mr-1 text-travesia-gold" />
                                 {cliente.telefono}
@@ -246,7 +246,7 @@ export default function ClientesPage() {
         {/* PAGINACIÓN */}
         {!loading && totalPages > 1 && (
           <div className="flex items-center justify-between px-8 py-6 border-t border-white/5">
-            <p className="text-[10px] text-white/30 uppercase font-black tracking-widest">
+            <p className="text-xs text-white/30 uppercase font-black tracking-widest">
               Página {page + 1} de {totalPages} — {totalCount} socios
             </p>
             <div className="flex items-center gap-2">
@@ -304,7 +304,7 @@ export default function ClientesPage() {
             <form onSubmit={handleUpdateCliente} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase font-black text-white/40 ml-2">Nombre</label>
+                  <label className="text-xs uppercase font-black text-white/40 ml-2">Nombre</label>
                   <input
                     value={selectedCliente.nombre}
                     onChange={(e) => setSelectedCliente({ ...selectedCliente, nombre: e.target.value })}
@@ -312,7 +312,7 @@ export default function ClientesPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase font-black text-white/40 ml-2">Apellido</label>
+                  <label className="text-xs uppercase font-black text-white/40 ml-2">Apellido</label>
                   <input
                     value={selectedCliente.apellido}
                     onChange={(e) => setSelectedCliente({ ...selectedCliente, apellido: e.target.value })}
@@ -321,7 +321,7 @@ export default function ClientesPage() {
                 </div>
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] uppercase font-black text-white/40 ml-2">Correo</label>
+                <label className="text-xs uppercase font-black text-white/40 ml-2">Correo</label>
                 <input
                   value={selectedCliente.email}
                   onChange={(e) => setSelectedCliente({ ...selectedCliente, email: e.target.value })}
@@ -330,7 +330,7 @@ export default function ClientesPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase font-black text-white/40 ml-2">WhatsApp</label>
+                  <label className="text-xs uppercase font-black text-white/40 ml-2">WhatsApp</label>
                   <input
                     value={selectedCliente.telefono}
                     onChange={(e) => setSelectedCliente({ ...selectedCliente, telefono: e.target.value })}
@@ -338,7 +338,7 @@ export default function ClientesPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase font-black text-white/40 ml-2">Visitas</label>
+                  <label className="text-xs uppercase font-black text-white/40 ml-2">Visitas</label>
                   <input
                     type="number"
                     value={selectedCliente.total_visitas}
@@ -353,14 +353,14 @@ export default function ClientesPage() {
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="flex-1 py-4 bg-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-all"
+                  className="flex-1 py-4 bg-white/5 rounded-2xl text-xs font-black uppercase tracking-widest text-white/40 hover:text-white transition-all"
                 >
                   Cancelar
                 </button>
                 <button
                   disabled={isSaving}
                   type="submit"
-                  className="flex-1 py-4 bg-travesia-gold rounded-2xl text-[10px] font-black uppercase tracking-widest text-[#051A10] hover:brightness-110 transition-all disabled:opacity-60"
+                  className="flex-1 py-4 bg-travesia-gold rounded-2xl text-xs font-black uppercase tracking-widest text-[#051A10] hover:brightness-110 transition-all disabled:opacity-60"
                 >
                   {isSaving ? 'Guardando...' : 'Guardar Cambios'}
                 </button>
@@ -382,36 +382,36 @@ export default function ClientesPage() {
                 <h3 className="text-2xl font-serif font-bold text-white leading-tight">
                   {selectedCliente.nombre} {selectedCliente.apellido}
                 </h3>
-                <p className="text-travesia-gold/60 text-[10px] uppercase font-black tracking-widest mt-1">Miembro</p>
+                <p className="text-travesia-gold/60 text-xs uppercase font-black tracking-widest mt-1">Miembro</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-6 py-6 border-y border-white/5">
               <div className="space-y-1">
-                <p className="text-[9px] uppercase font-black text-white/30 tracking-widest">Cumpleaños</p>
+                <p className="text-xs uppercase font-black text-white/30 tracking-widest">Cumpleaños</p>
                 <p className="text-white font-medium">{selectedCliente.fecha_nacimiento || 'No registrado'}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[9px] uppercase font-black text-white/30 tracking-widest">Registro</p>
+                <p className="text-xs uppercase font-black text-white/30 tracking-widest">Registro</p>
                 <p className="text-white font-medium">{new Date(selectedCliente.created_at).toLocaleDateString()}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[9px] uppercase font-black text-white/30 tracking-widest">Última Visita</p>
+                <p className="text-xs uppercase font-black text-white/30 tracking-widest">Última Visita</p>
                 <p className="text-white font-medium">{selectedCliente.fecha_ultima_visita || 'Hoy'}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[9px] uppercase font-black text-white/30 tracking-widest">Género</p>
+                <p className="text-xs uppercase font-black text-white/30 tracking-widest">Género</p>
                 <p className="text-white font-medium">{selectedCliente.genero || 'No registrado'}</p>
               </div>
               <div className="col-span-2 space-y-1">
-                <p className="text-[9px] uppercase font-black text-white/30 tracking-widest">Visitas / Meta</p>
+                <p className="text-xs uppercase font-black text-white/30 tracking-widest">Visitas / Meta</p>
                 <p className="text-travesia-gold font-bold text-xl">{selectedCliente.total_visitas} de 10</p>
               </div>
             </div>
 
             <button
               onClick={() => setIsDetailsOpen(false)}
-              className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all"
+              className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl text-xs font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all"
             >
               Cerrar
             </button>

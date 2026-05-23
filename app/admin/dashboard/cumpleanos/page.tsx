@@ -130,7 +130,7 @@ export default function CumpleanosPage() {
                         <div className="font-bold text-gray-900 flex items-center gap-2">
                           {cliente.nombre} {cliente.apellido}
                           {isToday(cliente.fecha_nacimiento) && (
-                            <span className="bg-[#4A5D4E] text-white text-[10px] uppercase font-black px-2 py-0.5 rounded">¡Hoy!</span>
+                            <span className="bg-[#4A5D4E] text-white text-xs uppercase font-black px-2 py-0.5 rounded">¡Hoy!</span>
                           )}
                         </div>
                         <div className="text-sm text-gray-500 flex items-center gap-2">
