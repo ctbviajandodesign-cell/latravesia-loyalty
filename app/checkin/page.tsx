@@ -334,21 +334,20 @@ function CheckInContent() {
               </div>
 
               {!reviewOpened ? (
-                <button onClick={() => {
-                  setReviewOpened(true);
-                  sessionStorage.setItem('chk_review_pending', 'true');
-                  // Guardar el estado antes de salir
-                  sessionStorage.setItem('chk_step', step);
-                  if (cliente) sessionStorage.setItem('chk_cliente', JSON.stringify(cliente));
-                  if (visitData) sessionStorage.setItem('chk_visit_data', JSON.stringify(visitData));
-                  sessionStorage.setItem('chk_already_today', String(alreadyToday));
-                  sessionStorage.setItem('chk_review_opened', 'true');
-
-                  window.location.href = googleReviewLink;
-                }}
+                <a href={googleReviewLink}
+                  onClick={() => {
+                    setReviewOpened(true);
+                    sessionStorage.setItem('chk_review_pending', 'true');
+                    // Guardar el estado antes de salir
+                    sessionStorage.setItem('chk_step', step);
+                    if (cliente) sessionStorage.setItem('chk_cliente', JSON.stringify(cliente));
+                    if (visitData) sessionStorage.setItem('chk_visit_data', JSON.stringify(visitData));
+                    sessionStorage.setItem('chk_already_today', String(alreadyToday));
+                    sessionStorage.setItem('chk_review_opened', 'true');
+                  }}
                   className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
                   <Star size={14} className="fill-current" /> DEJAR MI RESEÑA ⭐
-                </button>
+                </a>
               ) : (
                 <button onClick={() => setStep('success')}
                   className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
