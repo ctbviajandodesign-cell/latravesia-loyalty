@@ -44,6 +44,7 @@ export default function RedirectPage() {
 function RedirectContent() {
   const searchParams = useSearchParams();
   const url = searchParams.get('url') || '';
+  const app = searchParams.get('app') || '';
   const key = searchParams.get('key') || 'red social';
   const from = searchParams.get('from') || 'registro';
   const [redirectAttempted, setRedirectAttempted] = useState(false);
@@ -57,32 +58,81 @@ function RedirectContent() {
 
   // Redirigir automáticamente en el primer montaje
   useEffect(() => {
-    if (url && !redirectAttempted) {
-      setRedirectAttempted(true);
-      
-      // Registrar en sessionStorage el inicio de redirección
-      sessionStorage.setItem(`redir_done_${key}`, 'true');
-      
-      // Intentar redirección automática
-      setTimeout(() => {
+    if (!url || redirectAttempted) return;
+    setRedirectAttempted(true);
+
+    // Registrar en sessionStorage el inicio de redirección
+    sessionStorage.setItem(`redir_done_${key}`, 'true');
+
+    let fallbackTimeout: NodeJS.Timeout | null = null;
+    let appOpened = false;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        appOpened = true;
+        if (fallbackTimeout) {
+          clearTimeout(fallbackTimeout);
+          fallbackTimeout = null;
+        }
+      } else if (document.visibilityState === 'visible') {
+        if (appOpened) {
+          sessionStorage.setItem('reg_pending_social', key); // Asegurar que se marque al volver
+          try {
+            window.close();
+            // Por si window.close() falla de forma silenciosa, redirigimos tras 500ms
+            setTimeout(() => {
+              window.location.replace(from === 'checkin' ? '/checkin' : '/registro');
+            }, 500);
+          } catch (e) {
+            window.location.replace(from === 'checkin' ? '/checkin' : '/registro');
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    if (app && app !== '#') {
+      window.location.href = app;
+
+      // Si sigue visible tras 1.5s, no tiene la app instalada; usamos fallback a web
+      fallbackTimeout = setTimeout(() => {
+        if (document.visibilityState === 'visible') {
+          window.location.href = url;
+        }
+      }, 1500);
+    } else {
+      fallbackTimeout = setTimeout(() => {
         window.location.href = url;
       }, 800);
     }
-  }, [url, key, redirectAttempted]);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (fallbackTimeout) clearTimeout(fallbackTimeout);
+    };
+  }, [url, app, key, from, redirectAttempted]);
 
   const handleOpenApp = () => {
     sessionStorage.setItem(`redir_done_${key}`, 'true');
-    window.location.href = url;
+    if (app && app !== '#') {
+      window.location.href = app;
+      setTimeout(() => {
+        if (document.visibilityState === 'visible') {
+          window.location.href = url;
+        }
+      }, 1000);
+    } else {
+      window.location.href = url;
+    }
   };
 
   const handleReturn = () => {
     sessionStorage.setItem(`redir_done_${key}`, 'true');
     sessionStorage.setItem('reg_pending_social', key); // Asegurar que se marque al volver
     
-    // Intentar cerrar la pestaña. Si no se puede, redireccionar
     try {
       window.close();
-      // Si la ventana no se cierra (ej: si se abrió en la misma pestaña), redirigimos en 200ms
       setTimeout(() => {
         window.location.replace(from === 'checkin' ? '/checkin' : '/registro');
       }, 200);

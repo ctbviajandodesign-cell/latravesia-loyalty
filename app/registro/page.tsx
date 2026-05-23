@@ -18,6 +18,25 @@ const COUNTRY_CODES = [
   { code: '+56', name: 'CL' }, { code: '+52', name: 'MX' },
 ];
 
+const getAppSchemeUrl = (key: string, webUrl: string): string | null => {
+  if (!webUrl) return null;
+  const cleanUrl = webUrl.trim().split('?')[0].replace(/\/$/, '');
+  const parts = cleanUrl.split('/');
+  const lastSegment = parts[parts.length - 1] || '';
+  
+  if (key === 'instagram') {
+    return `instagram://user?username=${lastSegment}`;
+  }
+  if (key === 'facebook') {
+    return `fb://page/${lastSegment}`;
+  }
+  if (key === 'tiktok') {
+    const username = lastSegment.replace('@', '');
+    return `snssdk1128://user/profile/${username}`;
+  }
+  return null;
+};
+
 type Step = 'form' | 'social' | 'review' | 'game' | 'success';
 
 export default function RegistroPage() {
@@ -178,7 +197,7 @@ export default function RegistroPage() {
     };
   }, [step]);
 
-  const onSocialClick = (key: string) => {
+  const onSocialClick = (key: string, url: string) => {
     sessionStorage.setItem('reg_pending_social', key);
     pendingSocialRef.current = key;
     waitingForReturnRef.current = true;
@@ -188,6 +207,11 @@ export default function RegistroPage() {
     sessionStorage.setItem('reg_form_data', JSON.stringify(formData));
     sessionStorage.setItem('reg_telefono_final', telefonoFinal);
     sessionStorage.setItem('reg_visited_socials', JSON.stringify(Array.from(visitedSocials)));
+
+    const appScheme = getAppSchemeUrl(key, url) || '';
+    const redirectUrl = `/redirect?url=${encodeURIComponent(url)}&app=${encodeURIComponent(appScheme)}&key=${key}&from=registro`;
+    const w = window.open(redirectUrl, '_blank');
+    openedWindowRef.current = w;
   };
 
   const goToReview = () => {
@@ -423,24 +447,24 @@ export default function RegistroPage() {
 
                 if (visited) {
                   return (
-                    <a key={key}
-                      href={fullUrl}
-                      onClick={() => onSocialClick(key)}
+                    <button key={key}
+                      type="button"
+                      onClick={() => onSocialClick(key, fullUrl)}
                       className="w-full flex items-center justify-between p-4 rounded-2xl bg-travesia-gold/15 border border-travesia-gold/50 text-left transition-all duration-300">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center text-white shadow-lg opacity-80`}>{icon}</div>
                         <span className="text-xs font-black uppercase tracking-widest text-travesia-gold">{label}</span>
                       </div>
                       <CheckCircle2 size={16} className="text-travesia-gold shrink-0" />
-                    </a>
+                    </button>
                   );
                 }
 
                 if (isActive) {
                   return (
-                    <a key={key}
-                      href={fullUrl}
-                      onClick={() => onSocialClick(key)}
+                    <button key={key}
+                      type="button"
+                      onClick={() => onSocialClick(key, fullUrl)}
                       className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/10 border-2 border-travesia-gold text-left active:scale-[0.98] transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.15)]">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center text-white shadow-lg animate-pulse`}>{icon}</div>
@@ -450,7 +474,7 @@ export default function RegistroPage() {
                         <span className="text-[10px] font-black uppercase tracking-widest">IR</span>
                         <ArrowRight size={12} className="animate-bounce" style={{ animationDuration: '0.8s' }} />
                       </div>
-                    </a>
+                    </button>
                   );
                 }
 
