@@ -4,22 +4,6 @@
     "valor": "Todos"
   },
   {
-    "clave": "link_instagram",
-    "valor": "https://www.instagram.com/latravesia_cue/"
-  },
-  {
-    "clave": "link_facebook",
-    "valor": "https://www.facebook.com/latravesiacampina.cue/"
-  },
-  {
-    "clave": "link_tiktok",
-    "valor": "https://www.tiktok.com/@vivelatravesia_ec"
-  },
-  {
-    "clave": "link_whatsapp",
-    "valor": "https://chat.whatsapp.com/HCAXeXfDk871EUEYzkiwNn?mode=gi_t"
-  },
-  {
     "clave": "visitas_para_premio",
     "valor": "10"
   },
@@ -28,12 +12,76 @@
     "valor": "latravesia@1215"
   },
   {
-    "clave": "pin_validacion",
-    "valor": "1234"
+    "clave": "birthday_email_subject",
+    "valor": "¡Feliz Cumpleaños! 🥂"
   },
   {
     "clave": "resend_api_key",
     "valor": "re_bTZpd7w1_FS5g2KqwK42PySeHsSobRfy1"
+  },
+  {
+    "clave": "birthday_email_body",
+    "valor": "Hola {nombre}, un mensaje especial para ti."
+  },
+  {
+    "clave": "birthday_image_url",
+    "valor": "https://unsplash.com/es/fotos/e4kmTGIQFIw"
+  },
+  {
+    "clave": "birthday_roulette_link",
+    "valor": "https://unsplash.com/es/fotos/e4kmTGIQFIw"
+  },
+  {
+    "clave": "welcome_email_subject",
+    "valor": "¡Bienvenido al Club! ✨"
+  },
+  {
+    "clave": "welcome_email_body",
+    "valor": "Hola {nombre}, un mensaje especial para ti. texto de bienvenida cuando se registre"
+  },
+  {
+    "clave": "welcome_image_url",
+    "valor": "https://unsplash.com/es/fotos/e4kmTGIQFIw"
+  },
+  {
+    "clave": "welcome_roulette_link",
+    "valor": ""
+  },
+  {
+    "clave": "loyalty_email_subject",
+    "valor": "¡Has alcanzado una meta! 🏆"
+  },
+  {
+    "clave": "loyalty_email_body",
+    "valor": "Hola {nombre}, un mensaje especial para ti. cuando cumpla las metas de visitas"
+  },
+  {
+    "clave": "loyalty_image_url",
+    "valor": "https://unsplash.com/es/fotos/e4kmTGIQFIw"
+  },
+  {
+    "clave": "loyalty_roulette_link",
+    "valor": ""
+  },
+  {
+    "clave": "broadcast_email_subject",
+    "valor": "¡Nueva Sorpresa en La Travesía! 🎁"
+  },
+  {
+    "clave": "broadcast_email_body",
+    "valor": "Hola {nombre}, un mensaje especial para ti. maskivo solo para hombres"
+  },
+  {
+    "clave": "broadcast_image_url",
+    "valor": "https://unsplash.com/es/fotos/e4kmTGIQFIw"
+  },
+  {
+    "clave": "broadcast_roulette_link",
+    "valor": ""
+  },
+  {
+    "clave": "google_maps_link",
+    "valor": ""
   },
   {
     "clave": "email_asunto",
@@ -74,5 +122,41 @@
   {
     "clave": "admin_email",
     "valor": "juanmarcav@gmail.com"
+  },
+  {
+    "clave": "whatsapp_join_label",
+    "valor": "Unirme al grupo de WhatsApp de la comunidad"
+  },
+  {
+    "clave": "whatsapp_join_enabled",
+    "valor": "true"
+  },
+  {
+    "clave": "admin_whatsapp",
+    "valor": ""
+  },
+  {
+    "clave": "pin_validacion",
+    "valor": "9945"
+  },
+  {
+    "clave": "pin_fecha",
+    "valor": "2026-05-23"
+  },
+  {
+    "clave": "instagram_link",
+    "valor": "https://www.instagram.com/latravesia_cue/"
+  },
+  {
+    "clave": "facebook_link",
+    "valor": "https://www.facebook.com/latravesiacampina.cue/"
+  },
+  {
+    "clave": "tiktok_link",
+    "valor": "https://www.tiktok.com/@vivelatravesia_ec"
+  },
+  {
+    "clave": "whatsapp_group_link",
+    "valor": "https://chat.whatsapp.com/HCAXeXfDk871EUEYzkiwNn?mode=gi_t"
   }
 ]

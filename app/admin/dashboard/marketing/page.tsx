@@ -20,6 +20,7 @@ import {
   Image as LucideImage
 } from 'lucide-react';
 import { formatUnsplashUrl } from '@/lib/unsplash';
+import { resolveUnsplashUrl } from '@/app/actions/unsplash';
 
 export default function MarketingPage() {
   const [activeTab, setActiveTab] = useState<'birthday' | 'welcome' | 'loyalty' | 'mass'>('birthday');
@@ -30,6 +31,8 @@ export default function MarketingPage() {
   const [upcomingCount, setUpcomingCount] = useState(0);
   const [upcomingList, setUpcomingList] = useState<any[]>([]);
   const [genderFilter, setGenderFilter] = useState<'ALL' | 'M' | 'F'>('ALL');
+  const [minAge, setMinAge] = useState<string>('');
+  const [maxAge, setMaxAge] = useState<string>('');
   
   const [marketingData, setMarketingData] = useState({
     asunto: '',
@@ -67,8 +70,11 @@ export default function MarketingPage() {
     setUpcomingList(list);
   }
 
-  const formatWhatsAppLink = (telefono: string, nombre: string, groupLink: string) => {
-    const msg = `¡Hola ${nombre}! 🥂 Consulta tus beneficios aquí: ${groupLink || 'https://chat.whatsapp.com/...'}`;
+  const formatWhatsAppLink = (telefono: string, nombre: string, mensajeTemplate: string, rouletteLink: string) => {
+    let msg = mensajeTemplate.replace(/\{nombre\}/gi, nombre);
+    if (rouletteLink) {
+      msg += `\n\n${rouletteLink}`;
+    }
     const num = telefono.replace(/\+/g, '').replace(/\s+/g, '');
     return `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
   };
@@ -93,13 +99,31 @@ export default function MarketingPage() {
     }
   };
 
-  const updatePreview = (url: string) => {
+  const updatePreview = async (url: string) => {
     if (!url) {
       setPreviewImage('');
       return;
     }
-    const formatted = formatUnsplashUrl(url);
-    setPreviewImage(formatted);
+    
+    // Si es un link de unsplash.com pero no es del CDN directo, intentar resolverlo en el servidor
+    if (url.includes('unsplash.com') && !url.includes('images.unsplash.com')) {
+      try {
+        const resolved = await resolveUnsplashUrl(url);
+        setPreviewImage(resolved);
+        // Actualizamos marketingData para que se guarde la URL limpia en la base de datos
+        setMarketingData(prev => {
+          if (prev.image_url === url) {
+            return { ...prev, image_url: resolved };
+          }
+          return prev;
+        });
+      } catch (e) {
+        console.error("Error al resolver URL de Unsplash:", e);
+        setPreviewImage(formatUnsplashUrl(url));
+      }
+    } else {
+      setPreviewImage(formatUnsplashUrl(url));
+    }
   };
 
   const handleRefreshPreview = () => {
@@ -191,8 +215,9 @@ export default function MarketingPage() {
           message: marketingData.mensaje,
           imageUrl: formatUnsplashUrl(marketingData.image_url),
           to: 'BROADCAST',
-          recipients: cumpleaneros.map(c => c.email),
-          isBirthday: true
+          recipients: cumpleaneros.map(c => ({ email: c.email, nombre: c.nombre })),
+          isBirthday: true,
+          rouletteLink: marketingData.roulette_link
         })
       });
 
@@ -241,9 +266,9 @@ export default function MarketingPage() {
           message: marketingData.mensaje,
           imageUrl: formatUnsplashUrl(marketingData.image_url),
           to: 'BROADCAST',
-          recipients: upcomingBirthdays.map(c => c.email),
+          recipients: upcomingBirthdays.map(c => ({ email: c.email, nombre: c.nombre })),
           isBirthday: true,
-          weeklyBroadcast: true
+          rouletteLink: marketingData.roulette_link
         })
       });
 
@@ -261,8 +286,12 @@ export default function MarketingPage() {
 
   const handleLaunch = async () => {
     const isMass = activeTab === 'mass';
+    let filterDesc = genderFilter === 'ALL' ? 'Todos' : genderFilter === 'M' ? 'Hombres' : 'Mujeres';
+    if (minAge || maxAge) {
+      filterDesc += ` (Edad: ${minAge || 0} - ${maxAge || '∞'} años)`;
+    }
     const confirmMsg = isMass 
-      ? `¿Enviar campaña MASIVA a todos los clientes (${genderFilter === 'ALL' ? 'Todos' : genderFilter === 'M' ? 'Hombres' : 'Mujeres'})?`
+      ? `¿Enviar campaña MASIVA a clientes con filtro: ${filterDesc}?`
       : "¿Enviar prueba a tu correo admin?";
     
     if (!confirm(confirmMsg)) return;
@@ -270,15 +299,31 @@ export default function MarketingPage() {
     setSaving(true);
     try {
       let targetTo = '';
-      let recipients: string[] = [];
+      let recipients: any[] = [];
 
       if (isMass) {
-        let query = supabase.from('clientes').select('email, genero');
+        let query = supabase.from('clientes').select('email, nombre, genero, fecha_nacimiento');
         if (genderFilter !== 'ALL') {
           query = query.eq('genero', genderFilter === 'M' ? 'Masculino' : 'Femenino');
         }
         const { data: clients } = await query;
-        recipients = clients?.map(c => c.email).filter(Boolean) || [];
+        
+        let filteredClients = clients || [];
+        if (minAge || maxAge) {
+          const currentYear = new Date().getFullYear();
+          filteredClients = filteredClients.filter(c => {
+            if (!c.fecha_nacimiento) return false;
+            const birthYear = parseInt(c.fecha_nacimiento.split('-')[0]);
+            if (isNaN(birthYear)) return false;
+            const age = currentYear - birthYear;
+            
+            const min = minAge ? parseInt(minAge) : 0;
+            const max = maxAge ? parseInt(maxAge) : 999;
+            
+            return age >= min && age <= max;
+          });
+        }
+        recipients = filteredClients.map(c => ({ email: c.email, nombre: c.nombre })).filter(r => r.email);
         targetTo = 'BROADCAST';
         
         if (recipients.length === 0) {
@@ -405,22 +450,46 @@ export default function MarketingPage() {
                 )}
 
                 {activeTab === 'mass' && (
-                  <div className="space-y-3 animate-in slide-in-from-bottom-2">
-                    <label className="text-xs font-black uppercase tracking-widest text-white/30 ml-2">Filtrar Destinatarios</label>
-                    <div className="flex gap-2">
-                      {[
-                        { id: 'ALL', label: 'Todos' },
-                        { id: 'M', label: 'Hombres' },
-                        { id: 'F', label: 'Mujeres' },
-                      ].map(g => (
-                        <button 
-                          key={g.id}
-                          onClick={() => setGenderFilter(g.id as any)}
-                          className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${genderFilter === g.id ? 'bg-white/10 border-travesia-gold text-travesia-gold' : 'bg-white/5 border-white/10 text-white/40'}`}
-                        >
-                          {g.label}
-                        </button>
-                      ))}
+                  <div className="space-y-4 animate-in slide-in-from-bottom-2">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-white/30 ml-2">Filtrar Género</label>
+                      <div className="flex gap-2">
+                        {[
+                          { id: 'ALL', label: 'Todos' },
+                          { id: 'M', label: 'Hombres' },
+                          { id: 'F', label: 'Mujeres' },
+                        ].map(g => (
+                          <button 
+                            key={g.id}
+                            type="button"
+                            onClick={() => setGenderFilter(g.id as any)}
+                            className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${genderFilter === g.id ? 'bg-white/10 border-travesia-gold text-travesia-gold' : 'bg-white/5 border-white/10 text-white/40'}`}
+                          >
+                            {g.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-white/30 ml-2">Filtrar por Edad</label>
+                      <div className="flex items-center gap-3">
+                        <input 
+                          type="number" 
+                          placeholder="Min" 
+                          value={minAge}
+                          onChange={(e) => setMinAge(e.target.value)}
+                          className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold text-sm text-center font-sans"
+                        />
+                        <span className="text-xs text-white/40 font-black uppercase tracking-widest">y</span>
+                        <input 
+                          type="number" 
+                          placeholder="Max" 
+                          value={maxAge}
+                          onChange={(e) => setMaxAge(e.target.value)}
+                          className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold text-sm text-center font-sans"
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -477,7 +546,7 @@ export default function MarketingPage() {
                               <p className="text-xs text-white/30 uppercase font-black tracking-tighter mt-0.5">{c.fecha_nacimiento}</p>
                             </div>
                             <a 
-                              href={formatWhatsAppLink(c.telefono, c.nombre, whatsappGroupLink)}
+                              href={formatWhatsAppLink(c.telefono, c.nombre, marketingData.mensaje, marketingData.roulette_link)}
                               target="_blank"
                               className="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl hover:bg-emerald-500 hover:text-white transition-all shadow-lg"
                               title="Enviar WhatsApp Personalizado"
