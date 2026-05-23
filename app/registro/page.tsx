@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import {
   CheckCircle2, Sparkles, ChevronRight, Star,
@@ -34,6 +34,7 @@ export default function RegistroPage() {
   const [saveLoading, setSaveLoading] = useState(false);
   const [formError, setFormError] = useState('');
   const [visitedSocials, setVisitedSocials] = useState<Set<string>>(new Set());
+  const pendingSocialRef = useRef<string | null>(null);
   const [reviewOpened, setReviewOpened] = useState(false);
   const [googleReviewLink, setGoogleReviewLink] = useState('https://g.page/r/CSyFh_Ou1msUEBM/review');
   const [socialLinks, setSocialLinks] = useState({
@@ -77,11 +78,29 @@ export default function RegistroPage() {
     setWhatsappConfig(wc);
   }
 
-  // Social visit tracking — marca siempre al hacer click, abre URL si existe
+  // Cuando el usuario vuelve a la app tras abrir una red, marca el check
+  useEffect(() => {
+    function handleReturn() {
+      if (pendingSocialRef.current && document.visibilityState === 'visible') {
+        setVisitedSocials(prev => new Set([...prev, pendingSocialRef.current!]));
+        pendingSocialRef.current = null;
+      }
+    }
+    document.addEventListener('visibilitychange', handleReturn);
+    window.addEventListener('focus', handleReturn);
+    return () => {
+      document.removeEventListener('visibilitychange', handleReturn);
+      window.removeEventListener('focus', handleReturn);
+    };
+  }, []);
+
   const handleSocialVisit = (key: string, url: string) => {
-    setVisitedSocials(prev => new Set([...prev, key]));
     if (url && url !== '#') {
+      pendingSocialRef.current = key;
       window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      // Sin URL configurada: marca directamente (modo demo/test)
+      setVisitedSocials(prev => new Set([...prev, key]));
     }
   };
   const requiredSocials = ['instagram', 'facebook', 'tiktok'];
