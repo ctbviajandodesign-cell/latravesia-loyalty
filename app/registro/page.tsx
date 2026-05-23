@@ -21,7 +21,7 @@ const COUNTRY_CODES = [
 type Step = 'welcome' | 'form' | 'social' | 'review' | 'game' | 'success';
 
 export default function RegistroPage() {
-  const [step, setStep] = useState<Step>('welcome');
+  const [step, setStep] = useState<Step>('form');
   const [loading, setLoading] = useState(true);
   const [formLoading, setFormLoading] = useState(false);
   const [countryCode, setCountryCode] = useState('+593');
@@ -77,14 +77,11 @@ export default function RegistroPage() {
     setWhatsappConfig(wc);
   }
 
-  // Social visit tracking — solo marca como visitado si hay URL real
+  // Social visit tracking — marca siempre al hacer click, abre URL si existe
   const handleSocialVisit = (key: string, url: string) => {
+    setVisitedSocials(prev => new Set([...prev, key]));
     if (url && url !== '#') {
       window.open(url, '_blank', 'noopener,noreferrer');
-      setVisitedSocials(prev => new Set([...prev, key]));
-    } else {
-      setFormError(`Link de ${key} no configurado. Configúralo en el admin.`);
-      setTimeout(() => setFormError(''), 3000);
     }
   };
   const requiredSocials = ['instagram', 'facebook', 'tiktok'];
@@ -340,10 +337,10 @@ export default function RegistroPage() {
             )}
 
             <button onClick={() => setStep('review')}
-              className={`w-full py-4 rounded-2xl font-black text-xs tracking-[0.3em] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 ${allSocialsVisited ? 'bg-travesia-gold text-[#051A10] hover:brightness-110' : 'bg-white/10 text-white/50 border border-white/10'}`}>
+              className="w-full py-4 rounded-2xl font-black text-xs tracking-[0.3em] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 bg-travesia-gold text-[#051A10] hover:brightness-110 active:scale-95">
               {allSocialsVisited
-                ? <><CheckCircle2 size={14} /> CONTINUANDO...</>
-                : `SEGUIR (${visitedCount}/${requiredSocials.length})`}
+                ? <><CheckCircle2 size={14} /> CONTINUAR</>
+                : <><ArrowRight size={14} /> SEGUIR ({visitedCount}/{requiredSocials.length})</>}
             </button>
           </div>
         )}
