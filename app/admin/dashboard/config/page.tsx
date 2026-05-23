@@ -3,39 +3,82 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { saveConfigValue } from '@/app/actions/config';
-import { 
-  Settings, 
-  RefreshCw, 
-  Globe, 
-  Lock, 
-  Link as LinkIcon, 
-  CheckCircle2, 
-  Database,
-  ShieldCheck,
-  Zap,
-  Layout,
-  Star
+import {
+  Settings, RefreshCw, Globe, Lock, Link as LinkIcon,
+  CheckCircle2, Database, ShieldCheck, Zap, Star,
+  Instagram, Facebook, Music2, Smartphone, Save
 } from 'lucide-react';
+
+const SOCIAL_KEYS = ['link_instagram', 'link_facebook', 'link_tiktok', 'link_whatsapp'];
+const HIDDEN_KEYS = [
+  ...SOCIAL_KEYS,
+  'instagram_link', 'facebook_link', 'tiktok_link', 'whatsapp_group_link',
+  'filtro_genero', 'pin_fecha',
+  'admin_password', 'resend_api_key',
+];
+const MARKETING_PREFIXES = ['birthday_', 'welcome_', 'loyalty_', 'mass_', 'email_', 'broadcast_'];
+
+const SOCIAL_META: Record<string, { label: string; icon: React.ReactNode; color: string; placeholder: string }> = {
+  link_instagram: {
+    label: 'Instagram',
+    icon: <Instagram size={18} />,
+    color: 'from-[#833ab4] via-[#fd1d1d] to-[#fcb045]',
+    placeholder: 'https://www.instagram.com/tu_cuenta/',
+  },
+  link_facebook: {
+    label: 'Facebook',
+    icon: <Facebook size={18} />,
+    color: 'from-[#1877F2] to-[#1877F2]',
+    placeholder: 'https://www.facebook.com/tu_pagina/',
+  },
+  link_tiktok: {
+    label: 'TikTok',
+    icon: <Music2 size={18} />,
+    color: 'from-black to-[#111]',
+    placeholder: 'https://www.tiktok.com/@tu_cuenta',
+  },
+  link_whatsapp: {
+    label: 'Grupo WhatsApp',
+    icon: <Smartphone size={18} />,
+    color: 'from-[#25D366] to-[#128C7E]',
+    placeholder: 'https://chat.whatsapp.com/...',
+  },
+};
 
 export default function ConfigPage() {
   const [config, setConfig] = useState<any[]>([]);
+  const [socials, setSocials] = useState<Record<string, { id: string; valor: string }>>({});
+  const [socialInputs, setSocialInputs] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [savedId, setSavedId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchConfig();
-  }, []);
+  useEffect(() => { fetchConfig(); }, []);
 
   async function fetchConfig() {
     try {
       const { data } = await supabase.from('config').select('*');
-      if (data) {
-        // Filtramos para quitar ABSOLUTAMENTE TODO lo relacionado con emails, marketing y masivos
-        const marketingPrefixes = ['birthday_', 'welcome_', 'loyalty_', 'mass_', 'email_', 'broadcast_'];
-        const filtered = data.filter(c => !marketingPrefixes.some(prefix => c.clave.startsWith(prefix)));
-        setConfig(filtered);
-      }
+      if (!data) return;
+
+      const socialMap: Record<string, { id: string; valor: string }> = {};
+      const inputMap: Record<string, string> = {};
+      const rest: any[] = [];
+
+      data.forEach((item) => {
+        if (SOCIAL_KEYS.includes(item.clave)) {
+          socialMap[item.clave] = { id: item.id, valor: item.valor || '' };
+          inputMap[item.clave] = item.valor || '';
+        } else if (
+          !HIDDEN_KEYS.includes(item.clave) &&
+          !MARKETING_PREFIXES.some(p => item.clave.startsWith(p))
+        ) {
+          rest.push(item);
+        }
+      });
+
+      setSocials(socialMap);
+      setSocialInputs(inputMap);
+      setConfig(rest);
     } catch (e) {
       console.error(e);
     } finally {
@@ -43,142 +86,192 @@ export default function ConfigPage() {
     }
   }
 
-  const handleSave = async (id: string, valor: string) => {
-    setSaving(true);
+  const handleSaveSocial = async (clave: string) => {
+    const entry = socials[clave];
+    if (!entry) return;
+    setSavingId(clave);
     try {
-      const result = await saveConfigValue(id, valor);
+      const result = await saveConfigValue(entry.id, socialInputs[clave]);
       if (result.error) throw new Error(result.error);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (e) {
-      alert("Error al guardar");
+      setSocials(prev => ({ ...prev, [clave]: { ...prev[clave], valor: socialInputs[clave] } }));
+      setSavedId(clave);
+      setTimeout(() => setSavedId(null), 2500);
+    } catch {
+      alert('Error al guardar');
     } finally {
-      setSaving(false);
+      setSavingId(null);
     }
   };
 
+  const handleSaveGeneric = async (id: string, inputId: string) => {
+    setSavingId(id);
+    try {
+      const value = (document.getElementById(inputId) as HTMLInputElement)?.value ?? '';
+      const result = await saveConfigValue(id, value);
+      if (result.error) throw new Error(result.error);
+      setSavedId(id);
+      setTimeout(() => setSavedId(null), 2500);
+    } catch {
+      alert('Error al guardar');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const LABEL_MAP: Record<string, string> = {
+    google_maps_link: 'Link de Opiniones Google',
+    nombre_restaurante: 'Nombre del Restaurante',
+    pin_validacion: 'PIN de Validación',
+    visitas_para_premio: 'Visitas para Premio',
+    admin_whatsapp: 'WhatsApp Admin',
+    whatsapp_join_label: 'Texto botón WhatsApp',
+    whatsapp_join_enabled: 'WhatsApp activo (true/false)',
+    premio_visitas: 'Premio por Visitas',
+    admin_email: 'Email Admin',
+  };
+
   return (
-    <div className="max-w-5xl space-y-12">
-      
+    <div className="max-w-4xl space-y-10">
+
       {/* HEADER */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-travesia-gold/10 border border-travesia-gold/20 rounded-xl flex items-center justify-center text-travesia-gold">
-              <Settings size={20} />
-            </div>
-            <h2 className="text-3xl font-serif font-bold text-white tracking-tight">Parámetros Globales</h2>
-          </div>
-          <p className="text-white/40 text-sm ml-13">Ajustes técnicos y enlaces de reputación institucional.</p>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-travesia-gold/10 border border-travesia-gold/20 rounded-xl flex items-center justify-center text-travesia-gold">
+          <Settings size={20} />
         </div>
-        
-        {saved && (
-          <div className="flex items-center gap-2 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl animate-in fade-in slide-in-from-right-4">
-            <CheckCircle2 size={16} /> <span className="text-xs font-black uppercase tracking-widest">Cambios sincronizados</span>
-          </div>
-        )}
+        <div>
+          <h2 className="text-3xl font-serif font-bold text-white tracking-tight">Parámetros Globales</h2>
+          <p className="text-white/40 text-sm">Links de redes sociales y ajustes técnicos.</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* PANEL LATERAL DE ESTADO */}
-        <div className="space-y-6">
-          <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 space-y-8 shadow-2xl">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <p className="text-xs uppercase tracking-widest font-black text-white/30">Infraestructura</p>
-                <span className="flex items-center gap-2 text-travesia-gold text-xs font-black uppercase tracking-widest"><Zap size={12}/> Online</span>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10">
-                  <div className="p-3 bg-travesia-gold/10 rounded-xl text-travesia-gold">
-                    <Database size={18} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold">Base de Datos</p>
-                    <p className="text-xs text-white/30">Supabase SQL</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="pt-8 border-t border-white/5">
-              <div className="flex items-center gap-3 mb-4">
-                <Star size={16} className="text-travesia-gold" />
-                <p className="text-xs uppercase tracking-widest font-black text-white/30">SEO & Reputación</p>
-              </div>
-              <p className="text-xs text-white/50 leading-relaxed italic">
-                El link de Google Maps es fundamental para que el sistema de Check-In invite a los clientes frecuentes a dejar una reseña.
-              </p>
-            </div>
-          </div>
+      {/* REDES SOCIALES */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 px-1">
+          <div className="w-1.5 h-6 bg-travesia-gold rounded-full" />
+          <h3 className="text-xl font-serif font-bold text-white">Redes Sociales</h3>
         </div>
 
-        {/* LISTA DE VARIABLES TÉCNICAS */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 shadow-2xl space-y-10">
-            {config.map((item) => {
-              const isGoogle = item.clave === 'google_maps_link';
-              return (
-                <div key={item.id} className="group space-y-4 animate-in fade-in duration-700">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-1.5 h-6 rounded-full transition-colors ${isGoogle ? 'bg-travesia-gold' : 'bg-white/20 group-hover:bg-white/40'}`}></div>
-                      <label className={`text-xs font-black uppercase tracking-[0.2em] transition-colors ${isGoogle ? 'text-travesia-gold' : 'text-white/60 group-hover:text-white'}`}>
-                        {item.clave === 'google_maps_link' ? 'LINK DE OPINIONES GOOGLE' : item.clave.replace(/_/g, ' ')}
-                      </label>
-                    </div>
-                    {isGoogle ? <Star size={14} className="text-travesia-gold animate-pulse" /> : <Globe size={14} className="text-white/20" />}
+        <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 space-y-6 shadow-2xl">
+          {SOCIAL_KEYS.map((clave) => {
+            const meta = SOCIAL_META[clave];
+            const isSaving = savingId === clave;
+            const isSaved = savedId === clave;
+            const entry = socials[clave];
+
+            return (
+              <div key={clave} className="space-y-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${meta.color} flex items-center justify-center text-white shrink-0`}>
+                    {meta.icon}
                   </div>
-                  
-                  <div className="flex gap-4">
-                    <div className="relative flex-1">
-                      <input 
-                        id={item.id}
-                        type="text" 
-                        defaultValue={item.valor} 
-                        className={`w-full bg-white/5 border p-5 rounded-[20px] outline-none transition-all text-sm font-medium pr-14 ${isGoogle ? 'border-travesia-gold/30 focus:border-travesia-gold' : 'border-white/10 focus:border-white/30'}`}
-                        placeholder={isGoogle ? "https://share.google/..." : "Valor de configuración"}
-                      />
-                      <div className="absolute right-5 top-1/2 -translate-y-1/2">
-                        {isGoogle ? <LinkIcon size={16} className="text-travesia-gold/40" /> : <Lock size={16} className="text-white/10" />}
-                      </div>
-                    </div>
-                    <button 
-                      className={`p-5 rounded-[20px] transition-all flex items-center justify-center ${isGoogle ? 'bg-travesia-gold text-[#051A10] hover:scale-105' : 'bg-white/5 border border-white/10 text-white/20 hover:text-travesia-gold'}`}
-                      onClick={() => handleSave(item.id, (document.getElementById(item.id) as any).value)}
-                    >
-                      {saving ? <RefreshCw className="animate-spin" size={20} /> : <RefreshCw size={20} />}
-                    </button>
-                  </div>
-                  {isGoogle && (
-                    <p className="text-xs text-travesia-gold/60 italic ml-4 font-bold">
-                      ⚠️ Este enlace aparecerá a los clientes frecuentes después de su segunda visita.
-                    </p>
-                  )}
+                  <label className="text-xs font-black uppercase tracking-[0.2em] text-white/70">{meta.label}</label>
                 </div>
-              );
-            })}
-
-            {config.length === 0 && (
-              <div className="py-20 text-center opacity-40">
-                <RefreshCw size={48} className="mx-auto animate-spin mb-4" />
-                <p className="uppercase tracking-widest font-black text-xs">Cargando parámetros...</p>
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={socialInputs[clave] ?? ''}
+                    onChange={e => setSocialInputs(prev => ({ ...prev, [clave]: e.target.value }))}
+                    placeholder={meta.placeholder}
+                    className="flex-1 min-w-0 bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-travesia-gold transition-all text-sm"
+                  />
+                  <button
+                    onClick={() => handleSaveSocial(clave)}
+                    disabled={isSaving || !entry}
+                    className={`shrink-0 px-5 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2 whitespace-nowrap
+                      ${isSaved
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-travesia-gold text-[#051A10] hover:brightness-110 active:scale-95 disabled:opacity-40'
+                      }`}
+                  >
+                    {isSaving
+                      ? <RefreshCw size={14} className="animate-spin" />
+                      : isSaved
+                        ? <><CheckCircle2 size={14} /> Guardado</>
+                        : <><Save size={14} /> Guardar</>
+                    }
+                  </button>
+                </div>
               </div>
-            )}
-          </div>
-          
-          <div className="bg-emerald-500/5 p-8 rounded-[32px] border border-emerald-500/10 flex items-center gap-6">
-            <ShieldCheck className="w-12 h-12 text-emerald-400 shrink-0" />
-            <div className="space-y-1">
-              <p className="font-bold text-white tracking-tight">Configuración Protegida</p>
-              <p className="text-xs text-white/40 leading-relaxed">Los cambios aquí afectan directamente al comportamiento de la App móvil y el sistema de envíos.</p>
-            </div>
-          </div>
+            );
+          })}
         </div>
-
       </div>
+
+      {/* CONFIGURACIÓN GENERAL */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 px-1">
+          <div className="w-1.5 h-6 bg-white/20 rounded-full" />
+          <h3 className="text-xl font-serif font-bold text-white">Configuración General</h3>
+        </div>
+
+        <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 shadow-2xl space-y-8">
+          {loading && (
+            <div className="py-16 text-center opacity-40">
+              <RefreshCw size={32} className="mx-auto animate-spin mb-3" />
+              <p className="uppercase tracking-widest font-black text-xs">Cargando...</p>
+            </div>
+          )}
+
+          {!loading && config.map((item) => {
+            const isGoogle = item.clave === 'google_maps_link';
+            const label = LABEL_MAP[item.clave] ?? item.clave.replace(/_/g, ' ');
+            const isSaving = savingId === item.id;
+            const isSaved = savedId === item.id;
+
+            return (
+              <div key={item.id} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className={`text-xs font-black uppercase tracking-[0.2em] ${isGoogle ? 'text-travesia-gold' : 'text-white/50'}`}>
+                    {label}
+                  </label>
+                  {isGoogle && <Star size={12} className="text-travesia-gold" />}
+                </div>
+                <div className="flex gap-3">
+                  <div className="relative flex-1 min-w-0">
+                    <input
+                      id={item.id}
+                      type="text"
+                      defaultValue={item.valor}
+                      className={`w-full bg-white/5 border p-4 rounded-2xl outline-none transition-all text-sm pr-10 ${isGoogle ? 'border-travesia-gold/30 focus:border-travesia-gold' : 'border-white/10 focus:border-white/30'}`}
+                      placeholder="Valor de configuración"
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                      {isGoogle ? <LinkIcon size={14} className="text-travesia-gold/40" /> : <Lock size={14} className="text-white/10" />}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleSaveGeneric(item.id, item.id)}
+                    disabled={isSaving}
+                    className={`shrink-0 px-5 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2 whitespace-nowrap
+                      ${isSaved
+                        ? 'bg-emerald-500 text-white'
+                        : isGoogle
+                          ? 'bg-travesia-gold text-[#051A10] hover:brightness-110 active:scale-95'
+                          : 'bg-white/5 border border-white/10 text-white/60 hover:text-travesia-gold hover:border-travesia-gold/30 active:scale-95 disabled:opacity-40'
+                      }`}
+                  >
+                    {isSaving
+                      ? <RefreshCw size={14} className="animate-spin" />
+                      : isSaved
+                        ? <><CheckCircle2 size={14} /> Guardado</>
+                        : <><Save size={14} /> Guardar</>
+                    }
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="bg-emerald-500/5 p-6 rounded-[32px] border border-emerald-500/10 flex items-center gap-5">
+        <ShieldCheck className="w-10 h-10 text-emerald-400 shrink-0" />
+        <div>
+          <p className="font-bold text-white">Configuración Protegida</p>
+          <p className="text-xs text-white/40 leading-relaxed mt-0.5">Los cambios afectan directamente la App móvil y el sistema de envíos.</p>
+        </div>
+      </div>
+
     </div>
   );
 }
