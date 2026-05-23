@@ -367,7 +367,7 @@ export default function RegistroPage() {
                 </button>
               )}
               <button onClick={() => setStep('game')}
-                className="w-full text-white/25 py-2 text-[11px] uppercase tracking-widest font-black hover:text-white/40 transition-colors">
+                className="w-full text-white/40 py-2 text-xs uppercase tracking-widest font-black hover:text-white/40 transition-colors">
                 Saltar por ahora
               </button>
             </div>

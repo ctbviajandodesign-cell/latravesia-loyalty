@@ -187,13 +187,13 @@ function CheckInContent() {
               </button>
 
               <button type="button" onClick={() => router.push('/registro')}
-                className="w-full text-white/30 text-[11px] uppercase tracking-widest font-black hover:text-white/50 transition-colors flex items-center justify-center gap-2">
-                <UserPlus size={12} /> ¿Primera vez? Regístrate
+                className="w-full border border-white/15 text-white/70 text-xs uppercase tracking-widest font-black hover:border-travesia-gold/50 hover:text-travesia-gold transition-all py-3 rounded-xl flex items-center justify-center gap-2">
+                <UserPlus size={14} /> ¿Primera vez? Regístrate
               </button>
 
               <button type="button" onClick={handleCambiarPersona}
-                className="w-full text-white/20 text-[11px] uppercase tracking-widest font-black hover:text-white/40 transition-colors flex items-center justify-center gap-1.5">
-                <RefreshCw size={10} /> Soy otra persona
+                className="w-full text-white/40 text-xs uppercase tracking-widest font-bold hover:text-white/60 transition-colors flex items-center justify-center gap-1.5 py-2">
+                <RefreshCw size={12} /> Soy otra persona
               </button>
             </form>
           )}
@@ -269,7 +269,7 @@ function CheckInContent() {
                 </button>
               )}
               <button onClick={() => setStep('success')}
-                className="w-full text-white/25 text-[11px] uppercase tracking-widest font-black hover:text-white/40 transition-colors">
+                className="w-full text-white/40 text-xs uppercase tracking-widest font-black hover:text-white/40 transition-colors">
                 Ahora no
               </button>
             </div>
@@ -310,7 +310,7 @@ function CheckInContent() {
               </button>
 
               <button onClick={handleCambiarPersona}
-                className="w-full text-white/20 text-[11px] uppercase tracking-widest font-black hover:text-white/40 transition-colors flex items-center justify-center gap-1.5 mt-1">
+                className="w-full text-white/40 text-xs uppercase tracking-widest font-black hover:text-white/40 transition-colors flex items-center justify-center gap-1.5 mt-1">
                 <RefreshCw size={10} /> Soy otra persona
               </button>
             </div>
@@ -319,8 +319,8 @@ function CheckInContent() {
         </div>
       </div>
 
-      <p className="mt-8 text-white/20 text-[11px] uppercase tracking-[0.4em] font-black italic">
-        Hostería La Travesía • High Fidelity Loyalty
+      <p className="mt-8 text-white/40 text-xs uppercase tracking-widest font-bold">
+        Hostería La Travesía • Loyalty
       </p>
     </div>
   );
