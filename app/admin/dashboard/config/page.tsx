@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { saveConfigValue } from '@/app/actions/config';
 import { 
   Settings, 
   RefreshCw, 
@@ -45,8 +46,8 @@ export default function ConfigPage() {
   const handleSave = async (id: string, valor: string) => {
     setSaving(true);
     try {
-      const { error } = await supabase.from('config').update({ valor }).eq('id', id);
-      if (error) throw error;
+      const result = await saveConfigValue(id, valor);
+      if (result.error) throw new Error(result.error);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (e) {
