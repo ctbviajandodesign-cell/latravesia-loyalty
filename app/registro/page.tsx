@@ -77,9 +77,10 @@ export default function RegistroPage() {
 
   // Social visit tracking
   const handleSocialVisit = (key: string, url: string) => {
-    if (!url || url === '#') return;
     setVisitedSocials(prev => new Set([...prev, key]));
-    window.open(url, '_blank', 'noopener,noreferrer');
+    if (url && url !== '#') {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
   const requiredSocials = ['instagram', 'facebook', 'tiktok'];
   const visitedCount = requiredSocials.filter(k => visitedSocials.has(k)).length;
