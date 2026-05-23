@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { formatUnsplashUrl } from '@/lib/unsplash';
+import { resolveUnsplashUrl } from '@/app/actions/unsplash';
 
 // Este endpoint es solo para llamadas internas autorizadas.
 // El flujo normal (registro, check-in) usa app/actions/notifications.ts
@@ -25,13 +26,16 @@ export async function POST(request: Request) {
     const waBase = `https://wa.me/${(config.admin_whatsapp || '').replace(/\D/g, '')}`;
 
     if (type === 'BIRTHDAY_WELCOME') {
+      const rawImage = config.welcome_image_url || config.email_foto_url || '';
+      const resolvedImage = await resolveUnsplashUrl(rawImage);
+
       await resend.emails.send({
         from: 'La Travesía <onboarding@resend.dev>',
         to: [cliente.email],
         subject: config.welcome_email_subject || '¡Bienvenido al Club!',
         html: `
           <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden; background-color: #ffffff;">
-            <img src="${formatUnsplashUrl(config.welcome_image_url || config.email_foto_url)}" style="width: 100%; height: auto; display: block;" />
+            ${resolvedImage ? `<img src="${resolvedImage}" style="width: 100%; height: auto; display: block;" />` : ''}
             <div style="padding: 40px; text-align: center;">
               <h1 style="color: #4A5D4E; font-size: 28px;">¡Hola ${cliente.nombre}!</h1>
               <p style="color: #666; font-size: 18px; line-height: 1.6;">
@@ -50,13 +54,16 @@ export async function POST(request: Request) {
     }
 
     if (type === 'LOYALTY_REWARD') {
+      const rawImage = config.loyalty_image_url || config.email_foto_url || '';
+      const resolvedImage = await resolveUnsplashUrl(rawImage);
+
       await resend.emails.send({
         from: 'La Travesía <onboarding@resend.dev>',
         to: [cliente.email],
         subject: config.loyalty_email_subject || '¡Felicidades por tu fidelidad!',
         html: `
           <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden; text-align: center; background-color: #ffffff;">
-            <img src="${formatUnsplashUrl(config.loyalty_image_url || config.email_foto_url)}" style="width: 100%; height: auto; display: block;" />
+            ${resolvedImage ? `<img src="${resolvedImage}" style="width: 100%; height: auto; display: block;" />` : ''}
             <div style="padding: 40px;">
               <h1 style="color: #4A5D4E; font-size: 28px;">¡META CUMPLIDA!</h1>
               <p style="font-size: 18px; color: #666; line-height: 1.6;">

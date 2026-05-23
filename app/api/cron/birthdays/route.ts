@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
 import { formatUnsplashUrl } from '@/lib/unsplash';
+import { resolveUnsplashUrl } from '@/app/actions/unsplash';
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization');
@@ -37,7 +38,8 @@ export async function GET(request: Request) {
     // Usar las nuevas llaves de configuración del Marketing Hub
     const subject = config.birthday_email_subject || '¡Feliz Cumpleaños! 🥂';
     const body = config.birthday_email_body || 'Hola {nombre}, te deseamos lo mejor en tu día.';
-    const imageUrl = formatUnsplashUrl(config.birthday_image_url || '');
+    const rawImageUrl = config.birthday_image_url || '';
+    const imageUrl = await resolveUnsplashUrl(rawImageUrl);
 
     const results = await Promise.all(cumpleaneros.map(cliente => 
       resend.emails.send({
