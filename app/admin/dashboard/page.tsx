@@ -2,18 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { 
-  Users, 
-  MapPin, 
-  Cake, 
-  TrendingUp, 
-  ArrowUpRight, 
-  Clock, 
+import { getCurrentDailyCode, rotateDailyCode } from '@/app/actions/daily-code';
+import {
+  Users,
+  MapPin,
+  Cake,
+  TrendingUp,
+  ArrowUpRight,
+  Clock,
   Star,
   Zap,
   ChevronRight,
   ShieldCheck,
-  Calendar
+  Calendar,
+  KeyRound,
+  RefreshCw
 } from 'lucide-react';
 
 export default function AdminOverview() {
@@ -24,10 +27,34 @@ export default function AdminOverview() {
     ultimosClientes: [] as any[]
   });
   const [loading, setLoading] = useState(true);
+  const [dailyCode, setDailyCode] = useState<string>('····');
+  const [rotating, setRotating] = useState(false);
 
   useEffect(() => {
     fetchStats();
+    fetchDailyCode();
   }, []);
+
+  async function fetchDailyCode() {
+    try {
+      const code = await getCurrentDailyCode();
+      setDailyCode(code);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async function handleRotate() {
+    setRotating(true);
+    try {
+      const newCode = await rotateDailyCode();
+      setDailyCode(newCode);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRotating(false);
+    }
+  }
 
   async function fetchStats() {
     try {
@@ -61,9 +88,42 @@ export default function AdminOverview() {
     { name: 'Score Fidelidad', value: '98%', icon: Star, color: 'from-emerald-500/20 to-emerald-500/5', border: 'border-emerald-500/20', text: 'text-emerald-400', label: 'Clientes VIP' },
   ];
 
+  const today = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+
   return (
     <div className="space-y-12">
-      
+
+      {/* CÓDIGO DEL DÍA */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-travesia-gold/15 via-travesia-gold/5 to-transparent border border-travesia-gold/30 rounded-[40px] p-8 md:p-10 shadow-2xl shadow-travesia-gold/5">
+        <div className="absolute -top-16 -right-16 w-64 h-64 bg-travesia-gold/10 blur-[80px] rounded-full pointer-events-none" />
+        <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+          <div className="flex items-center gap-6">
+            <div className="w-16 h-16 rounded-3xl bg-travesia-gold/20 border border-travesia-gold/30 flex items-center justify-center shrink-0">
+              <KeyRound className="w-8 h-8 text-travesia-gold" />
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.4em] font-black text-white/30 mb-1">Código de Visita • {today}</p>
+              <div className="flex items-baseline gap-4">
+                <span className="text-7xl font-mono font-black text-travesia-gold tracking-[0.2em] leading-none select-all">
+                  {dailyCode}
+                </span>
+              </div>
+              <p className="text-xs text-white/30 mt-2 font-medium">
+                Díselo al cliente para validar su visita presencial
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleRotate}
+            disabled={rotating}
+            className="flex items-center gap-3 px-8 py-4 bg-travesia-gold/10 border border-travesia-gold/30 text-travesia-gold rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-travesia-gold hover:text-[#051A10] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+          >
+            <RefreshCw className={`w-4 h-4 ${rotating ? 'animate-spin' : ''}`} />
+            Rotar código
+          </button>
+        </div>
+      </div>
+
       {/* GRID DE ESTADÍSTICAS */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {statCards.map((card, i) => (
