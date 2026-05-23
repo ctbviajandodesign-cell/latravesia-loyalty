@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import {
   CheckCircle2, UserPlus, Loader2, MapPin, Sparkles,
   Trophy, Star, AlertCircle, ArrowLeft, Phone, RefreshCw
@@ -44,6 +44,69 @@ function CheckInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isNew = searchParams.get('new') === 'true';
+  const openedWindowRef = useRef<Window | null>(null);
+
+  // Listener único: maneja retorno de Google Review
+  useEffect(() => {
+    function handleReturn() {
+      const isReviewPending = sessionStorage.getItem('chk_review_pending') === 'true';
+      if (isReviewPending && (document.visibilityState === 'visible' || document.hasFocus())) {
+        sessionStorage.removeItem('chk_review_pending');
+        setReviewOpened(true);
+        setStep('success'); // Al volver de la reseña, avanza automáticamente a éxito
+      }
+    }
+
+    handleReturn();
+    document.addEventListener('visibilitychange', handleReturn);
+    window.addEventListener('focus', handleReturn);
+    return () => {
+      document.removeEventListener('visibilitychange', handleReturn);
+      window.removeEventListener('focus', handleReturn);
+    };
+  }, [step]);
+
+  // Cargar estado inicial desde sessionStorage para no perder progreso al volver de la reseña
+  useEffect(() => {
+    const savedStep = sessionStorage.getItem('chk_step');
+    const savedCliente = sessionStorage.getItem('chk_cliente');
+    const savedVisitData = sessionStorage.getItem('chk_visit_data');
+    const savedAlreadyToday = sessionStorage.getItem('chk_already_today');
+    const savedReviewOpened = sessionStorage.getItem('chk_review_opened');
+    const isReviewPending = sessionStorage.getItem('chk_review_pending') === 'true';
+
+    let targetStep = savedStep as any;
+    let targetReviewOpened = savedReviewOpened === 'true';
+
+    if (isReviewPending) {
+      sessionStorage.removeItem('chk_review_pending');
+      targetReviewOpened = true;
+      targetStep = 'success';
+    }
+
+    if (targetStep) setStep(targetStep);
+    if (savedCliente) setCliente(JSON.parse(savedCliente));
+    if (savedVisitData) setVisitData(JSON.parse(savedVisitData));
+    if (savedAlreadyToday) setAlreadyToday(savedAlreadyToday === 'true');
+    setReviewOpened(targetReviewOpened);
+  }, []);
+
+  // Guardar estado en sessionStorage cuando cambie
+  useEffect(() => {
+    if (step !== 'phone') {
+      sessionStorage.setItem('chk_step', step);
+      if (cliente) sessionStorage.setItem('chk_cliente', JSON.stringify(cliente));
+      if (visitData) sessionStorage.setItem('chk_visit_data', JSON.stringify(visitData));
+      sessionStorage.setItem('chk_already_today', String(alreadyToday));
+      sessionStorage.setItem('chk_review_opened', String(reviewOpened));
+    } else {
+      sessionStorage.removeItem('chk_step');
+      sessionStorage.removeItem('chk_cliente');
+      sessionStorage.removeItem('chk_visit_data');
+      sessionStorage.removeItem('chk_already_today');
+      sessionStorage.removeItem('chk_review_opened');
+    }
+  }, [step, cliente, visitData, alreadyToday, reviewOpened]);
 
   useEffect(() => {
     // Pre-rellenar teléfono desde localStorage
@@ -239,7 +302,7 @@ function CheckInContent() {
             </form>
           )}
 
-          {/* STEP: REVIEW (visita 5 y 10) */}
+          {/* STEP: REVIEW (visita 1, 5 y 10) */}
           {step === 'review' && visitData && (
             <div className="space-y-6 text-center animate-in zoom-in duration-500">
               <div className="space-y-2">
@@ -249,11 +312,15 @@ function CheckInContent() {
                 <h2 className="text-2xl font-bold text-white">
                   {visitData.nuevasVisitas === visitData.meta
                     ? '¡Lo lograste! Comparte tu experiencia'
+                    : visitData.nuevasVisitas === 1
+                    ? '¡Bienvenido! Danos tu opinión'
                     : '¿Cómo ha sido tu experiencia?'}
                 </h2>
                 <p className="text-white/40 text-sm">
                   {visitData.nuevasVisitas === visitData.meta
                     ? 'Has completado el reto de fidelidad. ¡Cuéntale al mundo!'
+                    : visitData.nuevasVisitas === 1
+                    ? 'Queremos saber qué te pareció tu primera visita. Déjanos una reseña rápida.'
                     : 'A mitad del camino. Una reseña nos ayuda mucho.'}
                 </p>
               </div>
@@ -267,7 +334,18 @@ function CheckInContent() {
               </div>
 
               {!reviewOpened ? (
-                <button onClick={() => { setReviewOpened(true); window.open(googleReviewLink, '_blank', 'noopener,noreferrer'); }}
+                <button onClick={() => {
+                  setReviewOpened(true);
+                  sessionStorage.setItem('chk_review_pending', 'true');
+                  // Guardar el estado antes de salir
+                  sessionStorage.setItem('chk_step', step);
+                  if (cliente) sessionStorage.setItem('chk_cliente', JSON.stringify(cliente));
+                  if (visitData) sessionStorage.setItem('chk_visit_data', JSON.stringify(visitData));
+                  sessionStorage.setItem('chk_already_today', String(alreadyToday));
+                  sessionStorage.setItem('chk_review_opened', 'true');
+
+                  window.location.href = googleReviewLink;
+                }}
                   className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
                   <Star size={14} className="fill-current" /> DEJAR MI RESEÑA ⭐
                 </button>
@@ -313,7 +391,14 @@ function CheckInContent() {
                 )}
               </div>
 
-              <button onClick={() => router.push('/')}
+              <button onClick={() => {
+                sessionStorage.removeItem('chk_step');
+                sessionStorage.removeItem('chk_cliente');
+                sessionStorage.removeItem('chk_visit_data');
+                sessionStorage.removeItem('chk_already_today');
+                sessionStorage.removeItem('chk_review_opened');
+                router.push('/');
+              }}
                 className="text-travesia-gold/60 font-bold text-xs uppercase tracking-widest hover:text-travesia-gold transition-colors">
                 Volver al inicio
               </button>

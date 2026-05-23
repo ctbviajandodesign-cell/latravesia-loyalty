@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import {
   CheckCircle2, Sparkles, ChevronRight, Star,
   User, Mail, Calendar, Loader2, ArrowRight,
-  Smartphone, Globe, Instagram, Facebook, Music2
+  Smartphone, Globe, Instagram, Facebook, Music2, Lock
 } from 'lucide-react';
 import Ruleta from '@/components/Ruleta';
 import { useRouter } from 'next/navigation';
@@ -35,6 +35,7 @@ export default function RegistroPage() {
   const [formError, setFormError] = useState('');
   const [visitedSocials, setVisitedSocials] = useState<Set<string>>(new Set());
   const pendingSocialRef = useRef<string | null>(null);
+  const openedWindowRef = useRef<Window | null>(null);
   const waitingForReturnRef = useRef(false);
   const reviewPendingRef = useRef(false);
   const [reviewOpened, setReviewOpened] = useState(false);
@@ -46,6 +47,47 @@ export default function RegistroPage() {
     enabled: true, label: 'Unirme al grupo de WhatsApp de la comunidad',
   });
   const router = useRouter();
+
+  // Cargar estado inicial desde sessionStorage (si existe) para no perder progreso al volver de redes
+  useEffect(() => {
+    const savedStep = sessionStorage.getItem('reg_step');
+    const savedFormData = sessionStorage.getItem('reg_form_data');
+    const savedTelefonoFinal = sessionStorage.getItem('reg_telefono_final');
+    const savedVisited = sessionStorage.getItem('reg_visited_socials');
+    const pendingSocial = sessionStorage.getItem('reg_pending_social');
+
+    let newVisited = new Set<string>();
+    if (savedVisited) {
+      newVisited = new Set(JSON.parse(savedVisited));
+    }
+    if (pendingSocial) {
+      newVisited.add(pendingSocial);
+      sessionStorage.removeItem('reg_pending_social');
+    }
+
+    if (savedStep) setStep(savedStep as Step);
+    if (savedFormData) setFormData(JSON.parse(savedFormData));
+    if (savedTelefonoFinal) setTelefonoFinal(savedTelefonoFinal);
+    setVisitedSocials(newVisited);
+  }, []);
+
+  // Guardar estado en sessionStorage cuando cambie
+  useEffect(() => {
+    if (step !== 'form' && step !== 'success') {
+      sessionStorage.setItem('reg_step', step);
+      sessionStorage.setItem('reg_form_data', JSON.stringify(formData));
+      sessionStorage.setItem('reg_telefono_final', telefonoFinal);
+      sessionStorage.setItem('reg_visited_socials', JSON.stringify(Array.from(visitedSocials)));
+    } else {
+      // Si estamos en el formulario o ya se completó el registro, limpiar todo
+      sessionStorage.removeItem('reg_step');
+      sessionStorage.removeItem('reg_form_data');
+      sessionStorage.removeItem('reg_telefono_final');
+      sessionStorage.removeItem('reg_visited_socials');
+      sessionStorage.removeItem('reg_pending_social');
+      sessionStorage.removeItem('reg_review_pending');
+    }
+  }, [step, formData, telefonoFinal, visitedSocials]);
 
   useEffect(() => {
     async function init() {
@@ -88,49 +130,85 @@ export default function RegistroPage() {
   // Listener único: maneja retorno de redes sociales Y de Google Review
   useEffect(() => {
     function handleVisibilityReturn() {
-      if (document.visibilityState !== 'visible') return;
-      if (!waitingForReturnRef.current) return;
-      waitingForReturnRef.current = false;
-
-      // Retorno desde red social
-      if (pendingSocialRef.current) {
-        const key = pendingSocialRef.current;
+      // Retorno desde red social (persistencia en sessionStorage)
+      const pendingKey = sessionStorage.getItem('reg_pending_social') || pendingSocialRef.current;
+      if (pendingKey && (document.visibilityState === 'visible' || document.hasFocus())) {
+        // Cerrar la ventana/pestaña intermedia si existe y el navegador lo permite
+        if (openedWindowRef.current) {
+          try {
+            openedWindowRef.current.close();
+          } catch (e) {
+            console.error("Error al cerrar la ventana:", e);
+          }
+          openedWindowRef.current = null;
+        }
+        sessionStorage.removeItem('reg_pending_social');
         pendingSocialRef.current = null;
-        setVisitedSocials(prev => new Set([...prev, key]));
+        setVisitedSocials(prev => new Set([...prev, pendingKey]));
       }
 
       // Retorno desde Google Review → avanzar al juego
-      if (reviewPendingRef.current) {
+      const isReviewPending = sessionStorage.getItem('reg_review_pending') === 'true' || reviewPendingRef.current;
+      if (isReviewPending && (document.visibilityState === 'visible' || document.hasFocus())) {
+        // Cerrar la ventana/pestaña intermedia si existe y el navegador lo permite
+        if (openedWindowRef.current) {
+          try {
+            openedWindowRef.current.close();
+          } catch (e) {
+            console.error("Error al cerrar la ventana:", e);
+          }
+          openedWindowRef.current = null;
+        }
+        sessionStorage.removeItem('reg_review_pending');
         reviewPendingRef.current = false;
         setReviewOpened(true);
         setStep('game');
       }
     }
-    document.addEventListener('visibilitychange', handleVisibilityReturn);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityReturn);
-  }, []);
 
-  // Abre la URL sincrónicamente (garantizado en iOS como gesto de usuario)
+    // Ejecutar verificación inmediatamente al montar (para cuando vuelven por botón de Atrás/Back)
+    handleVisibilityReturn();
+
+    document.addEventListener('visibilitychange', handleVisibilityReturn);
+    window.addEventListener('focus', handleVisibilityReturn);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityReturn);
+      window.removeEventListener('focus', handleVisibilityReturn);
+    };
+  }, [step]);
+
   const onSocialClick = (key: string, url: string) => {
+    sessionStorage.setItem('reg_pending_social', key);
     pendingSocialRef.current = key;
-    window.open(url, '_blank', 'noopener,noreferrer');
-    setTimeout(() => { waitingForReturnRef.current = true; }, 500);
+    waitingForReturnRef.current = true;
+    
+    // Asegurar que el estado esté guardado antes de salir
+    sessionStorage.setItem('reg_step', step);
+    sessionStorage.setItem('reg_form_data', JSON.stringify(formData));
+    sessionStorage.setItem('reg_telefono_final', telefonoFinal);
+    sessionStorage.setItem('reg_visited_socials', JSON.stringify(Array.from(visitedSocials)));
+
+    window.location.href = url;
   };
 
   const goToReview = () => {
+    sessionStorage.setItem('reg_review_pending', 'true');
     reviewPendingRef.current = true;
-    setTimeout(() => { waitingForReturnRef.current = true; }, 800);
     setStep('review');
-    // window.open funciona aquí porque está en un handler de click directo
-    window.open(ensureProtocol(googleReviewLink), '_blank', 'noopener,noreferrer');
+    const redirectUrl = `/redirect?url=${encodeURIComponent(ensureProtocol(googleReviewLink))}&key=reseña&from=registro`;
+    const w = window.open(redirectUrl, '_blank');
+    openedWindowRef.current = w;
   };
+
   const requiredSocials = ['instagram', 'facebook', 'tiktok'];
+  const nextSocialKey = requiredSocials.find(k => !visitedSocials.has(k));
   const visitedCount = requiredSocials.filter(k => visitedSocials.has(k)).length;
   const allSocialsVisited = visitedCount === requiredSocials.length;
 
   useEffect(() => {
     if (step === 'social' && allSocialsVisited) {
-      const t = setTimeout(() => goToReview(), 1500);
+      const t = setTimeout(() => setStep('game'), 1500);
       return () => clearTimeout(t);
     }
   }, [allSocialsVisited, step]);
@@ -330,48 +408,66 @@ export default function RegistroPage() {
               ].map(({ key, label, url, icon, bg }) => {
                 const fullUrl = url ? ensureProtocol(url) : null;
                 const visited = visitedSocials.has(key);
-                return fullUrl ? (
-                  <button key={key}
-                    type="button"
-                    onClick={() => onSocialClick(key, fullUrl)}
-                    className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 text-left ${visited ? 'bg-travesia-gold/10 border border-travesia-gold/50' : 'bg-white/5 border border-white/10 active:scale-[0.98]'}`}>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center text-white shadow-lg`}>{icon}</div>
-                      <span className="text-xs font-black uppercase tracking-widest text-white">{label}</span>
+                const isActive = nextSocialKey === key;
+
+                if (!fullUrl) {
+                  return (
+                    <div key={key}
+                      className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 opacity-30 cursor-not-allowed">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center text-white shadow-lg`}>{icon}</div>
+                        <span className="text-xs font-black uppercase tracking-widest text-white/50">{label}</span>
+                      </div>
+                      <span className="text-xs text-white/30">Sin link</span>
                     </div>
-                    {visited
-                      ? <CheckCircle2 size={16} className="text-travesia-gold" />
-                      : <ArrowRight size={12} className="text-white/40" />}
-                  </button>
-                ) : (
+                  );
+                }
+
+                if (visited) {
+                  return (
+                    <button key={key}
+                      type="button"
+                      onClick={() => onSocialClick(key, fullUrl)}
+                      className="w-full flex items-center justify-between p-4 rounded-2xl bg-travesia-gold/15 border border-travesia-gold/50 text-left transition-all duration-300">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center text-white shadow-lg opacity-80`}>{icon}</div>
+                        <span className="text-xs font-black uppercase tracking-widest text-travesia-gold">{label}</span>
+                      </div>
+                      <CheckCircle2 size={16} className="text-travesia-gold shrink-0" />
+                    </button>
+                  );
+                }
+
+                if (isActive) {
+                  return (
+                    <button key={key}
+                      type="button"
+                      onClick={() => onSocialClick(key, fullUrl)}
+                      className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/10 border-2 border-travesia-gold text-left active:scale-[0.98] transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.15)]">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center text-white shadow-lg animate-pulse`}>{icon}</div>
+                        <span className="text-xs font-black uppercase tracking-widest text-white">{label}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-travesia-gold">
+                        <span className="text-[10px] font-black uppercase tracking-widest">IR</span>
+                        <ArrowRight size={12} className="animate-bounce" style={{ animationDuration: '0.8s' }} />
+                      </div>
+                    </button>
+                  );
+                }
+
+                // Locked state
+                return (
                   <div key={key}
-                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 opacity-40 cursor-not-allowed">
+                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 text-left opacity-30 select-none cursor-not-allowed">
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center text-white shadow-lg`}>{icon}</div>
-                      <span className="text-xs font-black uppercase tracking-widest text-white">{label}</span>
+                      <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center text-white/50">{icon}</div>
+                      <span className="text-xs font-black uppercase tracking-widest text-white/40">{label}</span>
                     </div>
-                    <span className="text-xs text-white/40">Sin link</span>
+                    <Lock size={12} className="text-white/30 shrink-0" />
                   </div>
                 );
               })}
-
-              {whatsappConfig.enabled && (() => {
-                const waUrl = socialLinks.whatsapp_group ? ensureProtocol(socialLinks.whatsapp_group) : null;
-                const visited = visitedSocials.has('whatsapp');
-                return waUrl ? (
-                  <button type="button"
-                    onClick={() => onSocialClick('whatsapp', waUrl)}
-                    className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 text-left ${visited ? 'bg-emerald-500/20 border border-emerald-500/50' : 'bg-emerald-500/10 border border-emerald-500/30'}`}>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-lg"><Smartphone size={16} /></div>
-                      <span className="text-xs font-black uppercase tracking-widest text-emerald-400">{whatsappConfig.label}</span>
-                    </div>
-                    {visited
-                      ? <CheckCircle2 size={16} className="text-emerald-400" />
-                      : <ArrowRight size={12} className="text-emerald-500/40 animate-pulse" />}
-                  </button>
-                ) : null;
-              })()}
             </div>
 
             {formError && (
@@ -380,11 +476,11 @@ export default function RegistroPage() {
               </div>
             )}
 
-            <button onClick={goToReview}
+            <button onClick={() => setStep('game')}
               className="w-full py-4 rounded-2xl font-black text-xs tracking-[0.3em] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 bg-travesia-gold text-[#051A10] hover:brightness-110 active:scale-95">
               {allSocialsVisited
-                ? <><CheckCircle2 size={14} /> CONTINUAR</>
-                : <><ArrowRight size={14} /> SEGUIR ({visitedCount}/{requiredSocials.length})</>}
+                ? <>SIGUIENTE <ChevronRight size={14} /></>
+                : <>SEGUIR ({visitedCount}/{requiredSocials.length}) <ChevronRight size={14} /></>}
             </button>
           </div>
         )}
@@ -440,13 +536,13 @@ export default function RegistroPage() {
 
         {/* SUCCESS */}
         {step === 'success' && (
-          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in zoom-in select-none touch-none">
-            <div className="space-y-4">
+          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in zoom-in select-none touch-none w-full">
+            <div className="space-y-4 w-full">
               <div className="mx-auto w-16 h-16 bg-travesia-gold/20 rounded-2xl flex items-center justify-center border border-travesia-gold/30">
                 <CheckCircle2 className="w-8 h-8 text-travesia-gold" />
               </div>
               <h2 className="text-3xl font-serif font-bold">¡Bienvenido!</h2>
-              <div className="relative">
+              <div className="relative w-full">
                 <div className="absolute -inset-0.5 bg-travesia-gold/20 rounded-[32px] blur opacity-75" />
                 <div className="relative p-6 bg-white/5 border border-travesia-gold/30 rounded-[32px] backdrop-blur-2xl">
                   <p className="text-xs uppercase tracking-[0.4em] text-travesia-gold font-black mb-2">Premio Ganado</p>
@@ -454,6 +550,16 @@ export default function RegistroPage() {
                 </div>
               </div>
             </div>
+
+            {whatsappConfig.enabled && socialLinks.whatsapp_group && (
+              <a
+                href={ensureProtocol(socialLinks.whatsapp_group)}
+                className="w-full bg-[#25D366] text-white py-4 rounded-2xl font-black text-xs tracking-widest uppercase hover:brightness-110 shadow-xl transition-all flex items-center justify-center gap-2 mt-4"
+              >
+                <Smartphone size={16} /> {whatsappConfig.label}
+              </a>
+            )}
+
             <button onClick={() => router.push('/checkin?new=true')}
               className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-widest uppercase hover:brightness-110 shadow-2xl transition-all flex items-center justify-center gap-2">
               IR A MI PANEL <ArrowRight size={14} />

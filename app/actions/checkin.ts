@@ -66,7 +66,7 @@ export async function validateCheckin(clienteId: string, code: string) {
     sendNotification('LOYALTY_REWARD', { ...cliente, total_visitas: nuevasVisitas }).catch(console.error);
   }
 
-  const showReview = nuevasVisitas === 5 || nuevasVisitas === meta;
+  const showReview = nuevasVisitas === 1 || nuevasVisitas === 5 || nuevasVisitas === meta;
 
   return {
     success: true,

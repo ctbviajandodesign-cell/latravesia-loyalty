@@ -64,9 +64,9 @@ export default function AdminOverview() {
       const { count: clientesCount } = await supabase.from('clientes').select('*', { count: 'exact', head: true });
       const { data: clientesData } = await supabase.from('clientes').select('*').order('created_at', { ascending: false }).limit(5);
       
-      // Sumar visitas reales desde la tabla clientes
-      const { data: allClientes } = await supabase.from('clientes').select('total_visitas');
-      const visitasTotal = allClientes?.reduce((acc, c) => acc + (c.total_visitas || 0), 0) || 0;
+      // Conteo rápido y exacto de visitas totales desde la tabla de visitas
+      const { count: visitasCount } = await supabase.from('visitas').select('*', { count: 'exact', head: true });
+      const visitasTotal = visitasCount || 0;
 
       const hoy = new Date().toISOString().split('T')[0].slice(5); // MM-DD
       const { count: cumplesCount } = await supabase.from('clientes').select('*', { count: 'exact', head: true }).like('fecha_nacimiento', `%${hoy}`);

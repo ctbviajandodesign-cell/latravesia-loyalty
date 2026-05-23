@@ -46,7 +46,7 @@ export default function MarketingPage() {
   }, [activeTab]);
 
   async function calculateUpcomingBirthdays() {
-    const { data: clients } = await supabase.from('clientes').select('*');
+    const { data: clients } = await supabase.from('clientes').select('id, nombre, apellido, fecha_nacimiento, telefono, email');
     if (!clients) return;
     
     const list = clients.filter(cliente => {

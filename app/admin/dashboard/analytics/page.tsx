@@ -35,7 +35,7 @@ export default function AnalyticsPage() {
       const hoy = new Date().toISOString().split('T')[0];
       
       const [visitasRes, clientesRes] = await Promise.all([
-        supabase.from('visitas').select('*'),
+        supabase.from('visitas').select('fecha, premio_ganado'),
         supabase.from('clientes').select('id')
       ]);
 

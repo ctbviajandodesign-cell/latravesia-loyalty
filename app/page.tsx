@@ -17,7 +17,7 @@ export default function QRLanding() {
         if (data) { router.replace('/checkin'); return; }
         localStorage.removeItem('travesia_cliente_id');
       }
-      setChecking(false);
+      router.replace('/registro');
     }
     checkSession();
   }, [router]);
@@ -62,7 +62,7 @@ export default function QRLanding() {
             </div>
             <div>
               <p className="font-black text-sm uppercase tracking-widest leading-tight">Registrarme</p>
-              <p className="text-xs font-semibold opacity-70 mt-0.5">Soy nuevo en el club</p>
+              <p className="text-xs font-semibold opacity-70 mt-0.5">Soy cliente nuevo</p>
             </div>
           </button>
 
@@ -76,7 +76,7 @@ export default function QRLanding() {
             </div>
             <div>
               <p className="font-black text-sm uppercase tracking-widest leading-tight">Registrar Visita</p>
-              <p className="text-xs font-semibold text-white/50 mt-0.5">Ya soy miembro del club</p>
+              <p className="text-xs font-semibold text-white/50 mt-0.5">Ya estoy registrado</p>
             </div>
           </button>
         </div>

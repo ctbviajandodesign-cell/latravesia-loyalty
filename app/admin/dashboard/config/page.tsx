@@ -9,10 +9,10 @@ import {
 } from 'lucide-react';
 
 const SOCIAL_DEFS = [
-  { clave: 'instagram_link', fallback: 'link_instagram', label: 'Instagram',      bg: 'bg-gradient-to-br from-[#833ab4] via-[#fd1d1d] to-[#fcb045]', placeholder: 'https://www.instagram.com/tu_cuenta/' },
-  { clave: 'facebook_link',  fallback: 'link_facebook',  label: 'Facebook',       bg: 'bg-[#1877F2]',  placeholder: 'https://www.facebook.com/tu_pagina/' },
-  { clave: 'tiktok_link',    fallback: 'link_tiktok',    label: 'TikTok',         bg: 'bg-black',      placeholder: 'https://www.tiktok.com/@tu_cuenta' },
-  { clave: 'whatsapp_group_link', fallback: 'link_whatsapp', label: 'WhatsApp Grupo', bg: 'bg-[#25D366]', placeholder: 'https://chat.whatsapp.com/...' },
+  { clave: 'instagram_link', label: 'Instagram',      bg: 'bg-gradient-to-br from-[#833ab4] via-[#fd1d1d] to-[#fcb045]', placeholder: 'https://www.instagram.com/tu_cuenta/' },
+  { clave: 'facebook_link',  label: 'Facebook',       bg: 'bg-[#1877F2]',  placeholder: 'https://www.facebook.com/tu_pagina/' },
+  { clave: 'tiktok_link',    label: 'TikTok',         bg: 'bg-black',      placeholder: 'https://www.tiktok.com/@tu_cuenta' },
+  { clave: 'whatsapp_group_link', label: 'WhatsApp Grupo', bg: 'bg-[#25D366]', placeholder: 'https://chat.whatsapp.com/...' },
 ];
 
 const SOCIAL_ICONS: Record<string, React.ReactNode> = {
@@ -41,7 +41,7 @@ const GENERAL_LABELS: Record<string, string> = {
 
 export default function ConfigPage() {
   const [socialInputs, setSocialInputs]   = useState<Record<string, string>>({});
-  const [generalItems, setGeneralItems]   = useState<{ clave: string; id: string }[]>([]);
+  const [generalItems, setGeneralItems]   = useState<string[]>([]);
   const [generalInputs, setGeneralInputs] = useState<Record<string, string>>({});
   const [loading, setLoading]   = useState(true);
   const [savingKey, setSavingKey] = useState<string | null>(null);
@@ -54,24 +54,22 @@ export default function ConfigPage() {
       const { data } = await supabase.from('config').select('*');
       if (!data) return;
 
-      const map: Record<string, { id: string; valor: string }> = {};
-      data.forEach((row: any) => { map[row.clave] = { id: row.id, valor: row.valor ?? '' }; });
+      const map: Record<string, string> = {};
+      data.forEach((row: any) => { map[row.clave] = row.valor ?? ''; });
 
-      // Social: clave canónica, con fallback al alias link_*
+      // Social: clave canónica
       const si: Record<string, string> = {};
-      SOCIAL_DEFS.forEach(({ clave, fallback }) => {
-        si[clave] = map[clave]?.valor || map[fallback]?.valor || '';
+      SOCIAL_DEFS.forEach(({ clave }) => {
+        si[clave] = map[clave] || '';
       });
       setSocialInputs(si);
 
       // General: solo las claves de GENERAL_KEYS
-      const gi: { clave: string; id: string }[] = [];
+      const gi: string[] = [];
       const gInputs: Record<string, string> = {};
       GENERAL_KEYS.forEach(clave => {
-        if (map[clave]) {
-          gi.push({ clave, id: map[clave].id });
-          gInputs[map[clave].id] = map[clave].valor;
-        }
+        gi.push(clave);
+        gInputs[clave] = map[clave] || '';
       });
       setGeneralItems(gi);
       setGeneralInputs(gInputs);
@@ -93,12 +91,12 @@ export default function ConfigPage() {
     finally { setSavingKey(null); }
   }
 
-  async function saveGeneral(id: string, clave: string) {
-    setSavingKey(id);
+  async function saveGeneral(clave: string) {
+    setSavingKey(clave);
     try {
-      const r = await upsertConfigByClave(clave, generalInputs[id] ?? '');
+      const r = await upsertConfigByClave(clave, generalInputs[clave] ?? '');
       if (r.error) throw new Error(r.error);
-      setSavedKey(id);
+      setSavedKey(clave);
       setTimeout(() => setSavedKey(null), 2500);
     } catch { alert('Error al guardar'); }
     finally { setSavingKey(null); }
@@ -174,12 +172,12 @@ export default function ConfigPage() {
           <h3 className="text-xl font-serif font-bold text-white">Configuración General</h3>
         </div>
         <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 shadow-2xl space-y-6">
-          {generalItems.map(({ clave, id }) => {
+          {generalItems.map((clave) => {
             const isGoogle = clave === 'google_maps_link';
-            const isSaving = savingKey === id;
-            const isSaved  = savedKey  === id;
+            const isSaving = savingKey === clave;
+            const isSaved  = savedKey  === clave;
             return (
-              <div key={id} className="space-y-2">
+              <div key={clave} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className={`text-xs font-black uppercase tracking-[0.2em] ${isGoogle ? 'text-travesia-gold' : 'text-white/50'}`}>
                     {GENERAL_LABELS[clave] ?? clave}
@@ -190,8 +188,8 @@ export default function ConfigPage() {
                   <div className="relative flex-1 min-w-0">
                     <input
                       type="text"
-                      value={generalInputs[id] ?? ''}
-                      onChange={e => setGeneralInputs(p => ({ ...p, [id]: e.target.value }))}
+                      value={generalInputs[clave] ?? ''}
+                      onChange={e => setGeneralInputs(p => ({ ...p, [clave]: e.target.value }))}
                       placeholder="Valor de configuración"
                       className={`w-full bg-white/5 border p-4 rounded-2xl outline-none transition-all text-sm pr-10
                         ${isGoogle ? 'border-travesia-gold/30 focus:border-travesia-gold' : 'border-white/10 focus:border-white/30'}`}
@@ -201,7 +199,7 @@ export default function ConfigPage() {
                     </div>
                   </div>
                   <button
-                    onClick={() => saveGeneral(id, clave)}
+                    onClick={() => saveGeneral(clave)}
                     disabled={isSaving}
                     className={`shrink-0 px-5 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2 whitespace-nowrap active:scale-95 disabled:opacity-50
                       ${isSaved ? 'bg-emerald-500 text-white'
