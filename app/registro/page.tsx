@@ -35,6 +35,8 @@ export default function RegistroPage() {
   const [formError, setFormError] = useState('');
   const [visitedSocials, setVisitedSocials] = useState<Set<string>>(new Set());
   const pendingSocialRef = useRef<string | null>(null);
+  const waitingForReturnRef = useRef(false);
+  const reviewPendingRef = useRef(false);
   const [reviewOpened, setReviewOpened] = useState(false);
   const [googleReviewLink, setGoogleReviewLink] = useState('https://g.page/r/CSyFh_Ou1msUEBM/review');
   const [socialLinks, setSocialLinks] = useState({
@@ -78,30 +80,61 @@ export default function RegistroPage() {
     setWhatsappConfig(wc);
   }
 
-  // Cuando el usuario vuelve a la app tras abrir una red, marca el check
+  const ensureProtocol = (url: string) =>
+    url.startsWith('http') ? url : `https://${url}`;
+
+  // Listener único: maneja retorno de redes sociales Y de Google Review
   useEffect(() => {
-    function handleReturn() {
-      if (pendingSocialRef.current && document.visibilityState === 'visible') {
-        setVisitedSocials(prev => new Set([...prev, pendingSocialRef.current!]));
+    function handleVisibilityReturn() {
+      if (document.visibilityState !== 'visible') return;
+      if (!waitingForReturnRef.current) return;
+      waitingForReturnRef.current = false;
+
+      // Retorno desde red social
+      if (pendingSocialRef.current) {
+        const key = pendingSocialRef.current;
         pendingSocialRef.current = null;
+        setVisitedSocials(prev => new Set([...prev, key]));
+      }
+
+      // Retorno desde Google Review → avanzar al juego
+      if (reviewPendingRef.current) {
+        reviewPendingRef.current = false;
+        setReviewOpened(true);
+        setStep('game');
       }
     }
-    document.addEventListener('visibilitychange', handleReturn);
-    window.addEventListener('focus', handleReturn);
-    return () => {
-      document.removeEventListener('visibilitychange', handleReturn);
-      window.removeEventListener('focus', handleReturn);
-    };
+    document.addEventListener('visibilitychange', handleVisibilityReturn);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityReturn);
   }, []);
+
+  const openLink = (url: string) => {
+    const full = ensureProtocol(url);
+    const a = document.createElement('a');
+    a.href = full;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   const handleSocialVisit = (key: string, url: string) => {
     if (url && url !== '#') {
       pendingSocialRef.current = key;
-      window.open(url, '_blank', 'noopener,noreferrer');
+      // Esperar 700ms antes de activar el listener para evitar falso positivo inmediato
+      setTimeout(() => { waitingForReturnRef.current = true; }, 700);
+      openLink(url);
     } else {
-      // Sin URL configurada: marca directamente (modo demo/test)
       setVisitedSocials(prev => new Set([...prev, key]));
     }
+  };
+
+  const goToReview = () => {
+    reviewPendingRef.current = true;
+    setTimeout(() => { waitingForReturnRef.current = true; }, 700);
+    openLink(googleReviewLink);
+    setStep('review');
   };
   const requiredSocials = ['instagram', 'facebook', 'tiktok'];
   const visitedCount = requiredSocials.filter(k => visitedSocials.has(k)).length;
@@ -109,7 +142,7 @@ export default function RegistroPage() {
 
   useEffect(() => {
     if (step === 'social' && allSocialsVisited) {
-      const t = setTimeout(() => setStep('review'), 1500);
+      const t = setTimeout(() => goToReview(), 1500);
       return () => clearTimeout(t);
     }
   }, [allSocialsVisited, step]);
@@ -355,7 +388,7 @@ export default function RegistroPage() {
               </div>
             )}
 
-            <button onClick={() => setStep('review')}
+            <button onClick={goToReview}
               className="w-full py-4 rounded-2xl font-black text-xs tracking-[0.3em] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 bg-travesia-gold text-[#051A10] hover:brightness-110 active:scale-95">
               {allSocialsVisited
                 ? <><CheckCircle2 size={14} /> CONTINUAR</>
@@ -364,47 +397,36 @@ export default function RegistroPage() {
           </div>
         )}
 
-        {/* GOOGLE REVIEW */}
+        {/* GOOGLE REVIEW — se abre automático al llegar aquí */}
         {step === 'review' && (
           <div className="flex-1 flex flex-col items-center justify-center space-y-7 animate-in fade-in slide-in-from-right-8">
             <div className="text-center space-y-3">
               <div className="mx-auto w-16 h-16 bg-travesia-gold/10 rounded-[24px] flex items-center justify-center border border-travesia-gold/20">
-                <Star size={28} className="text-travesia-gold fill-current" />
+                <Star size={28} className="text-travesia-gold fill-current animate-pulse" />
               </div>
-              <h2 className="text-2xl font-serif font-bold text-white">¡Un último paso!</h2>
+              <h2 className="text-2xl font-serif font-bold text-white">¡Gracias!</h2>
               <p className="text-white/50 text-sm leading-relaxed px-4">
-                Cuéntale al mundo cómo es La Travesía y desbloquea tu ruleta de premios.
+                Se abrió Google para tu reseña. Cuando termines, vuelve aquí y continúa automáticamente.
               </p>
             </div>
 
             <div className="flex gap-1.5 justify-center">
               {[1, 2, 3, 4, 5].map(i => (
                 <Star key={i} size={30}
-                  className={`text-travesia-gold transition-all duration-500 ${reviewOpened ? 'fill-current scale-110' : 'opacity-30'}`}
-                  style={{ transitionDelay: reviewOpened ? `${(i - 1) * 80}ms` : '0ms' }} />
+                  className="text-travesia-gold fill-current scale-110"
+                  style={{ animationDelay: `${(i - 1) * 80}ms` }} />
               ))}
             </div>
 
+            {/* Botón de respaldo si el popup fue bloqueado */}
             <div className="w-full px-2 space-y-3">
-              {!reviewOpened ? (
-                <button
-                  onClick={() => {
-                    setReviewOpened(true);
-                    window.open(googleReviewLink, '_blank', 'noopener,noreferrer');
-                  }}
-                  className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
-                >
-                  <Star size={14} className="fill-current" /> DEJAR MI RESEÑA EN GOOGLE
-                </button>
-              ) : (
-                <button onClick={() => setStep('game')}
-                  className="w-full bg-travesia-gold text-[#051A10] py-5 rounded-2xl font-black text-xs tracking-[0.2em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
-                  <CheckCircle2 size={14} /> ¡GRACIAS! GIRAR LA RULETA →
-                </button>
-              )}
+              <button onClick={goToReview}
+                className="w-full bg-white/10 border border-white/20 text-white py-4 rounded-2xl font-black text-xs tracking-widest uppercase hover:border-travesia-gold/50 active:scale-95 transition-all flex items-center justify-center gap-2">
+                <Star size={14} className="text-travesia-gold fill-current" /> Abrir reseña de nuevo
+              </button>
               <button onClick={() => setStep('game')}
-                className="w-full text-white/40 py-2 text-xs uppercase tracking-widest font-black hover:text-white/40 transition-colors">
-                Saltar por ahora
+                className="w-full bg-travesia-gold text-[#051A10] py-4 rounded-2xl font-black text-xs tracking-widest uppercase hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">
+                <ChevronRight size={14} /> Ya dejé mi reseña — Girar ruleta
               </button>
             </div>
           </div>
