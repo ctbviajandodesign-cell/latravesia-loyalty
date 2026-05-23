@@ -108,10 +108,11 @@ export default function RegistroPage() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityReturn);
   }, []);
 
-  // Registra la intención de abrir — el <a href> real hace la apertura
-  const onSocialClick = (key: string) => {
+  // Abre la URL sincrónicamente (garantizado en iOS como gesto de usuario)
+  const onSocialClick = (key: string, url: string) => {
     pendingSocialRef.current = key;
-    setTimeout(() => { waitingForReturnRef.current = true; }, 800);
+    window.open(url, '_blank', 'noopener,noreferrer');
+    setTimeout(() => { waitingForReturnRef.current = true; }, 500);
   };
 
   const goToReview = () => {
@@ -344,12 +345,10 @@ export default function RegistroPage() {
                 const fullUrl = url ? ensureProtocol(url) : null;
                 const visited = visitedSocials.has(key);
                 return fullUrl ? (
-                  <a key={key}
-                    href={fullUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => onSocialClick(key)}
-                    className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 no-underline ${visited ? 'bg-travesia-gold/10 border border-travesia-gold/50' : 'bg-white/5 border border-white/10 active:scale-[0.98]'}`}>
+                  <button key={key}
+                    type="button"
+                    onClick={() => onSocialClick(key, fullUrl)}
+                    className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 text-left ${visited ? 'bg-travesia-gold/10 border border-travesia-gold/50' : 'bg-white/5 border border-white/10 active:scale-[0.98]'}`}>
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center text-white shadow-lg`}>{icon}</div>
                       <span className="text-xs font-black uppercase tracking-widest text-white">{label}</span>
@@ -357,7 +356,7 @@ export default function RegistroPage() {
                     {visited
                       ? <CheckCircle2 size={16} className="text-travesia-gold" />
                       : <ArrowRight size={12} className="text-white/40" />}
-                  </a>
+                  </button>
                 ) : (
                   <div key={key}
                     className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 opacity-40 cursor-not-allowed">
@@ -374,9 +373,9 @@ export default function RegistroPage() {
                 const waUrl = socialLinks.whatsapp_group ? ensureProtocol(socialLinks.whatsapp_group) : null;
                 const visited = visitedSocials.has('whatsapp');
                 return waUrl ? (
-                  <a href={waUrl} target="_blank" rel="noopener noreferrer"
-                    onClick={() => onSocialClick('whatsapp')}
-                    className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 no-underline ${visited ? 'bg-emerald-500/20 border border-emerald-500/50' : 'bg-emerald-500/10 border border-emerald-500/30'}`}>
+                  <button type="button"
+                    onClick={() => onSocialClick('whatsapp', waUrl)}
+                    className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 text-left ${visited ? 'bg-emerald-500/20 border border-emerald-500/50' : 'bg-emerald-500/10 border border-emerald-500/30'}`}>
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-lg"><Smartphone size={16} /></div>
                       <span className="text-xs font-black uppercase tracking-widest text-emerald-400">{whatsappConfig.label}</span>
@@ -384,7 +383,7 @@ export default function RegistroPage() {
                     {visited
                       ? <CheckCircle2 size={16} className="text-emerald-400" />
                       : <ArrowRight size={12} className="text-emerald-500/40 animate-pulse" />}
-                  </a>
+                  </button>
                 ) : null;
               })()}
             </div>
