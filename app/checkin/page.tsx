@@ -56,9 +56,15 @@ function CheckInContent() {
       }
     }
 
-    // Cargar link de reseña
-    supabase.from('config').select('valor').eq('clave', 'google_review_link').single()
-      .then(({ data }) => { if (data?.valor) setGoogleReviewLink(data.valor); });
+    // Cargar link de reseña (acepta google_review_link o google_maps_link)
+    supabase.from('config').select('clave, valor').in('clave', ['google_review_link', 'google_maps_link'])
+      .then(({ data }) => {
+        if (!data) return;
+        const m: Record<string, string> = {};
+        data.forEach(({ clave, valor }) => { if (valor) m[clave] = valor; });
+        const link = m['google_review_link'] || m['google_maps_link'] || '';
+        if (link) setGoogleReviewLink(link);
+      });
 
     // Si viene de registro nuevo (?new=true), mostrar panel directo
     if (isNew) {

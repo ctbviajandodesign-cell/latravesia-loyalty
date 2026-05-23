@@ -65,19 +65,21 @@ export default function RegistroPage() {
   async function fetchConfig() {
     const { data } = await supabase.from('config').select('clave, valor');
     if (!data) return;
-    const links = { ...socialLinks };
-    const wc = { ...whatsappConfig };
-    data.forEach(({ clave, valor }) => {
-      if (clave === 'instagram_link') links.instagram = valor;
-      if (clave === 'facebook_link') links.facebook = valor;
-      if (clave === 'tiktok_link') links.tiktok = valor;
-      if (clave === 'whatsapp_group_link') links.whatsapp_group = valor;
-      if (clave === 'whatsapp_join_label') wc.label = valor;
-      if (clave === 'whatsapp_join_enabled') wc.enabled = valor === 'true';
-      if (clave === 'google_review_link') setGoogleReviewLink(valor);
+    const m: Record<string, string> = {};
+    data.forEach(({ clave, valor }) => { if (valor) m[clave] = valor; });
+
+    setSocialLinks({
+      instagram: m['instagram_link'] || m['link_instagram'] || '',
+      facebook: m['facebook_link'] || m['link_facebook'] || '',
+      tiktok: m['tiktok_link'] || m['link_tiktok'] || '',
+      whatsapp_group: m['whatsapp_group_link'] || m['link_whatsapp'] || '',
     });
-    setSocialLinks(links);
-    setWhatsappConfig(wc);
+    setWhatsappConfig({
+      label: m['whatsapp_join_label'] || 'Unirme al grupo de WhatsApp de la comunidad',
+      enabled: m['whatsapp_join_enabled'] !== 'false',
+    });
+    const reviewLink = m['google_review_link'] || m['google_maps_link'] || '';
+    if (reviewLink) setGoogleReviewLink(reviewLink);
   }
 
   const ensureProtocol = (url: string) =>
