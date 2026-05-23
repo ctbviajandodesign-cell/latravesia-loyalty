@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import Ruleta from '@/components/Ruleta';
 import { useRouter } from 'next/navigation';
+import { sendNotification } from '@/app/actions/notifications';
 
 const COUNTRY_CODES = [
   { code: '+593', name: 'EC', label: 'Ecuador (+593)' },
@@ -130,12 +131,8 @@ export default function Home() {
       localStorage.setItem('travesia_cliente_id', data.id);
       setClienteId(data.id);
       setStep('social');
-      
-      fetch('/api/marketing/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'BIRTHDAY_WELCOME', cliente: data })
-      }).catch(e => console.error(e));
+
+      sendNotification('BIRTHDAY_WELCOME', data).catch(console.error);
 
     } catch (error: any) {
       alert("Error en el registro. Verifica los datos.");

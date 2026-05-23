@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { sendNotification } from '@/app/actions/notifications';
 
 export default function CheckInPage() {
   return (
@@ -123,12 +124,7 @@ function CheckInContent() {
       const meta = parseInt(configVisitas?.valor || '10');
 
       if (nuevasVisitas >= meta) {
-        // Disparar notificación de premio
-        await fetch('/api/marketing/notifications', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'LOYALTY_REWARD', cliente: { ...cliente, total_visitas: nuevasVisitas } })
-        });
+        sendNotification('LOYALTY_REWARD', { ...cliente, total_visitas: nuevasVisitas }).catch(console.error);
       }
 
       setStep('success');

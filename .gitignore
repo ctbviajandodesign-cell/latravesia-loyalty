@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# scripts de debug y migración ad-hoc (no pertenecen al repo)
+/scratch/
+add_gender.js
+insert_key.js
+public/hola.txt
