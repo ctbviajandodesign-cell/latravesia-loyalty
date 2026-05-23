@@ -77,11 +77,14 @@ export default function RegistroPage() {
     setWhatsappConfig(wc);
   }
 
-  // Social visit tracking
+  // Social visit tracking — solo marca como visitado si hay URL real
   const handleSocialVisit = (key: string, url: string) => {
-    setVisitedSocials(prev => new Set([...prev, key]));
     if (url && url !== '#') {
       window.open(url, '_blank', 'noopener,noreferrer');
+      setVisitedSocials(prev => new Set([...prev, key]));
+    } else {
+      setFormError(`Link de ${key} no configurado. Configúralo en el admin.`);
+      setTimeout(() => setFormError(''), 3000);
     }
   };
   const requiredSocials = ['instagram', 'facebook', 'tiktok'];
@@ -329,6 +332,12 @@ export default function RegistroPage() {
                 </button>
               )}
             </div>
+
+            {formError && (
+              <div className="w-full bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-400 text-xs font-bold text-center">
+                {formError}
+              </div>
+            )}
 
             <button onClick={() => setStep('review')}
               className={`w-full py-4 rounded-2xl font-black text-xs tracking-[0.3em] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 ${allSocialsVisited ? 'bg-travesia-gold text-[#051A10] hover:brightness-110' : 'bg-white/10 text-white/50 border border-white/10'}`}>
