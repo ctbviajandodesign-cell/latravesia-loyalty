@@ -163,9 +163,9 @@ export default function Ruleta({ onWin }: RuletaProps) {
                 const pathData = `M 50 50 L ${x1} ${y1} A 50 50 0 ${largeArc} 1 ${x2} ${y2} Z`;
                 const isEven = i % 2 === 0;
 
-                // Texto dinámico para evitar cortes
+                // Texto dinámico — tamaños más grandes para legibilidad en móvil
                 const textLength = premio.nombre.length;
-                const fontSize = textLength > 18 ? '2.2' : textLength > 12 ? '2.6' : '3.2';
+                const fontSize = textLength > 18 ? '3.8' : textLength > 12 ? '4.5' : '5.5';
 
                 return (
                   <g key={i}>
@@ -178,14 +178,16 @@ export default function Ruleta({ onWin }: RuletaProps) {
                     <g transform={`rotate(${startAngle + segmentSize / 2} 50 50)`}>
                       <text
                         x="50"
-                        y="18"
+                        y="22"
                         fill="#dac88c"
                         fontSize={fontSize}
                         fontWeight="900"
                         textAnchor="middle"
-                        className="uppercase tracking-tighter"
-                        style={{ 
-                          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))',
+                        dominantBaseline="middle"
+                        style={{
+                          filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.9))',
+                          letterSpacing: '-0.02em',
+                          textTransform: 'uppercase',
                         }}
                       >
                         {premio.nombre}

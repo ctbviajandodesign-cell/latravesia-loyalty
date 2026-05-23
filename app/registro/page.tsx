@@ -217,7 +217,7 @@ export default function RegistroPage() {
         <div className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] bg-travesia-gold/5 blur-[100px] rounded-full" />
       </div>
 
-      <div className="relative max-w-md mx-auto min-h-screen flex flex-col px-6 py-6">
+      <div className="relative max-w-md mx-auto min-h-screen flex flex-col px-6 py-6 overflow-x-hidden w-full">
 
         {/* Logo */}
         <div className="flex flex-col items-center mb-6 animate-in fade-in slide-in-from-top-4 duration-1000">
@@ -250,19 +250,19 @@ export default function RegistroPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
+                  <div className="space-y-1 min-w-0">
                     <label className="text-xs font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={10}/> Nombre</label>
                     <input required type="text" value={formData.nombre}
                       autoComplete="given-name"
                       onChange={e => setFormData({...formData, nombre: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" />
+                      className="w-full min-w-0 bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" />
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1 min-w-0">
                     <label className="text-xs font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={10}/> Apellido</label>
                     <input required type="text" value={formData.apellido}
                       autoComplete="family-name"
                       onChange={e => setFormData({...formData, apellido: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" />
+                      className="w-full min-w-0 bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" />
                   </div>
                 </div>
 
