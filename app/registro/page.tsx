@@ -29,8 +29,9 @@ export default function RegistroPage() {
     nombre: '', apellido: '', email: '', telefono: '',
     fecha_nacimiento: '', genero: 'Otro', joinWhatsApp: true,
   });
-  const [clienteId, setClienteId] = useState<string | null>(null);
   const [premioFinal, setPremioFinal] = useState<string | null>(null);
+  const [telefonoFinal, setTelefonoFinal] = useState('');
+  const [saveLoading, setSaveLoading] = useState(false);
   const [visitedSocials, setVisitedSocials] = useState<Set<string>>(new Set());
   const [reviewOpened, setReviewOpened] = useState(false);
   const [googleReviewLink, setGoogleReviewLink] = useState('https://g.page/r/CSyFh_Ou1msUEBM/review');
@@ -97,9 +98,29 @@ export default function RegistroPage() {
     e.preventDefault();
     setFormLoading(true);
     const numLimpio = formData.telefono.replace(/^0/, '').replace(/\s+/g, '');
-    const telefonoFinal = `${countryCode}${numLimpio}`;
+    const tel = `${countryCode}${numLimpio}`;
+    try {
+      // Solo verificar duplicado — sin guardar aún
+      const { data: existing } = await supabase
+        .from('clientes').select('id').eq('telefono', tel).maybeSingle();
+      if (existing) {
+        alert('Este número ya está registrado. Ve a Registrar Visita.');
+        return;
+      }
+      setTelefonoFinal(tel);
+      setStep('social');
+    } catch (error: any) {
+      alert(`Error: ${error?.message || 'Intenta de nuevo'}`);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleRegistroFinal = async (premio: string) => {
+    setSaveLoading(true);
     try {
       const { joinWhatsApp, ...dbData } = formData;
+      const hoy = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('clientes')
         .insert([{
@@ -107,28 +128,29 @@ export default function RegistroPage() {
           telefono: telefonoFinal,
           total_visitas: 1,
           visitas: 1,
-          fecha_ultima_visita: new Date().toISOString().split('T')[0],
+          fecha_ultima_visita: hoy,
         }])
         .select().single();
       if (error) throw error;
       await supabase.from('visitas').insert([{
         cliente_id: data.id,
-        fecha: new Date().toISOString().split('T')[0],
+        fecha: hoy,
+        premio_ganado: premio,
       }]);
       localStorage.setItem('travesia_cliente_id', data.id);
       localStorage.setItem('travesia_phone', telefonoFinal);
-      setClienteId(data.id);
-      setStep('social');
       sendNotification('BIRTHDAY_WELCOME', data).catch(console.error);
-    } catch (error: any) {
-      const msg = error?.message || '';
-      if (msg.includes('duplicate') || msg.includes('unique') || msg.includes('telefono')) {
+      setPremioFinal(premio);
+      setStep('success');
+    } catch (err: any) {
+      const msg = err?.message || '';
+      if (msg.includes('duplicate') || msg.includes('unique')) {
         alert('Este número ya está registrado. Ve a Registrar Visita.');
       } else {
-        alert(`Error: ${msg}`);
+        alert(`Error al guardar: ${msg}`);
       }
     } finally {
-      setFormLoading(false);
+      setSaveLoading(false);
     }
   };
 
@@ -355,16 +377,13 @@ export default function RegistroPage() {
         {/* GAME */}
         {step === 'game' && (
           <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in h-full overflow-hidden select-none touch-none">
+            {saveLoading && (
+              <div className="absolute inset-0 bg-[#051A10]/80 flex items-center justify-center z-50 rounded-3xl">
+                <Loader2 className="animate-spin text-travesia-gold w-10 h-10" />
+              </div>
+            )}
             <div className="w-full max-w-[320px] mx-auto">
-              <Ruleta onWin={async (p) => {
-                setPremioFinal(p);
-                if (clienteId) {
-                  const hoy = new Date().toISOString().split('T')[0];
-                  await supabase.from('visitas').update({ premio_ganado: p })
-                    .eq('cliente_id', clienteId).eq('fecha', hoy);
-                }
-                setStep('success');
-              }} />
+              <Ruleta onWin={handleRegistroFinal} />
             </div>
           </div>
         )}
