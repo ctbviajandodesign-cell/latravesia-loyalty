@@ -32,6 +32,7 @@ export default function RegistroPage() {
   const [premioFinal, setPremioFinal] = useState<string | null>(null);
   const [telefonoFinal, setTelefonoFinal] = useState('');
   const [saveLoading, setSaveLoading] = useState(false);
+  const [formError, setFormError] = useState('');
   const [visitedSocials, setVisitedSocials] = useState<Set<string>>(new Set());
   const [reviewOpened, setReviewOpened] = useState(false);
   const [googleReviewLink, setGoogleReviewLink] = useState('https://g.page/r/CSyFh_Ou1msUEBM/review');
@@ -99,18 +100,18 @@ export default function RegistroPage() {
     setFormLoading(true);
     const numLimpio = formData.telefono.replace(/^0/, '').replace(/\s+/g, '');
     const tel = `${countryCode}${numLimpio}`;
+    setFormError('');
     try {
-      // Solo verificar duplicado — sin guardar aún
       const { data: existing } = await supabase
         .from('clientes').select('id').eq('telefono', tel).maybeSingle();
       if (existing) {
-        alert('Este número ya está registrado. Ve a Registrar Visita.');
+        setFormError('Este número ya está registrado. Ve a Registrar Visita.');
         return;
       }
       setTelefonoFinal(tel);
       setStep('social');
     } catch (error: any) {
-      alert(`Error: ${error?.message || 'Intenta de nuevo'}`);
+      setFormError(error?.message || 'Error al verificar. Intenta de nuevo.');
     } finally {
       setFormLoading(false);
     }
@@ -144,11 +145,9 @@ export default function RegistroPage() {
       setStep('success');
     } catch (err: any) {
       const msg = err?.message || '';
-      if (msg.includes('duplicate') || msg.includes('unique')) {
-        alert('Este número ya está registrado. Ve a Registrar Visita.');
-      } else {
-        alert(`Error al guardar: ${msg}`);
-      }
+      setFormError(msg.includes('duplicate') || msg.includes('unique')
+        ? 'Este número ya está registrado. Ve a Registrar Visita.'
+        : `Error al guardar: ${msg}`);
     } finally {
       setSaveLoading(false);
     }
@@ -200,62 +199,74 @@ export default function RegistroPage() {
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={9}/> Nombre</label>
+                    <label className="text-xs font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={10}/> Nombre</label>
                     <input required type="text" value={formData.nombre}
+                      autoComplete="given-name"
                       onChange={e => setFormData({...formData, nombre: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" />
+                      className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={9}/> Apellido</label>
+                    <label className="text-xs font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={10}/> Apellido</label>
                     <input required type="text" value={formData.apellido}
+                      autoComplete="family-name"
                       onChange={e => setFormData({...formData, apellido: e.target.value})}
-                      className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" />
+                      className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Mail size={9}/> Correo</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Mail size={10}/> Correo</label>
                   <input required type="email" value={formData.email}
+                    autoComplete="email"
                     onChange={e => setFormData({...formData, email: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" />
+                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Globe size={9}/> WhatsApp</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Globe size={10}/> WhatsApp</label>
                   <div className="flex gap-2">
                     <select value={countryCode} onChange={e => setCountryCode(e.target.value)}
-                      className="w-[85px] bg-white/10 border border-white/10 px-1 rounded-xl text-travesia-gold font-bold text-[10px] outline-none focus:border-travesia-gold">
+                      className="w-[100px] bg-white/10 border border-white/10 py-3 px-2 rounded-xl text-travesia-gold font-bold text-sm outline-none focus:border-travesia-gold">
                       {COUNTRY_CODES.map(c => (
                         <option key={c.code} value={c.code} className="bg-[#051A10] text-white">{c.name} {c.code}</option>
                       ))}
                     </select>
-                    <input required type="tel" value={formData.telefono}
+                    <input required type="tel" inputMode="numeric" autoComplete="tel"
+                      value={formData.telefono}
                       onChange={e => setFormData({...formData, telefono: e.target.value.replace(/[^0-9]/g, '')})}
-                      className="flex-1 bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" />
+                      className="flex-1 bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm" />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Calendar size={9}/> Fecha de Cumpleaños</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Calendar size={10}/> Fecha de Cumpleaños</label>
                   <input required type="date" value={formData.fecha_nacimiento}
+                    autoComplete="bday"
                     onChange={e => setFormData({...formData, fecha_nacimiento: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all [color-scheme:dark] text-xs" />
+                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all [color-scheme:dark] text-sm" />
                 </div>
 
                 <div className="space-y-2 pt-1">
-                  <label className="text-[11px] font-black uppercase tracking-widest text-travesia-gold">Género</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-travesia-gold">Género</label>
                   <div className="grid grid-cols-2 gap-2">
                     {[{id: 'Masculino', label: 'Hombre'}, {id: 'Femenino', label: 'Mujer'}].map(g => (
                       <button key={g.id} type="button" onClick={() => setFormData({...formData, genero: g.id})}
-                        className={`py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all border ${formData.genero === g.id ? 'bg-travesia-gold/10 border-travesia-gold text-travesia-gold' : 'bg-white/5 border-white/10 text-white/40'}`}>
+                        className={`py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${formData.genero === g.id ? 'bg-travesia-gold/10 border-travesia-gold text-travesia-gold' : 'bg-white/5 border-white/10 text-white/50'}`}>
                         {g.label}
                       </button>
                     ))}
                   </div>
                 </div>
               </div>
+
+              {formError && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-400 text-xs font-bold text-center">
+                  {formError}
+                </div>
+              )}
+
               <button type="submit" disabled={formLoading}
-                className="w-full bg-travesia-gold text-[#051A10] py-4 rounded-2xl font-black text-[10px] tracking-[0.2em] uppercase shadow-xl hover:brightness-110 transition-all flex items-center justify-center gap-2 mt-4">
+                className="w-full bg-travesia-gold text-[#051A10] py-4 rounded-2xl font-black text-xs tracking-widest uppercase shadow-xl hover:brightness-110 transition-all flex items-center justify-center gap-2 mt-4">
                 {formLoading ? <Loader2 className="animate-spin w-5 h-5" /> : <>LISTO PARA JUGAR <ChevronRight size={14} /></>}
               </button>
             </form>

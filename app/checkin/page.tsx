@@ -169,12 +169,14 @@ function CheckInContent() {
 
               <div className="flex gap-2">
                 <select value={countryCode} onChange={e => setCountryCode(e.target.value)}
-                  className="w-[90px] bg-white/10 border border-white/10 px-2 rounded-xl text-travesia-gold font-bold text-[11px] outline-none focus:border-travesia-gold">
+                  aria-label="Código de país"
+                  className="w-[100px] bg-white/10 border border-white/10 py-3 px-2 rounded-xl text-travesia-gold font-bold text-sm outline-none focus:border-travesia-gold">
                   {COUNTRY_CODES.map(c => (
                     <option key={c.code} value={c.code} className="bg-[#051A10]">{c.name} {c.code}</option>
                   ))}
                 </select>
-                <input type="tel" value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                <input type="tel" inputMode="numeric" autoComplete="tel"
+                  value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
                   placeholder="987654321" required
                   className="flex-1 bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm font-sans" />
               </div>
@@ -192,6 +194,7 @@ function CheckInContent() {
               </button>
 
               <button type="button" onClick={handleCambiarPersona}
+                aria-label="Cambiar de persona"
                 className="w-full text-white/40 text-xs uppercase tracking-widest font-bold hover:text-white/60 transition-colors flex items-center justify-center gap-1.5 py-2">
                 <RefreshCw size={12} /> Soy otra persona
               </button>
@@ -310,7 +313,8 @@ function CheckInContent() {
               </button>
 
               <button onClick={handleCambiarPersona}
-                className="w-full text-white/40 text-xs uppercase tracking-widest font-black hover:text-white/40 transition-colors flex items-center justify-center gap-1.5 mt-1">
+                aria-label="Cambiar de persona"
+                className="w-full text-white/40 text-xs uppercase tracking-widest font-black hover:text-white/60 transition-colors flex items-center justify-center gap-1.5 mt-1">
                 <RefreshCw size={10} /> Soy otra persona
               </button>
             </div>

@@ -29,6 +29,7 @@ export default function AdminOverview() {
   const [loading, setLoading] = useState(true);
   const [dailyCode, setDailyCode] = useState<string>('····');
   const [rotating, setRotating] = useState(false);
+  const [rotated, setRotated] = useState(false);
 
   useEffect(() => {
     fetchStats();
@@ -49,6 +50,8 @@ export default function AdminOverview() {
     try {
       const newCode = await rotateDailyCode();
       setDailyCode(newCode);
+      setRotated(true);
+      setTimeout(() => setRotated(false), 2000);
     } catch (e) {
       console.error(e);
     } finally {
@@ -82,10 +85,10 @@ export default function AdminOverview() {
   }
 
   const statCards = [
-    { name: 'Total Miembros', value: stats.totalClientes, icon: Users, color: 'from-blue-500/20 to-blue-500/5', border: 'border-blue-500/20', text: 'text-blue-400', label: '+12% este mes' },
-    { name: 'Visitas Registradas', value: stats.totalVisitas, icon: MapPin, color: 'from-travesia-gold/20 to-travesia-gold/5', border: 'border-travesia-gold/20', text: 'text-travesia-gold', label: 'Crecimiento constante' },
-    { name: 'Cumpleaños Hoy', value: stats.cumplesHoy, icon: Cake, color: 'from-pink-500/20 to-pink-500/5', border: 'border-pink-500/20', text: 'text-pink-400', label: 'Campañas listas' },
-    { name: 'Score Fidelidad', value: '98%', icon: Star, color: 'from-emerald-500/20 to-emerald-500/5', border: 'border-emerald-500/20', text: 'text-emerald-400', label: 'Clientes VIP' },
+    { name: 'Total Miembros', value: stats.totalClientes, icon: Users, color: 'from-blue-500/20 to-blue-500/5', border: 'border-blue-500/20', text: 'text-blue-400' },
+    { name: 'Visitas Registradas', value: stats.totalVisitas, icon: MapPin, color: 'from-travesia-gold/20 to-travesia-gold/5', border: 'border-travesia-gold/20', text: 'text-travesia-gold' },
+    { name: 'Cumpleaños Hoy', value: stats.cumplesHoy, icon: Cake, color: 'from-pink-500/20 to-pink-500/5', border: 'border-pink-500/20', text: 'text-pink-400' },
+    { name: 'Score Fidelidad', value: '98%', icon: Star, color: 'from-emerald-500/20 to-emerald-500/5', border: 'border-emerald-500/20', text: 'text-emerald-400' },
   ];
 
   const today = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -116,10 +119,11 @@ export default function AdminOverview() {
           <button
             onClick={handleRotate}
             disabled={rotating}
-            className="flex items-center gap-3 px-8 py-4 bg-travesia-gold/10 border border-travesia-gold/30 text-travesia-gold rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-travesia-gold hover:text-[#051A10] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            aria-label="Rotar código del día"
+            className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ${rotated ? 'bg-emerald-500 text-white border border-emerald-400' : 'bg-travesia-gold/10 border border-travesia-gold/30 text-travesia-gold hover:bg-travesia-gold hover:text-[#051A10]'}`}
           >
             <RefreshCw className={`w-4 h-4 ${rotating ? 'animate-spin' : ''}`} />
-            Rotar código
+            {rotated ? '✓ Código rotado' : 'Rotar código'}
           </button>
         </div>
       </div>
@@ -132,12 +136,9 @@ export default function AdminOverview() {
             className={`relative group overflow-hidden bg-gradient-to-br ${card.color} ${card.border} border rounded-[32px] p-8 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40`}
           >
             <div className="relative z-10 flex flex-col h-full justify-between">
-              <div className="flex items-center justify-between mb-8">
-                <div className={`p-4 rounded-2xl bg-white/5 border border-white/10 ${card.text}`}>
+              <div className="mb-8">
+                <div className={`p-4 rounded-2xl bg-white/5 border border-white/10 ${card.text} w-fit`}>
                   <card.icon size={24} />
-                </div>
-                <div className="text-[10px] uppercase font-black tracking-widest text-white/30 bg-white/5 px-3 py-1.5 rounded-full flex items-center gap-2">
-                  <TrendingUp size={12} /> {card.label}
                 </div>
               </div>
               <div>
@@ -174,16 +175,16 @@ export default function AdminOverview() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-white/5">
-                    <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Cliente</th>
-                    <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Contacto</th>
-                    <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Estado</th>
-                    <th className="p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Acción</th>
+                    <th className="p-4 md:p-6 lg:p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Cliente</th>
+                    <th className="p-4 md:p-6 lg:p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Contacto</th>
+                    <th className="p-4 md:p-6 lg:p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Estado</th>
+                    <th className="p-4 md:p-6 lg:p-8 text-[10px] uppercase tracking-[0.3em] font-black text-white/30">Acción</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {stats.ultimosClientes.map((cliente) => (
                     <tr key={cliente.id} className="group hover:bg-white/5 transition-colors">
-                      <td className="p-8">
+                      <td className="p-4 md:p-6 lg:p-8">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-travesia-gold to-[#B8860B] flex items-center justify-center text-[#051A10] font-black text-lg shadow-lg">
                             {cliente.nombre[0]}
@@ -194,19 +195,19 @@ export default function AdminOverview() {
                           </div>
                         </div>
                       </td>
-                      <td className="p-8">
+                      <td className="p-4 md:p-6 lg:p-8">
                         <div className="space-y-1">
                           <p className="text-sm font-medium text-white/80">{cliente.telefono}</p>
                           <p className="text-xs text-white/40">{cliente.email}</p>
                         </div>
                       </td>
-                      <td className="p-8">
+                      <td className="p-4 md:p-6 lg:p-8">
                         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
                           <ShieldCheck size={12} /> Activo
                         </span>
                       </td>
-                      <td className="p-8">
-                        <button className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-travesia-gold hover:border-travesia-gold/40 transition-all">
+                      <td className="p-4 md:p-6 lg:p-8">
+                        <button aria-label="Ver detalle del cliente" className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-travesia-gold hover:border-travesia-gold/40 transition-all">
                           <ChevronRight size={18} />
                         </button>
                       </td>
