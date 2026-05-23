@@ -295,7 +295,7 @@ export default function RegistroPage() {
                   <input required type="date" value={formData.fecha_nacimiento}
                     autoComplete="bday"
                     onChange={e => setFormData({...formData, fecha_nacimiento: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all [color-scheme:dark] text-sm" />
+                    className="w-full min-w-0 bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-white [color-scheme:dark]" />
                 </div>
 
                 <div className="space-y-2 pt-1">

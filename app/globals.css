@@ -41,3 +41,17 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-cormorant), serif;
 }
+
+/* Previene zoom automático de iOS Safari al enfocar inputs (requiere font-size >= 16px) */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* Input de fecha: normaliza apariencia del sistema en todos los navegadores */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
