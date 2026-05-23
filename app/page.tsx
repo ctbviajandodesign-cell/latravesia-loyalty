@@ -54,6 +54,7 @@ export default function Home() {
     enabled: true,
     label: 'Unirme al grupo de WhatsApp de la comunidad'
   });
+  const [visitedSocials, setVisitedSocials] = useState<Set<string>>(new Set());
   const [socialLinks, setSocialLinks] = useState({
     instagram: 'https://instagram.com',
     facebook: 'https://facebook.com',
@@ -84,6 +85,23 @@ export default function Home() {
       setWhatsappConfig(wConfig);
     }
   }
+
+  const handleSocialVisit = (key: string, url: string) => {
+    if (!url || url === '#') return;
+    setVisitedSocials(prev => new Set([...prev, key]));
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const requiredSocials = ['instagram', 'facebook', 'tiktok'];
+  const visitedCount = requiredSocials.filter(k => visitedSocials.has(k)).length;
+  const allVisited = visitedCount === requiredSocials.length;
+
+  useEffect(() => {
+    if (step === 'social' && allVisited) {
+      const t = setTimeout(() => setStep('game'), 1500);
+      return () => clearTimeout(t);
+    }
+  }, [allVisited, step]);
 
   async function validarSesion() {
     const savedId = localStorage.getItem('travesia_cliente_id');
@@ -265,7 +283,7 @@ export default function Home() {
         )}
 
         {step === 'social' && (
-          <div className="flex-1 flex flex-col items-center justify-center space-y-6 animate-in fade-in slide-in-from-right-8">
+          <div className="flex-1 flex flex-col items-center justify-center space-y-5 animate-in fade-in slide-in-from-right-8">
             <div className="text-center space-y-2">
               <div className="mx-auto w-12 h-12 bg-travesia-gold/10 rounded-2xl flex items-center justify-center text-travesia-gold mb-1">
                 <Sparkles size={20} className="animate-pulse" />
@@ -274,54 +292,118 @@ export default function Home() {
               <p className="text-white/40 text-[8px] uppercase tracking-widest font-black italic">Síguenos para activar tu premio</p>
             </div>
 
+            {/* PROGRESO */}
+            <div className="w-full px-2">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] uppercase font-black tracking-widest text-white/30">Progreso</span>
+                <span className="text-[9px] uppercase font-black tracking-widest text-travesia-gold">{visitedCount} / {requiredSocials.length}</span>
+              </div>
+              <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-travesia-gold rounded-full transition-all duration-700"
+                  style={{ width: `${(visitedCount / requiredSocials.length) * 100}%` }}
+                />
+              </div>
+            </div>
+
             <div className="w-full space-y-2 px-2">
-              <a href={socialLinks.instagram} target="_blank" className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
+              {/* INSTAGRAM */}
+              <button
+                onClick={() => handleSocialVisit('instagram', socialLinks.instagram)}
+                className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${
+                  visitedSocials.has('instagram')
+                    ? 'bg-travesia-gold/10 border border-travesia-gold/50'
+                    : 'bg-white/5 border border-white/10 active:scale-[0.98]'
+                }`}
+              >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-tr from-[#833ab4] via-[#fd1d1d] to-[#fcb045] rounded-lg flex items-center justify-center text-white shadow-lg"><Instagram size={16} /></div>
+                  <div className="w-8 h-8 bg-gradient-to-tr from-[#833ab4] via-[#fd1d1d] to-[#fcb045] rounded-lg flex items-center justify-center text-white shadow-lg">
+                    <Instagram size={16} />
+                  </div>
                   <span className="text-[10px] font-black uppercase tracking-widest">Instagram</span>
                 </div>
-                <ArrowRight size={12} className="text-white/20 group-hover:text-travesia-gold" />
-              </a>
+                {visitedSocials.has('instagram')
+                  ? <CheckCircle2 size={16} className="text-travesia-gold" />
+                  : <ArrowRight size={12} className="text-white/20" />}
+              </button>
 
-              <a href={socialLinks.facebook} target="_blank" className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
+              {/* FACEBOOK */}
+              <button
+                onClick={() => handleSocialVisit('facebook', socialLinks.facebook)}
+                className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${
+                  visitedSocials.has('facebook')
+                    ? 'bg-travesia-gold/10 border border-travesia-gold/50'
+                    : 'bg-white/5 border border-white/10 active:scale-[0.98]'
+                }`}
+              >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#1877F2] rounded-lg flex items-center justify-center text-white shadow-lg"><Facebook size={16} /></div>
+                  <div className="w-8 h-8 bg-[#1877F2] rounded-lg flex items-center justify-center text-white shadow-lg">
+                    <Facebook size={16} />
+                  </div>
                   <span className="text-[10px] font-black uppercase tracking-widest">Facebook</span>
                 </div>
-                <ArrowRight size={12} className="text-white/20 group-hover:text-travesia-gold" />
-              </a>
+                {visitedSocials.has('facebook')
+                  ? <CheckCircle2 size={16} className="text-travesia-gold" />
+                  : <ArrowRight size={12} className="text-white/20" />}
+              </button>
 
-              <a href={socialLinks.tiktok} target="_blank" className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl group hover:border-travesia-gold/50 transition-all">
+              {/* TIKTOK */}
+              <button
+                onClick={() => handleSocialVisit('tiktok', socialLinks.tiktok)}
+                className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${
+                  visitedSocials.has('tiktok')
+                    ? 'bg-travesia-gold/10 border border-travesia-gold/50'
+                    : 'bg-white/5 border border-white/10 active:scale-[0.98]'
+                }`}
+              >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#000000] border border-white/10 rounded-lg flex items-center justify-center text-white shadow-lg"><Music2 size={16} /></div>
+                  <div className="w-8 h-8 bg-black border border-white/10 rounded-lg flex items-center justify-center text-white shadow-lg">
+                    <Music2 size={16} />
+                  </div>
                   <span className="text-[10px] font-black uppercase tracking-widest">TikTok</span>
                 </div>
-                <ArrowRight size={12} className="text-white/20 group-hover:text-travesia-gold" />
-              </a>
+                {visitedSocials.has('tiktok')
+                  ? <CheckCircle2 size={16} className="text-travesia-gold" />
+                  : <ArrowRight size={12} className="text-white/20" />}
+              </button>
 
-              {/* WHATSAPP GROUP (Configurable) */}
+              {/* WHATSAPP GROUP (opcional) */}
               {whatsappConfig.enabled && (
-                <a 
-                  href={socialLinks.whatsapp_group || '#'} 
-                  target="_blank" 
-                  className="flex items-center justify-between p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl group hover:bg-emerald-500/20 transition-all shadow-[0_0_20px_rgba(16,185,129,0.1)]"
+                <button
+                  onClick={() => handleSocialVisit('whatsapp', socialLinks.whatsapp_group)}
+                  className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${
+                    visitedSocials.has('whatsapp')
+                      ? 'bg-emerald-500/20 border border-emerald-500/50'
+                      : 'bg-emerald-500/10 border border-emerald-500/30'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-lg"><Smartphone size={16} /></div>
+                    <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-lg">
+                      <Smartphone size={16} />
+                    </div>
                     <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
                       {whatsappConfig.label}
                     </span>
                   </div>
-                  <ArrowRight size={12} className="text-emerald-500/40 group-hover:text-emerald-500 animate-pulse" />
-                </a>
+                  {visitedSocials.has('whatsapp')
+                    ? <CheckCircle2 size={16} className="text-emerald-400" />
+                    : <ArrowRight size={12} className="text-emerald-500/40 animate-pulse" />}
+                </button>
               )}
             </div>
 
-            <button 
-              onClick={() => setStep('game')} 
-              className="w-full bg-travesia-gold text-[#051A10] py-4 rounded-2xl font-black text-[9px] tracking-[0.3em] uppercase shadow-2xl hover:brightness-110 active:scale-95 transition-all mt-4"
+            {/* BOTÓN CONTINUAR */}
+            <button
+              onClick={() => setStep('game')}
+              className={`w-full py-4 rounded-2xl font-black text-[9px] tracking-[0.3em] uppercase shadow-2xl transition-all mt-2 flex items-center justify-center gap-2 ${
+                allVisited
+                  ? 'bg-travesia-gold text-[#051A10] hover:brightness-110 active:scale-95'
+                  : 'bg-white/10 text-white/50 border border-white/10'
+              }`}
             >
-              CONTINUAR A JUGAR
+              {allVisited
+                ? <><CheckCircle2 size={14} /> CONTINUANDO AL JUEGO...</>
+                : `SEGUIR (${visitedCount}/${requiredSocials.length} visitadas)`}
             </button>
           </div>
         )}
