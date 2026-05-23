@@ -174,7 +174,7 @@ export default function RegistroPage() {
             <Sparkles className="w-6 h-6 text-[#051A10]" />
           </div>
           <h1 className="mt-2 text-xl font-serif font-bold text-travesia-gold">La Travesía</h1>
-          <p className="text-[6px] uppercase tracking-[0.4em] font-black text-white/30 italic">Loyalty Experience</p>
+          <p className="text-[10px] uppercase tracking-[0.4em] font-black text-white/30 italic">Loyalty Experience</p>
         </div>
 
         {/* WELCOME */}
@@ -200,13 +200,13 @@ export default function RegistroPage() {
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={9}/> Nombre</label>
+                    <label className="text-[11px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={9}/> Nombre</label>
                     <input required type="text" value={formData.nombre}
                       onChange={e => setFormData({...formData, nombre: e.target.value})}
                       className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={9}/> Apellido</label>
+                    <label className="text-[11px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><User size={9}/> Apellido</label>
                     <input required type="text" value={formData.apellido}
                       onChange={e => setFormData({...formData, apellido: e.target.value})}
                       className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" />
@@ -214,14 +214,14 @@ export default function RegistroPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Mail size={9}/> Correo</label>
+                  <label className="text-[11px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Mail size={9}/> Correo</label>
                   <input required type="email" value={formData.email}
                     onChange={e => setFormData({...formData, email: e.target.value})}
                     className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-xs" />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Globe size={9}/> WhatsApp</label>
+                  <label className="text-[11px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Globe size={9}/> WhatsApp</label>
                   <div className="flex gap-2">
                     <select value={countryCode} onChange={e => setCountryCode(e.target.value)}
                       className="w-[85px] bg-white/10 border border-white/10 px-1 rounded-xl text-travesia-gold font-bold text-[10px] outline-none focus:border-travesia-gold">
@@ -236,18 +236,18 @@ export default function RegistroPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Calendar size={9}/> Fecha de Cumpleaños</label>
+                  <label className="text-[11px] font-black uppercase tracking-widest text-travesia-gold flex items-center gap-1.5"><Calendar size={9}/> Fecha de Cumpleaños</label>
                   <input required type="date" value={formData.fecha_nacimiento}
                     onChange={e => setFormData({...formData, fecha_nacimiento: e.target.value})}
                     className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all [color-scheme:dark] text-xs" />
                 </div>
 
                 <div className="space-y-2 pt-1">
-                  <label className="text-[8px] font-black uppercase tracking-widest text-travesia-gold">Género</label>
+                  <label className="text-[11px] font-black uppercase tracking-widest text-travesia-gold">Género</label>
                   <div className="grid grid-cols-2 gap-2">
                     {[{id: 'Masculino', label: 'Hombre'}, {id: 'Femenino', label: 'Mujer'}].map(g => (
                       <button key={g.id} type="button" onClick={() => setFormData({...formData, genero: g.id})}
-                        className={`py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border ${formData.genero === g.id ? 'bg-travesia-gold/10 border-travesia-gold text-travesia-gold' : 'bg-white/5 border-white/10 text-white/40'}`}>
+                        className={`py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all border ${formData.genero === g.id ? 'bg-travesia-gold/10 border-travesia-gold text-travesia-gold' : 'bg-white/5 border-white/10 text-white/40'}`}>
                         {g.label}
                       </button>
                     ))}
@@ -270,13 +270,13 @@ export default function RegistroPage() {
                 <Sparkles size={20} className="animate-pulse" />
               </div>
               <h2 className="text-2xl font-serif font-bold text-white">Síguenos</h2>
-              <p className="text-white/40 text-[8px] uppercase tracking-widest font-black italic">Activa tu acceso a la ruleta</p>
+              <p className="text-white/40 text-[11px] uppercase tracking-widest font-black italic">Activa tu acceso a la ruleta</p>
             </div>
 
             <div className="w-full px-2">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[9px] uppercase font-black tracking-widest text-white/30">Progreso</span>
-                <span className="text-[9px] uppercase font-black tracking-widest text-travesia-gold">{visitedCount} / {requiredSocials.length}</span>
+                <span className="text-[11px] uppercase font-black tracking-widest text-white/30">Progreso</span>
+                <span className="text-[11px] uppercase font-black tracking-widest text-travesia-gold">{visitedCount} / {requiredSocials.length}</span>
               </div>
               <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                 <div className="h-full bg-travesia-gold rounded-full transition-all duration-700"
@@ -320,7 +320,7 @@ export default function RegistroPage() {
             </div>
 
             <button onClick={() => setStep('review')}
-              className={`w-full py-4 rounded-2xl font-black text-[9px] tracking-[0.3em] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 ${allSocialsVisited ? 'bg-travesia-gold text-[#051A10] hover:brightness-110' : 'bg-white/10 text-white/50 border border-white/10'}`}>
+              className={`w-full py-4 rounded-2xl font-black text-[11px] tracking-[0.3em] uppercase shadow-2xl transition-all flex items-center justify-center gap-2 ${allSocialsVisited ? 'bg-travesia-gold text-[#051A10] hover:brightness-110' : 'bg-white/10 text-white/50 border border-white/10'}`}>
               {allSocialsVisited
                 ? <><CheckCircle2 size={14} /> CONTINUANDO...</>
                 : `SEGUIR (${visitedCount}/${requiredSocials.length})`}
@@ -367,7 +367,7 @@ export default function RegistroPage() {
                 </button>
               )}
               <button onClick={() => setStep('game')}
-                className="w-full text-white/25 py-2 text-[9px] uppercase tracking-widest font-black hover:text-white/40 transition-colors">
+                className="w-full text-white/25 py-2 text-[11px] uppercase tracking-widest font-black hover:text-white/40 transition-colors">
                 Saltar por ahora
               </button>
             </div>
@@ -399,7 +399,7 @@ export default function RegistroPage() {
               <div className="relative">
                 <div className="absolute -inset-0.5 bg-travesia-gold/20 rounded-[32px] blur opacity-75" />
                 <div className="relative p-6 bg-white/5 border border-travesia-gold/30 rounded-[32px] backdrop-blur-2xl">
-                  <p className="text-[9px] uppercase tracking-[0.4em] text-travesia-gold font-black mb-2">Premio Ganado</p>
+                  <p className="text-[11px] uppercase tracking-[0.4em] text-travesia-gold font-black mb-2">Premio Ganado</p>
                   <p className="text-2xl font-black text-white leading-tight">{premioFinal}</p>
                 </div>
               </div>

@@ -45,7 +45,7 @@ export default function QRLanding() {
           </div>
           <div>
             <h1 className="text-4xl font-serif font-bold text-travesia-gold tracking-tight">La Travesía</h1>
-            <p className="text-[8px] uppercase tracking-[0.5em] font-black text-white/30 mt-1">Loyalty Experience</p>
+            <p className="text-[11px] uppercase tracking-[0.5em] font-black text-white/30 mt-1">Loyalty Experience</p>
           </div>
         </div>
 
@@ -68,7 +68,7 @@ export default function QRLanding() {
           </button>
         </div>
 
-        <p className="text-white/20 text-[9px] uppercase tracking-[0.4em] font-black italic">
+        <p className="text-white/20 text-[11px] uppercase tracking-[0.4em] font-black italic">
           Hostería La Travesía • High Fidelity Loyalty
         </p>
       </div>
