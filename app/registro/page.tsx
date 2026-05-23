@@ -108,33 +108,18 @@ export default function RegistroPage() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityReturn);
   }, []);
 
-  const openLink = (url: string) => {
-    const full = ensureProtocol(url);
-    const a = document.createElement('a');
-    a.href = full;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
-
-  const handleSocialVisit = (key: string, url: string) => {
-    if (url && url !== '#') {
-      pendingSocialRef.current = key;
-      // Esperar 700ms antes de activar el listener para evitar falso positivo inmediato
-      setTimeout(() => { waitingForReturnRef.current = true; }, 700);
-      openLink(url);
-    } else {
-      setVisitedSocials(prev => new Set([...prev, key]));
-    }
+  // Registra la intención de abrir — el <a href> real hace la apertura
+  const onSocialClick = (key: string) => {
+    pendingSocialRef.current = key;
+    setTimeout(() => { waitingForReturnRef.current = true; }, 800);
   };
 
   const goToReview = () => {
     reviewPendingRef.current = true;
-    setTimeout(() => { waitingForReturnRef.current = true; }, 700);
-    openLink(googleReviewLink);
+    setTimeout(() => { waitingForReturnRef.current = true; }, 800);
     setStep('review');
+    // window.open funciona aquí porque está en un handler de click directo
+    window.open(ensureProtocol(googleReviewLink), '_blank', 'noopener,noreferrer');
   };
   const requiredSocials = ['instagram', 'facebook', 'tiktok'];
   const visitedCount = requiredSocials.filter(k => visitedSocials.has(k)).length;
@@ -355,31 +340,53 @@ export default function RegistroPage() {
                   icon: <Facebook size={16} />, bg: 'bg-[#1877F2]' },
                 { key: 'tiktok', label: 'TikTok', url: socialLinks.tiktok,
                   icon: <Music2 size={16} />, bg: 'bg-black border border-white/10' },
-              ].map(({ key, label, url, icon, bg }) => (
-                <button key={key} onClick={() => handleSocialVisit(key, url)}
-                  className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${visitedSocials.has(key) ? 'bg-travesia-gold/10 border border-travesia-gold/50' : 'bg-white/5 border border-white/10 active:scale-[0.98]'}`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center text-white shadow-lg`}>{icon}</div>
-                    <span className="text-xs font-black uppercase tracking-widest">{label}</span>
+              ].map(({ key, label, url, icon, bg }) => {
+                const fullUrl = url ? ensureProtocol(url) : null;
+                const visited = visitedSocials.has(key);
+                return fullUrl ? (
+                  <a key={key}
+                    href={fullUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => onSocialClick(key)}
+                    className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 no-underline ${visited ? 'bg-travesia-gold/10 border border-travesia-gold/50' : 'bg-white/5 border border-white/10 active:scale-[0.98]'}`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center text-white shadow-lg`}>{icon}</div>
+                      <span className="text-xs font-black uppercase tracking-widest text-white">{label}</span>
+                    </div>
+                    {visited
+                      ? <CheckCircle2 size={16} className="text-travesia-gold" />
+                      : <ArrowRight size={12} className="text-white/40" />}
+                  </a>
+                ) : (
+                  <div key={key}
+                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 opacity-40 cursor-not-allowed">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center text-white shadow-lg`}>{icon}</div>
+                      <span className="text-xs font-black uppercase tracking-widest text-white">{label}</span>
+                    </div>
+                    <span className="text-xs text-white/40">Sin link</span>
                   </div>
-                  {visitedSocials.has(key)
-                    ? <CheckCircle2 size={16} className="text-travesia-gold" />
-                    : <ArrowRight size={12} className="text-white/20" />}
-                </button>
-              ))}
+                );
+              })}
 
-              {whatsappConfig.enabled && (
-                <button onClick={() => handleSocialVisit('whatsapp', socialLinks.whatsapp_group)}
-                  className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${visitedSocials.has('whatsapp') ? 'bg-emerald-500/20 border border-emerald-500/50' : 'bg-emerald-500/10 border border-emerald-500/30'}`}>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-lg"><Smartphone size={16} /></div>
-                    <span className="text-xs font-black uppercase tracking-widest text-emerald-400">{whatsappConfig.label}</span>
-                  </div>
-                  {visitedSocials.has('whatsapp')
-                    ? <CheckCircle2 size={16} className="text-emerald-400" />
-                    : <ArrowRight size={12} className="text-emerald-500/40 animate-pulse" />}
-                </button>
-              )}
+              {whatsappConfig.enabled && (() => {
+                const waUrl = socialLinks.whatsapp_group ? ensureProtocol(socialLinks.whatsapp_group) : null;
+                const visited = visitedSocials.has('whatsapp');
+                return waUrl ? (
+                  <a href={waUrl} target="_blank" rel="noopener noreferrer"
+                    onClick={() => onSocialClick('whatsapp')}
+                    className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 no-underline ${visited ? 'bg-emerald-500/20 border border-emerald-500/50' : 'bg-emerald-500/10 border border-emerald-500/30'}`}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-lg"><Smartphone size={16} /></div>
+                      <span className="text-xs font-black uppercase tracking-widest text-emerald-400">{whatsappConfig.label}</span>
+                    </div>
+                    {visited
+                      ? <CheckCircle2 size={16} className="text-emerald-400" />
+                      : <ArrowRight size={12} className="text-emerald-500/40 animate-pulse" />}
+                  </a>
+                ) : null;
+              })()}
             </div>
 
             {formError && (
