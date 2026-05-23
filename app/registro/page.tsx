@@ -18,7 +18,7 @@ const COUNTRY_CODES = [
   { code: '+56', name: 'CL' }, { code: '+52', name: 'MX' },
 ];
 
-type Step = 'welcome' | 'form' | 'social' | 'review' | 'game' | 'success';
+type Step = 'form' | 'social' | 'review' | 'game' | 'success';
 
 export default function RegistroPage() {
   const [step, setStep] = useState<Step>('form');
@@ -215,22 +215,6 @@ export default function RegistroPage() {
           <h1 className="mt-2 text-xl font-serif font-bold text-travesia-gold">La Travesía</h1>
           <p className="text-xs uppercase tracking-[0.4em] font-black text-white/30 italic">Loyalty Experience</p>
         </div>
-
-        {/* WELCOME */}
-        {step === 'welcome' && (
-          <div className="flex-1 flex flex-col justify-center space-y-6 animate-in fade-in slide-in-from-bottom-8">
-            <div className="space-y-2 text-center">
-              <h2 className="text-3xl font-serif leading-tight font-bold text-white">Únete al Club.</h2>
-              <p className="text-white/50 text-sm font-light">Registra tus datos y gana premios exclusivos desde hoy.</p>
-            </div>
-            <button
-              onClick={() => setStep('form')}
-              className="w-full bg-travesia-gold text-[#051A10] py-4 rounded-2xl font-black text-xs tracking-widest uppercase shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
-            >
-              REGISTRARME AHORA <ArrowRight size={14} />
-            </button>
-          </div>
-        )}
 
         {/* FORM */}
         {step === 'form' && (
