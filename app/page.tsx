@@ -135,7 +135,13 @@ export default function Home() {
       sendNotification('BIRTHDAY_WELCOME', data).catch(console.error);
 
     } catch (error: any) {
-      alert("Error en el registro. Verifica los datos.");
+      const msg = error?.message || error?.details || JSON.stringify(error);
+      if (msg?.includes('duplicate') || msg?.includes('unique') || msg?.includes('telefono')) {
+        alert('Este número de WhatsApp ya está registrado. Si ya eres socio, ve al check-in.');
+      } else {
+        alert(`Error en el registro: ${msg}`);
+      }
+      console.error('[Registro error]', error);
     } finally {
       setFormLoading(false);
     }
