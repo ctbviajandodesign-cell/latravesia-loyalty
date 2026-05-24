@@ -423,7 +423,8 @@ export default function RegistroPage() {
                   return (
                     <a key={key}
                       href={fullUrl}
-                      target="_self"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       onClick={() => onSocialClick(key)}
                       className="w-full flex items-center justify-between p-4 rounded-2xl bg-travesia-gold/15 border border-travesia-gold/50 text-left transition-all duration-300">
                       <div className="flex items-center gap-3">
@@ -439,7 +440,8 @@ export default function RegistroPage() {
                   return (
                     <a key={key}
                       href={fullUrl}
-                      target="_self"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       onClick={() => onSocialClick(key)}
                       className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/10 border-2 border-travesia-gold text-left active:scale-[0.98] transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.15)]">
                       <div className="flex items-center gap-3">
@@ -506,7 +508,7 @@ export default function RegistroPage() {
 
             {/* Botón de respaldo si el popup fue bloqueado */}
             <div className="w-full px-2 space-y-3">
-              <a href={ensureProtocol(googleReviewLink)} target="_self" onClick={goToReview}
+              <a href={ensureProtocol(googleReviewLink)} target="_blank" rel="noopener noreferrer" onClick={goToReview}
                 className="w-full bg-white/10 border border-white/20 text-white py-4 rounded-2xl font-black text-xs tracking-widest uppercase hover:border-travesia-gold/50 active:scale-95 transition-all flex items-center justify-center gap-2">
                 <Star size={14} className="text-travesia-gold fill-current" /> Abrir reseña de nuevo
               </a>
