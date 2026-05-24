@@ -209,18 +209,27 @@ export default function RegistroPage() {
     sessionStorage.setItem('reg_visited_socials', JSON.stringify(Array.from(visitedSocials)));
 
     const appScheme = getAppSchemeUrl(key, url) || '';
-    const redirectUrl = `/redirect?url=${encodeURIComponent(url)}&app=${encodeURIComponent(appScheme)}&key=${key}&from=registro`;
-    const w = window.open(redirectUrl, '_blank');
-    openedWindowRef.current = w;
+    
+    if (appScheme) {
+      // Intentar abrir app nativa en la misma pestaña
+      window.location.href = appScheme;
+      
+      // Fallback a web si en 1.5s no se abrió la app
+      setTimeout(() => {
+        if (document.visibilityState === 'visible') {
+          window.location.href = url;
+        }
+      }, 1500);
+    } else {
+      window.location.href = url;
+    }
   };
 
   const goToReview = () => {
     sessionStorage.setItem('reg_review_pending', 'true');
     reviewPendingRef.current = true;
     setStep('review');
-    const redirectUrl = `/redirect?url=${encodeURIComponent(ensureProtocol(googleReviewLink))}&key=reseña&from=registro`;
-    const w = window.open(redirectUrl, '_blank');
-    openedWindowRef.current = w;
+    window.location.href = ensureProtocol(googleReviewLink);
   };
 
   const requiredSocials = ['instagram', 'facebook', 'tiktok'];
