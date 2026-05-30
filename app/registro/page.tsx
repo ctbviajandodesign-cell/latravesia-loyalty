@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import {
-  CheckCircle2, ChevronRight, User, Mail, Calendar,
-  Loader2, ArrowRight, Smartphone, Globe, Instagram,
-  Facebook, Music2,
+  CheckCircle2, ChevronRight, Loader2, ArrowRight,
+  Smartphone, Instagram, Facebook, Music2,
 } from 'lucide-react';
 import Ruleta from '@/components/Ruleta';
 import { useRouter } from 'next/navigation';
@@ -19,23 +18,77 @@ const COUNTRY_CODES = [
   { code: '+56', name: 'CL' }, { code: '+52', name: 'MX' },
 ];
 
+const MONTHS = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+];
+
+/* ── Picker de fecha Android-friendly (3 selects separados) ── */
+function BirthdayPicker({
+  value, onChange,
+}: {
+  value: string;
+  onChange: (iso: string) => void;
+}) {
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 1929 }, (_, i) => currentYear - 16 - i);
+
+  // value comes as 'YYYY-MM-DD' or ''
+  const [day, setDay] = useState(() => value ? parseInt(value.split('-')[2]) : 0);
+  const [month, setMonth] = useState(() => value ? parseInt(value.split('-')[1]) : 0);
+  const [year, setYear] = useState(() => value ? parseInt(value.split('-')[0]) : 0);
+
+  const daysInMonth = month && year ? new Date(year, month, 0).getDate() : 31;
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+  const emit = (d: number, m: number, y: number) => {
+    if (d && m && y) {
+      const dd = String(d).padStart(2, '0');
+      const mm = String(m).padStart(2, '0');
+      onChange(`${y}-${mm}-${dd}`);
+    }
+  };
+
+  const handleDay = (v: number) => { setDay(v); emit(v, month, year); };
+  const handleMonth = (v: number) => {
+    const newDay = day > new Date(year || 2000, v, 0).getDate() ? 1 : day;
+    setMonth(v); setDay(newDay); emit(newDay, v, year);
+  };
+  const handleYear = (v: number) => { setYear(v); emit(day, month, v); };
+
+  const sel = 'flex-1 bg-transparent text-[17px] text-[#1C1C1E] outline-none appearance-none text-center py-1';
+
+  return (
+    <div className="flex items-center gap-1">
+      {/* Día */}
+      <select value={day || ''} onChange={e => handleDay(Number(e.target.value))}
+        className={sel} required>
+        <option value="" disabled>Día</option>
+        {days.map(d => <option key={d} value={d}>{d}</option>)}
+      </select>
+      <span className="text-[#AEAEB2] text-lg font-light">/</span>
+      {/* Mes */}
+      <select value={month || ''} onChange={e => handleMonth(Number(e.target.value))}
+        className={sel} required>
+        <option value="" disabled>Mes</option>
+        {MONTHS.map((m, i) => <option key={i + 1} value={i + 1}>{m}</option>)}
+      </select>
+      <span className="text-[#AEAEB2] text-lg font-light">/</span>
+      {/* Año — lista desplegable para navegar rápido en Android */}
+      <select value={year || ''} onChange={e => handleYear(Number(e.target.value))}
+        className={sel} required>
+        <option value="" disabled>Año</option>
+        {years.map(y => <option key={y} value={y}>{y}</option>)}
+      </select>
+    </div>
+  );
+}
+
 type Step = 'form' | 'social' | 'game' | 'success';
 
-/* ── Colores Apple ───────────────────────────────────────── */
-const C = {
-  bg:        'bg-[#F2F2F7]',
-  surface:   'bg-white',
-  border:    'border-[#D1D1D6]',
-  sep:       'divide-[#E5E5EA]',
-  label:     'text-[#1C1C1E]',
-  secondary: 'text-[#636366]',
-  tertiary:  'text-[#AEAEB2]',
-  blue:      '#007AFF',
-  gold:      '#B5933A',
-  goldText:  'text-[#B5933A]',
-  goldBg:    'bg-[#B5933A]',
-  green:     '#34C759',
-};
+/* Color principal de marca */
+const BRAND = '#3c5b39';
+const BRAND_DARK = '#2e4529';  // hover más oscuro
 
 export default function RegistroPage() {
   const [step, setStep] = useState<Step>('form');
@@ -93,7 +146,7 @@ export default function RegistroPage() {
   const ensureProtocol = (url: string) =>
     url.startsWith('http') ? url : `https://${url}`;
 
-  // Redes: marcar inmediatamente al tocar — sin abrir ningún link
+  /* Redes: marcar instantáneamente al tocar — sin abrir link */
   const onSocialClick = (key: string) => {
     setVisitedSocials(prev => new Set([...prev, key]));
   };
@@ -104,6 +157,10 @@ export default function RegistroPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.fecha_nacimiento) {
+      setFormError('Por favor ingresa tu fecha de cumpleaños.');
+      return;
+    }
     setFormLoading(true);
     const numLimpio = formData.telefono.replace(/^0/, '').replace(/\s+/g, '');
     const tel = `${countryCode}${numLimpio}`;
@@ -152,7 +209,7 @@ export default function RegistroPage() {
 
   if (loading) return (
     <div className="min-h-screen bg-[#F2F2F7] flex items-center justify-center">
-      <Loader2 className="animate-spin text-[#B5933A] w-8 h-8" />
+      <Loader2 className="animate-spin w-8 h-8" style={{ color: BRAND }} />
     </div>
   );
 
@@ -165,17 +222,16 @@ export default function RegistroPage() {
           <Image
             src="/logo_travesia.png"
             alt="La Travesía"
-            width={120}
-            height={120}
-            className="object-contain drop-shadow-sm"
+            width={130}
+            height={130}
+            className="object-contain"
             priority
           />
         </div>
 
-        {/* ── FORMULARIO ── */}
+        {/* ══════════════════════ FORMULARIO ══════════════════════ */}
         {step === 'form' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Cabecera */}
             <div className="mb-6">
               <h1 className="text-[28px] font-serif font-bold text-[#1C1C1E] leading-tight">
                 Únete al club
@@ -186,14 +242,13 @@ export default function RegistroPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3">
-              {/* Card de campos */}
+              {/* Card campos personales */}
               <div className="bg-white rounded-2xl overflow-hidden border border-[#E5E5EA]">
+
                 {/* Nombre / Apellido */}
                 <div className="grid grid-cols-2 divide-x divide-[#E5E5EA]">
                   <div className="p-4">
-                    <label className="block text-[13px] font-semibold text-[#636366] mb-1">
-                      Nombre
-                    </label>
+                    <label className="block text-[13px] font-semibold text-[#636366] mb-1">Nombre</label>
                     <input required type="text" value={formData.nombre}
                       autoComplete="given-name"
                       onChange={e => setFormData({ ...formData, nombre: e.target.value })}
@@ -201,9 +256,7 @@ export default function RegistroPage() {
                       placeholder="Juan" />
                   </div>
                   <div className="p-4">
-                    <label className="block text-[13px] font-semibold text-[#636366] mb-1">
-                      Apellido
-                    </label>
+                    <label className="block text-[13px] font-semibold text-[#636366] mb-1">Apellido</label>
                     <input required type="text" value={formData.apellido}
                       autoComplete="family-name"
                       onChange={e => setFormData({ ...formData, apellido: e.target.value })}
@@ -212,10 +265,9 @@ export default function RegistroPage() {
                   </div>
                 </div>
 
+                {/* Email */}
                 <div className="border-t border-[#E5E5EA] p-4">
-                  <label className="block text-[13px] font-semibold text-[#636366] mb-1">
-                    Correo electrónico
-                  </label>
+                  <label className="block text-[13px] font-semibold text-[#636366] mb-1">Correo electrónico</label>
                   <input required type="email" value={formData.email}
                     autoComplete="email"
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
@@ -223,17 +275,17 @@ export default function RegistroPage() {
                     placeholder="correo@ejemplo.com" />
                 </div>
 
+                {/* WhatsApp */}
                 <div className="border-t border-[#E5E5EA] p-4">
-                  <label className="block text-[13px] font-semibold text-[#636366] mb-1">
-                    WhatsApp
-                  </label>
+                  <label className="block text-[13px] font-semibold text-[#636366] mb-1">WhatsApp</label>
                   <div className="flex items-center gap-2">
                     <select value={countryCode} onChange={e => setCountryCode(e.target.value)}
-                      className="text-[17px] text-[#1C1C1E] bg-transparent outline-none font-medium">
+                      className="text-[17px] text-[#1C1C1E] bg-transparent outline-none font-medium shrink-0">
                       {COUNTRY_CODES.map(c => (
                         <option key={c.code} value={c.code}>{c.name} {c.code}</option>
                       ))}
                     </select>
+                    <div className="w-px h-5 bg-[#E5E5EA]" />
                     <input required type="tel" inputMode="numeric" autoComplete="tel"
                       value={formData.telefono}
                       onChange={e => setFormData({ ...formData, telefono: e.target.value.replace(/[^0-9]/g, '') })}
@@ -242,35 +294,33 @@ export default function RegistroPage() {
                   </div>
                 </div>
 
+                {/* Fecha de cumpleaños — 3 selects, funciona perfecto en Android */}
                 <div className="border-t border-[#E5E5EA] p-4">
-                  <label className="block text-[13px] font-semibold text-[#636366] mb-1">
+                  <label className="block text-[13px] font-semibold text-[#636366] mb-2">
                     Fecha de cumpleaños
                   </label>
-                  <input required type="date" value={formData.fecha_nacimiento}
-                    autoComplete="bday"
-                    onChange={e => setFormData({ ...formData, fecha_nacimiento: e.target.value })}
-                    className="w-full text-[17px] text-[#1C1C1E] bg-transparent outline-none [color-scheme:light]" />
+                  <BirthdayPicker
+                    value={formData.fecha_nacimiento}
+                    onChange={v => setFormData({ ...formData, fecha_nacimiento: v })}
+                  />
                 </div>
               </div>
 
               {/* Género */}
-              <div className="bg-white rounded-2xl overflow-hidden border border-[#E5E5EA]">
-                <div className="p-4 pb-3">
-                  <label className="block text-[13px] font-semibold text-[#636366] mb-3">
-                    Género
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[{ id: 'Masculino', label: 'Hombre' }, { id: 'Femenino', label: 'Mujer' }].map(g => (
-                      <button key={g.id} type="button"
-                        onClick={() => setFormData({ ...formData, genero: g.id })}
-                        className={`py-3 rounded-xl text-[15px] font-semibold transition-all border ${formData.genero === g.id
-                          ? 'bg-[#007AFF] border-[#007AFF] text-white'
-                          : 'bg-[#F2F2F7] border-transparent text-[#636366]'
-                        }`}>
-                        {g.label}
-                      </button>
-                    ))}
-                  </div>
+              <div className="bg-white rounded-2xl border border-[#E5E5EA] p-4">
+                <label className="block text-[13px] font-semibold text-[#636366] mb-3">Género</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[{ id: 'Masculino', label: 'Hombre' }, { id: 'Femenino', label: 'Mujer' }].map(g => (
+                    <button key={g.id} type="button"
+                      onClick={() => setFormData({ ...formData, genero: g.id })}
+                      className={`py-3 rounded-xl text-[15px] font-semibold transition-all border ${formData.genero === g.id
+                        ? 'border-transparent text-white'
+                        : 'bg-[#F2F2F7] border-transparent text-[#636366]'
+                      }`}
+                      style={formData.genero === g.id ? { backgroundColor: BRAND } : {}}>
+                      {g.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -281,7 +331,8 @@ export default function RegistroPage() {
               )}
 
               <button type="submit" disabled={formLoading}
-                className="w-full bg-[#007AFF] text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm hover:bg-[#0071E3] active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-2">
+                className="w-full text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-2"
+                style={{ backgroundColor: formLoading ? '#636366' : BRAND }}>
                 {formLoading
                   ? <Loader2 className="animate-spin w-5 h-5" />
                   : <>¡Listo para jugar! <ChevronRight size={20} /></>
@@ -291,78 +342,50 @@ export default function RegistroPage() {
           </div>
         )}
 
-        {/* ── REDES SOCIALES (decorativo — los botones solo incrementan el progreso) ── */}
+        {/* ══════════════════════ REDES (decorativo) ══════════════════════ */}
         {step === 'social' && (
           <div className="flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="mb-6">
-              <h1 className="text-[28px] font-serif font-bold text-[#1C1C1E] leading-tight">
-                Síguenos
-              </h1>
+              <h1 className="text-[28px] font-serif font-bold text-[#1C1C1E] leading-tight">Síguenos</h1>
               <p className="text-[17px] text-[#636366] mt-1">
-                Visita nuestras redes para desbloquear la ruleta
+                Toca nuestras redes para avanzar hacia la ruleta
               </p>
             </div>
 
-            {/* Barra de progreso estilo Apple */}
+            {/* Barra de progreso */}
             <div className="bg-white rounded-2xl border border-[#E5E5EA] p-5 mb-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[15px] font-semibold text-[#1C1C1E]">Progreso</span>
-                <span className="text-[15px] font-bold text-[#B5933A]">{progressPct}%</span>
+                <span className="text-[15px] font-bold" style={{ color: BRAND }}>{progressPct}%</span>
               </div>
               <div className="h-[6px] bg-[#E5E5EA] rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-700 ease-out"
-                  style={{ width: `${progressPct}%`, backgroundColor: '#B5933A' }}
-                />
+                <div className="h-full rounded-full transition-all duration-700 ease-out"
+                  style={{ width: `${progressPct}%`, backgroundColor: BRAND }} />
               </div>
               <p className="text-[13px] text-[#AEAEB2] mt-2">
                 {visitedCount} de {requiredSocials.length} redes visitadas
               </p>
             </div>
 
-            {/* Lista de redes — sin href, solo incrementan barra */}
+            {/* Lista de redes — solo incrementan barra, sin navegación */}
             <div className="bg-white rounded-2xl border border-[#E5E5EA] overflow-hidden mb-4">
               {[
-                {
-                  key: 'instagram',
-                  label: 'Instagram',
-                  sub: '@latravesia',
-                  icon: <Instagram size={20} />,
-                  color: 'bg-gradient-to-tr from-[#833ab4] via-[#fd1d1d] to-[#fcb045]',
-                },
-                {
-                  key: 'facebook',
-                  label: 'Facebook',
-                  sub: 'La Travesía',
-                  icon: <Facebook size={20} />,
-                  color: 'bg-[#1877F2]',
-                },
-                {
-                  key: 'tiktok',
-                  label: 'TikTok',
-                  sub: '@latravesia',
-                  icon: <Music2 size={20} />,
-                  color: 'bg-[#010101]',
-                },
+                { key: 'instagram', label: 'Instagram', sub: '@latravesia', icon: <Instagram size={20} />, color: 'bg-gradient-to-tr from-[#833ab4] via-[#fd1d1d] to-[#fcb045]' },
+                { key: 'facebook',  label: 'Facebook',  sub: 'La Travesía',  icon: <Facebook size={20} />,  color: 'bg-[#1877F2]' },
+                { key: 'tiktok',    label: 'TikTok',    sub: '@latravesia', icon: <Music2 size={20} />,    color: 'bg-[#010101]' },
               ].map(({ key, label, sub, icon, color }, idx) => {
                 const visited = visitedSocials.has(key);
                 return (
-                  <button
-                    key={key}
-                    type="button"
+                  <button key={key} type="button"
                     onClick={() => onSocialClick(key)}
-                    className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-all active:bg-[#F2F2F7] ${idx > 0 ? 'border-t border-[#E5E5EA]' : ''}`}
-                  >
-                    {/* Ícono de red */}
+                    className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-all active:bg-[#F2F2F7] ${idx > 0 ? 'border-t border-[#E5E5EA]' : ''}`}>
                     <div className={`w-11 h-11 ${color} rounded-2xl flex items-center justify-center text-white shadow-sm shrink-0`}>
                       {icon}
                     </div>
-                    {/* Texto */}
                     <div className="flex-1 min-w-0">
                       <p className="text-[17px] font-semibold text-[#1C1C1E] leading-tight">{label}</p>
                       <p className="text-[13px] text-[#AEAEB2] mt-0.5">{sub}</p>
                     </div>
-                    {/* Estado */}
                     {visited
                       ? <CheckCircle2 size={22} className="text-[#34C759] shrink-0" />
                       : <ChevronRight size={18} className="text-[#AEAEB2] shrink-0" />
@@ -378,11 +401,9 @@ export default function RegistroPage() {
               </div>
             )}
 
-            {/* CTA — siempre habilitado */}
-            <button
-              onClick={() => setStep('game')}
-              className="w-full bg-[#007AFF] text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm hover:bg-[#0071E3] active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-auto"
-            >
+            <button onClick={() => setStep('game')}
+              className="w-full text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-auto"
+              style={{ backgroundColor: BRAND }}>
               {visitedCount === requiredSocials.length
                 ? <>¡A girar la ruleta! <ChevronRight size={20} /></>
                 : <>Continuar <ChevronRight size={20} /></>
@@ -394,12 +415,12 @@ export default function RegistroPage() {
           </div>
         )}
 
-        {/* ── RULETA ── */}
+        {/* ══════════════════════ RULETA ══════════════════════ */}
         {step === 'game' && (
           <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in duration-500 select-none touch-none overflow-hidden">
             {saveLoading && (
               <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-50">
-                <Loader2 className="animate-spin text-[#B5933A] w-10 h-10" />
+                <Loader2 className="animate-spin w-10 h-10" style={{ color: BRAND }} />
               </div>
             )}
             {formError && (
@@ -416,11 +437,11 @@ export default function RegistroPage() {
           </div>
         )}
 
-        {/* ── ÉXITO ── */}
+        {/* ══════════════════════ ÉXITO ══════════════════════ */}
         {step === 'success' && (
           <div className="flex-1 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500 select-none touch-none">
-            {/* Ícono de check */}
-            <div className="w-20 h-20 bg-[#34C759] rounded-full flex items-center justify-center mb-6 shadow-lg shadow-green-200">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg"
+              style={{ backgroundColor: '#34C759', boxShadow: '0 8px 24px rgba(52,199,89,0.25)' }}>
               <CheckCircle2 className="w-10 h-10 text-white" />
             </div>
 
@@ -431,7 +452,6 @@ export default function RegistroPage() {
               Ya eres parte del club de La Travesía
             </p>
 
-            {/* Card del premio */}
             <div className="w-full bg-white border border-[#E5E5EA] rounded-3xl p-6 mb-6 shadow-sm">
               <p className="text-[13px] font-semibold text-[#AEAEB2] uppercase tracking-wide mb-2">
                 Premio ganado
@@ -439,24 +459,19 @@ export default function RegistroPage() {
               <p className="text-[24px] font-bold text-[#1C1C1E] leading-snug">{premioFinal}</p>
             </div>
 
-            {/* WhatsApp */}
             {whatsappConfig.enabled && socialLinks.whatsapp_group && (
-              <a
-                href={ensureProtocol(socialLinks.whatsapp_group)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-4 rounded-2xl font-semibold text-[17px] transition-all flex items-center justify-center gap-3 mb-3 active:scale-[0.98]"
-                style={{ backgroundColor: '#25D366', color: '#fff' }}
-              >
+              <a href={ensureProtocol(socialLinks.whatsapp_group)}
+                target="_blank" rel="noopener noreferrer"
+                className="w-full py-4 rounded-2xl font-semibold text-[17px] transition-all flex items-center justify-center gap-3 mb-3 active:scale-[0.98] text-white"
+                style={{ backgroundColor: '#25D366' }}>
                 <Smartphone size={20} />
                 {whatsappConfig.label}
               </a>
             )}
 
-            <button
-              onClick={() => router.push('/checkin?new=true')}
-              className="w-full bg-[#007AFF] text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm hover:bg-[#0071E3] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-            >
+            <button onClick={() => router.push('/checkin?new=true')}
+              className="w-full text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              style={{ backgroundColor: BRAND }}>
               Ir a mi panel <ArrowRight size={20} />
             </button>
           </div>

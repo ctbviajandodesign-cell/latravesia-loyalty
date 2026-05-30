@@ -10,6 +10,8 @@ import { supabase } from '@/lib/supabase';
 import { findClientByPhone, validateCheckin } from '@/app/actions/checkin';
 import Image from 'next/image';
 
+const BRAND = '#3c5b39';
+
 const COUNTRY_CODES = [
   { code: '+593', name: 'EC' }, { code: '+57', name: 'CO' },
   { code: '+51', name: 'PE' }, { code: '+1', name: 'US' },
@@ -21,7 +23,7 @@ export default function CheckInPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-[#F2F2F7] flex items-center justify-center">
-        <Loader2 className="animate-spin text-[#B5933A] w-8 h-8" />
+        <Loader2 className="animate-spin w-8 h-8" style={{ color: BRAND }} />
       </div>
     }>
       <CheckInContent />
@@ -250,12 +252,13 @@ function CheckInContent() {
             )}
 
             <button type="submit" disabled={processing || !phone}
-              className="w-full bg-[#007AFF] text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm hover:bg-[#0071E3] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-40">
+              className="w-full text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+              style={{ backgroundColor: BRAND }}>
               {processing ? <Loader2 className="animate-spin w-5 h-5" /> : 'Buscar mi cuenta →'}
             </button>
 
             <button type="button" onClick={() => router.push('/registro')}
-              className="w-full bg-white border border-[#E5E5EA] text-[#636366] py-4 rounded-2xl font-semibold text-[17px] active:bg-[#F2F2F7] transition-all flex items-center justify-center gap-2">
+              className="w-full bg-white border border-[#E5E5EA] text-[#3c5b39] py-4 rounded-2xl font-semibold text-[17px] active:bg-[#F2F2F7] transition-all flex items-center justify-center gap-2">
               <UserPlus size={18} /> Soy cliente nuevo
             </button>
 
@@ -288,7 +291,7 @@ function CheckInContent() {
               </label>
               <input type="password" inputMode="numeric" value={code}
                 onChange={e => setCode(e.target.value)} placeholder="••••" required
-                className="w-full text-center text-[40px] tracking-[0.8em] py-2 bg-transparent border-b-2 border-[#E5E5EA] focus:border-[#007AFF] outline-none transition-colors font-mono text-[#1C1C1E]" />
+                className="w-full text-center text-[40px] tracking-[0.8em] py-2 bg-transparent border-b-2 border-[#E5E5EA] focus:border-[#3c5b39] outline-none transition-colors font-mono text-[#1C1C1E]" />
             </div>
 
             {error && (
@@ -298,7 +301,8 @@ function CheckInContent() {
             )}
 
             <button type="submit" disabled={processing || !code}
-              className="w-full bg-[#007AFF] text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm hover:bg-[#0071E3] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-40">
+              className="w-full text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+              style={{ backgroundColor: BRAND }}>
               {processing ? <Loader2 className="animate-spin w-5 h-5" /> : <><CheckCircle2 className="w-5 h-5" /> Validar visita</>}
             </button>
 
@@ -347,12 +351,14 @@ function CheckInContent() {
                   sessionStorage.setItem('chk_already_today', String(alreadyToday));
                   sessionStorage.setItem('chk_review_opened', 'true');
                 }}
-                className="w-full bg-[#B5933A] text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                className="w-full text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                style={{ backgroundColor: BRAND }}>
                 <Star size={18} className="fill-current" /> Dejar mi reseña ⭐
               </a>
             ) : (
               <button onClick={() => setStep('success')}
-                className="w-full bg-[#007AFF] text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm hover:bg-[#0071E3] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                className="w-full text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                style={{ backgroundColor: BRAND }}>
                 <CheckCircle2 size={18} /> Ya dejé mi reseña →
               </button>
             )}
@@ -408,7 +414,8 @@ function CheckInContent() {
                 .forEach(k => sessionStorage.removeItem(k));
               router.push('/');
             }}
-              className="text-[#007AFF] text-[17px] font-semibold mb-3 hover:opacity-70 transition-opacity">
+              className="text-[17px] font-semibold mb-3 hover:opacity-70 transition-opacity"
+              style={{ color: BRAND }}>
               Volver al inicio
             </button>
 
