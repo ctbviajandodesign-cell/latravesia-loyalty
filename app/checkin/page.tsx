@@ -208,7 +208,7 @@ function CheckInContent() {
 
         {/* Título de sección */}
         <div className="mb-6">
-          <h1 className="text-[28px] font-serif font-bold text-[#1C1C1E]">
+          <h1 className="text-[32px] font-bold text-[#1C1C1E] tracking-tight">
             {step === 'phone' && 'Registrar visita'}
             {step === 'code' && 'Validar entrada'}
             {step === 'review' && 'Tu opinión'}
@@ -324,7 +324,7 @@ function CheckInContent() {
                     style={{ transitionDelay: reviewOpened ? `${(i - 1) * 80}ms` : '0ms' }} />
                 ))}
               </div>
-              <h2 className="text-[22px] font-serif font-bold text-[#1C1C1E] mb-2">
+              <h2 className="text-[22px] font-bold text-[#1C1C1E] mb-2">
                 {visitData.nuevasVisitas === visitData.meta
                   ? '¡Lo lograste!'
                   : visitData.nuevasVisitas === 1

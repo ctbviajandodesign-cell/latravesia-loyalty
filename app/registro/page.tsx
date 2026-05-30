@@ -233,7 +233,7 @@ export default function RegistroPage() {
         {step === 'form' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="mb-6">
-              <h1 className="text-[28px] font-serif font-bold text-[#1C1C1E] leading-tight">
+              <h1 className="text-[32px] font-bold text-[#1C1C1E] leading-tight tracking-tight">
                 Únete al club
               </h1>
               <p className="text-[17px] text-[#636366] mt-1">
@@ -346,7 +346,7 @@ export default function RegistroPage() {
         {step === 'social' && (
           <div className="flex-1 flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="mb-6">
-              <h1 className="text-[28px] font-serif font-bold text-[#1C1C1E] leading-tight">Síguenos</h1>
+              <h1 className="text-[32px] font-bold text-[#1C1C1E] leading-tight tracking-tight">Síguenos</h1>
               <p className="text-[17px] text-[#636366] mt-1">
                 Toca nuestras redes para avanzar hacia la ruleta
               </p>
@@ -428,7 +428,7 @@ export default function RegistroPage() {
                 {formError}
               </div>
             )}
-            <p className="text-[22px] font-serif font-bold text-[#1C1C1E] mb-4 text-center">
+            <p className="text-[22px] font-semibold text-[#1C1C1E] mb-4 text-center">
               ¡Gira la ruleta!
             </p>
             <div className="w-full max-w-[320px] mx-auto">
@@ -445,7 +445,7 @@ export default function RegistroPage() {
               <CheckCircle2 className="w-10 h-10 text-white" />
             </div>
 
-            <h1 className="text-[34px] font-serif font-bold text-[#1C1C1E] leading-tight">
+            <h1 className="text-[34px] font-bold text-[#1C1C1E] leading-tight tracking-tight">
               ¡Bienvenido!
             </h1>
             <p className="text-[17px] text-[#636366] mt-2 mb-8">

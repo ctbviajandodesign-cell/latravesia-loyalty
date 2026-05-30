@@ -4,24 +4,20 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Sistema Apple-inspired */
+  /* Sistema de color de marca */
+  --color-brand:           #3c5b39;
+  --color-brand-dark:      #2e4529;
+
+  /* Grises Apple */
   --color-apple-bg:        #F2F2F7;
   --color-apple-surface:   #FFFFFF;
-  --color-apple-border:    #D1D1D6;
-  --color-apple-separator: #E5E5EA;
+  --color-apple-border:    #E5E5EA;
   --color-apple-label:     #1C1C1E;
   --color-apple-secondary: #636366;
   --color-apple-tertiary:  #AEAEB2;
-  --color-apple-blue:      #007AFF;
   --color-apple-green:     #34C759;
-  --color-apple-indigo:    #5856D6;
 
-  /* Mantener gold sutil solo para acento */
-  --color-travesia-gold:       #B5933A;
-  --color-travesia-gold-light: #D4AF37;
-
-  --font-serif: var(--font-cormorant);
-  --font-sans:  var(--font-jost);
+  --font-sans: var(--font-inter);
 }
 
 :root {
@@ -40,14 +36,17 @@ body {
   max-width: 100vw;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-jost), -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  /* Stack Apple-style: Inter → SF Pro (iOS/macOS) → sistema */
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont,
+    "SF Pro Text", "Helvetica Neue", sans-serif;
 }
 
+/* Todos los headings también sans-serif */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-cormorant), 'Georgia', serif;
+  font-family: inherit;
 }
 
-/* iOS: previene zoom en inputs (font-size >= 16px) */
+/* Previene zoom en iOS al enfocar inputs */
 input, select, textarea {
   font-size: 16px !important;
 }
