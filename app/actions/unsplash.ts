@@ -1,47 +1,61 @@
 'use server';
 
 /**
- * Resuelve una URL de página de Unsplash (ej. unsplash.com/es/fotos/e4kmTGIQFIw)
- * a su URL de imagen directa en el CDN (images.unsplash.com/...)
+ * Resuelve una URL de Unsplash a su URL directa del CDN.
+ *
+ * Estrategia: construir directamente la URL del CDN de images.unsplash.com
+ * extrayendo el photo-ID con regex, SIN hacer scraping del HTML.
+ *
+ * Formatos soportados:
+ *   - unsplash.com/photos/AbCdEfGhI12  → photo-AbCdEfGhI12
+ *   - unsplash.com/es/fotos/titulo-AbCdEfGhI12
+ *   - unsplash.com/fotos/titulo-AbCdEfGhI12
+ *   - images.unsplash.com/...  → se usa tal cual
+ *   - Cualquier otra URL       → se usa tal cual
  */
 export async function resolveUnsplashUrl(url: string): Promise<string> {
   if (!url) return '';
-  
+
   const cleanUrl = url.trim().replace(/['"]/g, '');
-  
+
+  // 1. Ya es una URL directa del CDN → úsala tal cual
   if (cleanUrl.includes('images.unsplash.com')) {
     return cleanUrl;
   }
 
+  // 2. No es de Unsplash → devolver tal cual
   if (!cleanUrl.includes('unsplash.com')) {
     return cleanUrl;
   }
 
+  // 3. Extraer el photo-ID de la URL de página de Unsplash
+  //    El ID es la parte alfanumérica al final del path (después del último "-" en slugs)
+  //    Ejemplos:
+  //      /photos/e4kmTGIQFIw           → e4kmTGIQFIw
+  //      /es/fotos/bosque-e4kmTGIQFIw  → e4kmTGIQFIw
+  //      /fotos/e4kmTGIQFIw            → e4kmTGIQFIw
   try {
-    const res = await fetch(cleanUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      },
-      next: { revalidate: 3600 } // Cachear por una hora en Next.js
-    });
+    const pathMatch = cleanUrl.match(/(?:photos|fotos)\/([a-zA-Z0-9_-]+)/);
+    if (pathMatch && pathMatch[1]) {
+      let segment = pathMatch[1];
 
-    if (!res.ok) {
-      console.warn(`Unsplash fetch returned status ${res.status}`);
-      return cleanUrl;
-    }
+      // Si el segmento es un slug con guiones, el ID está al final
+      if (segment.includes('-')) {
+        const parts = segment.split('-');
+        const lastPart = parts[parts.length - 1];
+        // Los IDs de Unsplash son 10-12 caracteres alfanuméricos
+        if (lastPart.length >= 8 && lastPart.length <= 15) {
+          segment = lastPart;
+        }
+      }
 
-    const html = await res.text();
-    
-    // Buscar meta og:image o twitter:image
-    const ogMatch = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i) || 
-                    html.match(/<meta\s+name="twitter:image"\s+content="([^"]+)"/i);
-                    
-    if (ogMatch && ogMatch[1]) {
-      return ogMatch[1];
+      // Construir URL directa del CDN — no necesita autenticación para imágenes públicas
+      return `https://images.unsplash.com/photo-${segment}?w=1200&q=80&fm=jpg&fit=crop`;
     }
   } catch (e) {
-    console.error('Error resolving Unsplash URL on server:', e);
+    console.error('Error parsing Unsplash URL:', e);
   }
 
+  // Fallback: devolver la URL original
   return cleanUrl;
 }
