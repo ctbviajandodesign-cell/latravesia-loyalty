@@ -469,10 +469,13 @@ export default function RegistroPage() {
               </a>
             )}
 
-            <button onClick={() => router.push('/checkin?new=true')}
+            <button onClick={() => {
+              sessionStorage.clear();
+              router.push('/');
+            }}
               className="w-full text-white py-4 rounded-2xl font-semibold text-[17px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               style={{ backgroundColor: BRAND }}>
-              Ir a mi panel <ArrowRight size={20} />
+              Volver al inicio <ArrowRight size={20} />
             </button>
           </div>
         )}
