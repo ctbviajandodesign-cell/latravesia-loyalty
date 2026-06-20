@@ -141,7 +141,7 @@ export default function ClientesPage() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-travesia-gold/10 border border-travesia-gold/20 rounded-xl flex items-center justify-center text-travesia-gold">
+            <div className="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center text-white">
               <Users size={20} />
             </div>
             <h2 className="text-3xl font-serif font-bold text-white tracking-tight">Directorio de Socios</h2>
@@ -150,27 +150,27 @@ export default function ClientesPage() {
             {totalCount > 0 ? `${totalCount} socios registrados` : 'Administra y segmenta a tus clientes frecuentes.'}
           </p>
         </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-2xl text-white/60 text-xs font-black uppercase tracking-widest hover:text-travesia-gold hover:border-travesia-gold/40 transition-all self-start lg:self-auto">
+        <button className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-2xl text-white/60 text-xs font-black uppercase tracking-widest hover:text-white hover:border-white/40 transition-all self-start lg:self-auto">
           <Download size={16} /> Exportar CSV
         </button>
       </div>
 
       {/* BÚSQUEDA */}
-      <div className="flex items-center gap-4 p-4 bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[32px]">
+      <div className="flex items-center gap-4 p-4 bg-[#111111]/40 backdrop-blur-xl border border-white/5 rounded-[32px]">
         <div className="relative flex-1 group">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-travesia-gold transition-colors" size={18} />
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white transition-colors" size={18} />
           <input
             type="text"
             placeholder="Buscar por nombre, correo o teléfono..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 p-4 pl-14 rounded-2xl outline-none focus:border-travesia-gold transition-all text-sm"
+            className="w-full bg-white/5 border border-white/10 p-4 pl-14 rounded-2xl outline-none focus:border-white/20 transition-all text-sm"
           />
         </div>
       </div>
 
       {/* TABLA */}
-      <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] overflow-hidden shadow-2xl">
+      <div className="bg-[#111111]/40 backdrop-blur-xl border border-white/5 rounded-[40px] overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -187,7 +187,7 @@ export default function ClientesPage() {
                     <tr key={cliente.id} className="group hover:bg-white/5 transition-all duration-300">
                       <td className="p-8">
                         <div className="flex items-center gap-5">
-                          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#1A3A2A] to-[#051A10] border border-white/10 flex items-center justify-center text-travesia-gold font-serif text-2xl font-bold">
+                          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#222222] to-[#000000] border border-white/10 flex items-center justify-center text-white font-serif text-2xl font-bold">
                             {cliente.nombre?.[0] || '?'}
                           </div>
                           <div>
@@ -196,11 +196,11 @@ export default function ClientesPage() {
                             </p>
                             <p className="text-xs text-white/30 uppercase tracking-[0.2em] font-black mt-1 flex items-center gap-4">
                               <span>
-                                <Smartphone size={10} className="inline mr-1 text-travesia-gold" />
+                                <Smartphone size={10} className="inline mr-1 text-white" />
                                 {cliente.telefono}
                               </span>
                               <span>
-                                <Mail size={10} className="inline mr-1 text-travesia-gold" />
+                                <Mail size={10} className="inline mr-1 text-white" />
                                 {cliente.email}
                               </span>
                             </p>
@@ -208,7 +208,7 @@ export default function ClientesPage() {
                         </div>
                       </td>
                       <td className="p-8 text-center">
-                        <span className="text-2xl font-serif font-black text-travesia-gold">
+                        <span className="text-2xl font-serif font-black text-white">
                           {cliente.total_visitas || 0}
                         </span>
                       </td>
@@ -216,14 +216,14 @@ export default function ClientesPage() {
                         <div className="flex items-center justify-end gap-3">
                           <button
                             onClick={() => { setSelectedCliente(cliente); setIsDetailsOpen(true); }}
-                            className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-travesia-gold transition-all"
+                            className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-white transition-all"
                             aria-label="Ver detalles"
                           >
                             <Eye size={16} />
                           </button>
                           <button
                             onClick={() => { setSelectedCliente(cliente); setIsEditModalOpen(true); }}
-                            className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-travesia-gold transition-all"
+                            className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-white transition-all"
                             aria-label="Editar"
                           >
                             <Edit2 size={16} />
@@ -253,7 +253,7 @@ export default function ClientesPage() {
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-travesia-gold disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                 aria-label="Página anterior"
               >
                 <ChevronLeft size={16} />
@@ -268,8 +268,8 @@ export default function ClientesPage() {
                     onClick={() => setPage(pageNum)}
                     className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${
                       pageNum === page
-                        ? 'bg-travesia-gold text-[#051A10]'
-                        : 'bg-white/5 border border-white/10 text-white/40 hover:text-travesia-gold'
+                        ? 'bg-[#111111] text-white border border-white/20'
+                        : 'bg-white/5 border border-white/10 text-white/40 hover:text-white'
                     }`}
                   >
                     {pageNum + 1}
@@ -280,7 +280,7 @@ export default function ClientesPage() {
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
-                className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-travesia-gold disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                 aria-label="Página siguiente"
               >
                 <ChevronRight size={16} />
@@ -298,9 +298,9 @@ export default function ClientesPage() {
 
       {/* MODAL EDITAR */}
       {isEditModalOpen && selectedCliente && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#051A10]/90 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-md bg-[#0A2A18] border border-white/10 rounded-[40px] p-8 shadow-2xl space-y-6">
-            <h3 className="text-2xl font-serif font-bold text-travesia-gold">Editar Socio</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#000000]/90 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-md bg-[#111111] border border-white/10 rounded-[40px] p-8 shadow-2xl space-y-6">
+            <h3 className="text-2xl font-serif font-bold text-white">Editar Socio</h3>
             <form onSubmit={handleUpdateCliente} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
@@ -308,7 +308,7 @@ export default function ClientesPage() {
                   <input
                     value={selectedCliente.nombre}
                     onChange={(e) => setSelectedCliente({ ...selectedCliente, nombre: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm"
+                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-white/20 transition-all text-sm"
                   />
                 </div>
                 <div className="space-y-1">
@@ -316,7 +316,7 @@ export default function ClientesPage() {
                   <input
                     value={selectedCliente.apellido}
                     onChange={(e) => setSelectedCliente({ ...selectedCliente, apellido: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm"
+                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-white/20 transition-all text-sm"
                   />
                 </div>
               </div>
@@ -325,7 +325,7 @@ export default function ClientesPage() {
                 <input
                   value={selectedCliente.email}
                   onChange={(e) => setSelectedCliente({ ...selectedCliente, email: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm"
+                  className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-white/20 transition-all text-sm"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -334,7 +334,7 @@ export default function ClientesPage() {
                   <input
                     value={selectedCliente.telefono}
                     onChange={(e) => setSelectedCliente({ ...selectedCliente, telefono: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm"
+                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-white/20 transition-all text-sm"
                   />
                 </div>
                 <div className="space-y-1">
@@ -345,7 +345,7 @@ export default function ClientesPage() {
                     onChange={(e) =>
                       setSelectedCliente({ ...selectedCliente, total_visitas: parseInt(e.target.value) || 0 })
                     }
-                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold transition-all text-sm text-travesia-gold font-bold"
+                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-white/20 transition-all text-sm text-white font-bold"
                   />
                 </div>
               </div>
@@ -360,7 +360,7 @@ export default function ClientesPage() {
                 <button
                   disabled={isSaving}
                   type="submit"
-                  className="flex-1 py-4 bg-travesia-gold rounded-2xl text-xs font-black uppercase tracking-widest text-[#051A10] hover:brightness-110 transition-all disabled:opacity-60"
+                  className="flex-1 py-4 bg-white text-black rounded-2xl text-xs font-black uppercase tracking-widest text-[#000000] hover:brightness-110 transition-all disabled:opacity-60"
                 >
                   {isSaving ? 'Guardando...' : 'Guardar Cambios'}
                 </button>
@@ -372,17 +372,17 @@ export default function ClientesPage() {
 
       {/* MODAL DETALLES */}
       {isDetailsOpen && selectedCliente && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#051A10]/90 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-md bg-[#0A2A18] border border-white/10 rounded-[40px] p-10 shadow-2xl space-y-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#000000]/90 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-md bg-[#111111] border border-white/10 rounded-[40px] p-10 shadow-2xl space-y-8">
             <div className="flex flex-col items-center gap-4">
-              <div className="w-20 h-20 rounded-[32px] bg-travesia-gold flex items-center justify-center text-[#051A10] text-4xl font-serif font-bold">
+              <div className="w-20 h-20 rounded-[32px] bg-white text-black flex items-center justify-center text-[#000000] text-4xl font-serif font-bold">
                 {selectedCliente.nombre?.[0]}
               </div>
               <div className="text-center">
                 <h3 className="text-2xl font-serif font-bold text-white leading-tight">
                   {selectedCliente.nombre} {selectedCliente.apellido}
                 </h3>
-                <p className="text-travesia-gold/60 text-xs uppercase font-black tracking-widest mt-1">Miembro</p>
+                <p className="text-white/60 text-xs uppercase font-black tracking-widest mt-1">Miembro</p>
               </div>
             </div>
 
@@ -405,7 +405,7 @@ export default function ClientesPage() {
               </div>
               <div className="col-span-2 space-y-1">
                 <p className="text-xs uppercase font-black text-white/30 tracking-widest">Visitas / Meta</p>
-                <p className="text-travesia-gold font-bold text-xl">{selectedCliente.total_visitas} de 10</p>
+                <p className="text-white font-bold text-xl">{selectedCliente.total_visitas} de 10</p>
               </div>
             </div>
 

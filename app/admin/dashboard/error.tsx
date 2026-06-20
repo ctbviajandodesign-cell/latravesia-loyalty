@@ -27,7 +27,7 @@ export default function DashboardError({
       </div>
       <button
         onClick={reset}
-        className="flex items-center gap-2 px-6 py-3 bg-travesia-gold text-[#051A10] rounded-2xl font-black text-xs uppercase tracking-widest hover:brightness-110 transition-all"
+        className="flex items-center gap-2 px-6 py-3 bg-[#111111] text-white border border-white/20 rounded-2xl font-black text-xs uppercase tracking-widest hover:brightness-110 transition-all"
       >
         <RefreshCcw size={14} /> Reintentar
       </button>

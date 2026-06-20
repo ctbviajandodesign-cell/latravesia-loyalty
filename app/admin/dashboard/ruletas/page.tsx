@@ -128,7 +128,7 @@ export default function RuletasPage() {
 
   if (loading) return (
     <div className="p-20 flex flex-col items-center gap-4">
-      <Loader2 className="w-12 h-12 animate-spin text-[#4A5D4E]" />
+      <Loader2 className="w-12 h-12 animate-spin text-[#666666]" />
       <p className="text-gray-500 font-medium">Cargando sistema de ruletas...</p>
     </div>
   );
@@ -137,7 +137,7 @@ export default function RuletasPage() {
     <div className="space-y-8 pb-20 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-serif text-[#4A5D4E] flex items-center gap-3">
+          <h1 className="text-4xl font-serif text-[#666666] flex items-center gap-3">
             <RotateCw className="w-10 h-10" /> Configuración de Ruletas
           </h1>
           <p className="text-gray-500 mt-1 ml-13">Crea diferentes configuraciones de premios y actívalas según la ocasión.</p>
@@ -148,7 +148,7 @@ export default function RuletasPage() {
             if (showForm) { setIsEditing(false); setNombre(''); setSelectedPremios([]); }
             setShowForm(!showForm);
           }}
-          className="bg-[#4A5D4E] text-white px-8 py-4 rounded-2xl font-bold shadow-xl hover:scale-105 transition-all"
+          className="bg-[#666666] text-white px-8 py-4 rounded-2xl font-bold shadow-xl hover:scale-105 transition-all"
         >
           {showForm ? 'Cerrar Panel' : '+ Nueva Ruleta'}
         </button>
@@ -163,7 +163,7 @@ export default function RuletasPage() {
 
       {showForm && (
         <div className="bg-white p-10 rounded-[40px] shadow-2xl border border-gray-100 animate-in zoom-in-95 space-y-8">
-          <h3 className="text-2xl font-serif font-bold text-[#4A5D4E]">{isEditing ? 'Configurar Ruleta' : 'Nueva Configuración'}</h3>
+          <h3 className="text-2xl font-serif font-bold text-[#666666]">{isEditing ? 'Configurar Ruleta' : 'Nueva Configuración'}</h3>
           <form onSubmit={handleCreateOrUpdate} className="space-y-8">
             <div className="space-y-2">
               <label className="text-xs uppercase font-black text-gray-400 ml-2">Nombre Identificador</label>
@@ -172,7 +172,7 @@ export default function RuletasPage() {
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
                 placeholder="Ej: Ruleta de Fin de Semana / Especial Madres..."
-                className="w-full px-6 py-5 rounded-2xl border border-gray-200 outline-none focus:border-[#4A5D4E] transition-all text-lg font-medium bg-gray-50"
+                className="w-full px-6 py-5 rounded-2xl border border-gray-200 outline-none focus:border-[#666666] transition-all text-lg font-medium bg-gray-50"
               />
             </div>
 
@@ -185,14 +185,14 @@ export default function RuletasPage() {
                     <div 
                       key={p.id}
                       onClick={() => setSelectedPremios(prev => isSelected ? prev.filter(id => id !== p.id) : [...prev, p.id])}
-                      className={`p-5 rounded-2xl border-2 cursor-pointer transition-all flex items-center gap-4 ${isSelected ? 'border-[#4A5D4E] bg-[#4A5D4E]/5 shadow-inner' : 'border-gray-100 bg-white hover:border-gray-300'}`}
+                      className={`p-5 rounded-2xl border-2 cursor-pointer transition-all flex items-center gap-4 ${isSelected ? 'border-[#666666] bg-[#666666]/5 shadow-inner' : 'border-gray-100 bg-white hover:border-gray-300'}`}
                     >
                       <span className="text-3xl">{p.emoji || '🎁'}</span>
                       <div className="flex-1">
                         <p className="font-black text-gray-800 text-sm leading-tight">{p.nombre}</p>
                         <p className="text-xs text-gray-400 uppercase font-bold mt-1">Prob: {p.probabilidad}%</p>
                       </div>
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-[#4A5D4E] border-[#4A5D4E]' : 'border-gray-200'}`}>
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-[#666666] border-[#666666]' : 'border-gray-200'}`}>
                         {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
                       </div>
                     </div>
@@ -201,7 +201,7 @@ export default function RuletasPage() {
               </div>
             </div>
 
-            <button type="submit" disabled={actionLoading} className="w-full bg-[#4A5D4E] text-white py-6 rounded-2xl font-black tracking-[0.2em] uppercase shadow-2xl shadow-[#4A5D4E]/20 hover:scale-[1.01] transition-all">
+            <button type="submit" disabled={actionLoading} className="w-full bg-[#666666] text-white py-6 rounded-2xl font-black tracking-[0.2em] uppercase shadow-2xl shadow-[#666666]/20 hover:scale-[1.01] transition-all">
               {actionLoading ? 'PROCESANDO...' : isEditing ? 'GUARDAR CAMBIOS' : 'CREAR Y GUARDAR'}
             </button>
           </form>
@@ -210,13 +210,13 @@ export default function RuletasPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
         {ruletas.map((r) => (
-          <div key={r.id} className={`bg-white p-8 rounded-[40px] border-2 transition-all relative group overflow-hidden ${r.activa ? 'border-[#4A5D4E] shadow-2xl shadow-[#4A5D4E]/10' : 'border-gray-100 shadow-sm'}`}>
+          <div key={r.id} className={`bg-white p-8 rounded-[40px] border-2 transition-all relative group overflow-hidden ${r.activa ? 'border-[#666666] shadow-2xl shadow-[#666666]/10' : 'border-gray-100 shadow-sm'}`}>
             <div className="flex justify-between items-start mb-6">
                <div className="space-y-1">
                   <h3 className="text-xl font-black text-gray-800 leading-tight">{r.nombre}</h3>
                   <p className="text-xs text-gray-400 uppercase font-bold tracking-widest">{r.configuracion?.premiosIds?.length || 0} Premios configurados</p>
                </div>
-               {r.activa && <div className="p-2 bg-[#4A5D4E] text-white rounded-lg animate-pulse"><Play size={14} fill="currentColor" /></div>}
+               {r.activa && <div className="p-2 bg-[#666666] text-white rounded-lg animate-pulse"><Play size={14} fill="currentColor" /></div>}
             </div>
 
             <div className="space-y-3 mb-8">
@@ -240,11 +240,11 @@ export default function RuletasPage() {
             <div className="flex gap-2">
               <button 
                 onClick={() => toggleStatus(r.id, r.activa)}
-                className={`flex-1 py-4 rounded-2xl font-black text-xs tracking-widest uppercase transition-all ${r.activa ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-[#4A5D4E] text-white shadow-lg shadow-[#4A5D4E]/20 hover:brightness-110'}`}
+                className={`flex-1 py-4 rounded-2xl font-black text-xs tracking-widest uppercase transition-all ${r.activa ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-[#666666] text-white shadow-lg shadow-[#666666]/20 hover:brightness-110'}`}
               >
                 {r.activa ? 'DESACTIVAR' : 'ACTIVAR AHORA'}
               </button>
-              <button onClick={() => handleEdit(r)} className="p-4 bg-gray-50 text-gray-400 hover:text-[#4A5D4E] hover:bg-[#4A5D4E]/10 rounded-2xl transition-all"><Settings2 size={18} /></button>
+              <button onClick={() => handleEdit(r)} className="p-4 bg-gray-50 text-gray-400 hover:text-[#666666] hover:bg-[#666666]/10 rounded-2xl transition-all"><Settings2 size={18} /></button>
               <button onClick={() => handleDelete(r.id)} className="p-4 bg-gray-50 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all"><Trash2 size={18} /></button>
             </div>
           </div>

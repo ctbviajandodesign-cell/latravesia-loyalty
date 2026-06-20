@@ -29,10 +29,10 @@ export default function AdminLoginPage() {
 
   return (
     <main className="min-h-screen bg-travesia-cream flex items-center justify-center px-4">
-      <div className="max-w-sm w-full bg-white p-8 rounded-3xl shadow-xl space-y-8 border border-travesia-gold/20">
+      <div className="max-w-sm w-full bg-white p-8 rounded-3xl shadow-xl space-y-8 border border-white/20">
         <div className="text-center space-y-2">
           <div className="w-16 h-16 bg-travesia-green-dark rounded-full flex items-center justify-center mx-auto mb-4">
-            <Lock className="text-travesia-gold w-8 h-8" />
+            <Lock className="text-white w-8 h-8" />
           </div>
           <h1 className="text-2xl font-bold text-travesia-green-deep tracking-tight">
             Dashboard Admin
@@ -50,7 +50,7 @@ export default function AdminLoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-4 bg-travesia-cream border border-travesia-gold/30 rounded-xl focus:border-travesia-green-dark outline-none transition-all text-center text-lg"
+              className="w-full px-4 py-4 bg-travesia-cream border border-white/30 rounded-xl focus:border-travesia-green-dark outline-none transition-all text-center text-lg"
             />
           </div>
 

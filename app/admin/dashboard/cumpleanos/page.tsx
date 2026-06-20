@@ -89,7 +89,7 @@ export default function CumpleanosPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-serif text-[#4A5D4E] flex items-center gap-2">
+          <h1 className="text-3xl font-serif text-[#666666] flex items-center gap-2">
             <Cake className="w-8 h-8" />
             Calendario de Cumpleaños
           </h1>
@@ -103,7 +103,7 @@ export default function CumpleanosPage() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
               <h2 className="font-bold text-gray-900 flex items-center gap-2">
-                <PartyPopper className="w-5 h-5 text-travesia-gold" /> Próximos 30 días
+                <PartyPopper className="w-5 h-5 text-white" /> Próximos 30 días
               </h2>
               <span className="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full">
                 {upcoming.length} clientes
@@ -112,7 +112,7 @@ export default function CumpleanosPage() {
 
             {loading ? (
               <div className="p-12 flex justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-[#4A5D4E]" />
+                <Loader2 className="w-8 h-8 animate-spin text-[#666666]" />
               </div>
             ) : upcoming.length === 0 ? (
               <div className="p-12 text-center text-gray-400 italic">
@@ -123,14 +123,14 @@ export default function CumpleanosPage() {
                 {upcoming.map(cliente => (
                   <div key={cliente.id} className={`p-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors ${isToday(cliente.fecha_nacimiento) ? 'bg-amber-50/30' : ''}`}>
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-sm ${isToday(cliente.fecha_nacimiento) ? 'bg-travesia-gold text-white animate-pulse' : 'bg-gray-50 text-gray-400'}`}>
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-sm ${isToday(cliente.fecha_nacimiento) ? 'bg-white text-black text-white animate-pulse' : 'bg-gray-50 text-gray-400'}`}>
                         {isToday(cliente.fecha_nacimiento) ? '🎂' : '🎈'}
                       </div>
                       <div>
                         <div className="font-bold text-gray-900 flex items-center gap-2">
                           {cliente.nombre} {cliente.apellido}
                           {isToday(cliente.fecha_nacimiento) && (
-                            <span className="bg-[#4A5D4E] text-white text-xs uppercase font-black px-2 py-0.5 rounded">¡Hoy!</span>
+                            <span className="bg-[#666666] text-white text-xs uppercase font-black px-2 py-0.5 rounded">¡Hoy!</span>
                           )}
                         </div>
                         <div className="text-sm text-gray-500 flex items-center gap-2">
@@ -159,16 +159,16 @@ export default function CumpleanosPage() {
 
         {/* Sidebar Informativo */}
         <div className="space-y-6">
-          <div className="bg-[#4A5D4E] p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
+          <div className="bg-[#666666] p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
             <Cake className="absolute -bottom-4 -right-4 w-32 h-32 opacity-10 rotate-12" />
             <h3 className="text-xl font-bold mb-4">¿Por qué es importante?</h3>
             <ul className="space-y-4 text-white/80 text-sm">
               <li className="flex gap-3">
-                <Gift className="w-5 h-5 shrink-0 text-travesia-gold" />
+                <Gift className="w-5 h-5 shrink-0 text-white" />
                 <span>Envía un postre de cortesía por WhatsApp y asegura una reserva.</span>
               </li>
               <li className="flex gap-3">
-                <PartyPopper className="w-5 h-5 shrink-0 text-travesia-gold" />
+                <PartyPopper className="w-5 h-5 shrink-0 text-white" />
                 <span>Haz que tus clientes se sientan especiales y vuelvan pronto.</span>
               </li>
             </ul>

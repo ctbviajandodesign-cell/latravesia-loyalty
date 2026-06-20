@@ -363,7 +363,7 @@ export default function MarketingPage() {
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-travesia-gold/10 border border-travesia-gold/20 rounded-xl flex items-center justify-center text-travesia-gold">
+            <div className="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center text-white">
               <Zap size={20} />
             </div>
             <h2 className="text-3xl font-serif font-bold text-white tracking-tight">Marketing Hub</h2>
@@ -381,7 +381,7 @@ export default function MarketingPage() {
             <button 
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-5 py-3 rounded-[18px] text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-travesia-gold text-[#051A10] shadow-lg' : 'text-white/40 hover:text-white'}`}
+              className={`flex items-center gap-2 px-5 py-3 rounded-[18px] text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-[#111111] text-white border border-white/20 shadow-lg' : 'text-white/40 hover:text-white'}`}
             >
               <tab.icon size={14} /> {tab.label}
             </button>
@@ -393,7 +393,7 @@ export default function MarketingPage() {
         
         {/* CONFIGURADOR */}
         <div className="space-y-8">
-          <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 shadow-2xl space-y-8 relative overflow-hidden">
+          <div className="bg-[#111111]/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 shadow-2xl space-y-8 relative overflow-hidden">
             
             {saved && (
               <div className="absolute top-4 right-8 flex items-center gap-2 text-emerald-400 animate-in slide-in-from-top-4">
@@ -408,20 +408,20 @@ export default function MarketingPage() {
                   type="text" 
                   value={marketingData.asunto}
                   onChange={(e) => setMarketingData({...marketingData, asunto: e.target.value})}
-                  className="w-full bg-white/5 border border-white/10 p-5 rounded-[24px] outline-none focus:border-travesia-gold transition-all text-sm font-medium"
+                  className="w-full bg-white/5 border border-white/10 p-5 rounded-[24px] outline-none focus:border-white/20 transition-all text-sm font-medium"
                 />
               </div>
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center px-2">
                   <label className="text-xs font-black uppercase tracking-widest text-white/30">Cuerpo del Mensaje</label>
-                  <button onClick={() => setMarketingData({...marketingData, mensaje: marketingData.mensaje + ' {nombre}'})} className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs font-black text-travesia-gold hover:bg-travesia-gold hover:text-[#051A10] transition-all">+{'{nombre}'}</button>
+                  <button onClick={() => setMarketingData({...marketingData, mensaje: marketingData.mensaje + ' {nombre}'})} className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs font-black text-white hover:bg-white text-black hover:text-[#000000] transition-all">+{'{nombre}'}</button>
                 </div>
                 <textarea 
                   rows={4}
                   value={marketingData.mensaje}
                   onChange={(e) => setMarketingData({...marketingData, mensaje: e.target.value})}
-                  className="w-full bg-white/5 border border-white/10 p-5 rounded-[24px] outline-none focus:border-travesia-gold transition-all text-sm resize-none font-medium leading-relaxed"
+                  className="w-full bg-white/5 border border-white/10 p-5 rounded-[24px] outline-none focus:border-white/20 transition-all text-sm resize-none font-medium leading-relaxed"
                 />
               </div>
 
@@ -432,19 +432,19 @@ export default function MarketingPage() {
                     type="text" 
                     value={marketingData.image_url}
                     onChange={(e) => { setMarketingData({...marketingData, image_url: e.target.value}); updatePreview(e.target.value); }}
-                    className="w-full bg-white/5 border border-white/10 p-4 rounded-[20px] outline-none focus:border-travesia-gold transition-all text-xs"
+                    className="w-full bg-white/5 border border-white/10 p-4 rounded-[20px] outline-none focus:border-white/20 transition-all text-xs"
                   />
                 </div>
                 
                 {activeTab === 'birthday' && (
                   <div className="space-y-2 animate-in slide-in-from-bottom-2">
-                    <label className="text-xs font-black uppercase tracking-widest text-travesia-gold ml-2">Link de Ruleta de Regalo (Opcional)</label>
+                    <label className="text-xs font-black uppercase tracking-widest text-white ml-2">Link de Ruleta de Regalo (Opcional)</label>
                     <input 
                       type="text" 
                       placeholder="https://latravesia.app/game?id=birthday"
                       value={marketingData.roulette_link}
                       onChange={(e) => setMarketingData({...marketingData, roulette_link: e.target.value})}
-                      className="w-full bg-travesia-gold/5 border border-travesia-gold/20 p-4 rounded-[20px] outline-none focus:border-travesia-gold transition-all text-xs text-travesia-gold"
+                      className="w-full bg-white text-black/5 border border-white/20 p-4 rounded-[20px] outline-none focus:border-white/20 transition-all text-xs text-white"
                     />
                   </div>
                 )}
@@ -463,7 +463,7 @@ export default function MarketingPage() {
                             key={g.id}
                             type="button"
                             onClick={() => setGenderFilter(g.id as any)}
-                            className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${genderFilter === g.id ? 'bg-white/10 border-travesia-gold text-travesia-gold' : 'bg-white/5 border-white/10 text-white/40'}`}
+                            className={`flex-1 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${genderFilter === g.id ? 'bg-white/10 border-white/20 text-white' : 'bg-white/5 border-white/10 text-white/40'}`}
                           >
                             {g.label}
                           </button>
@@ -479,7 +479,7 @@ export default function MarketingPage() {
                           placeholder="Min" 
                           value={minAge}
                           onChange={(e) => setMinAge(e.target.value)}
-                          className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold text-sm text-center font-sans"
+                          className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-white/20 text-sm text-center font-sans"
                         />
                         <span className="text-xs text-white/40 font-black uppercase tracking-widest">y</span>
                         <input 
@@ -487,7 +487,7 @@ export default function MarketingPage() {
                           placeholder="Max" 
                           value={maxAge}
                           onChange={(e) => setMaxAge(e.target.value)}
-                          className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-travesia-gold text-sm text-center font-sans"
+                          className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-white/20 text-sm text-center font-sans"
                         />
                       </div>
                     </div>
@@ -509,7 +509,7 @@ export default function MarketingPage() {
                 <button 
                   onClick={handleLaunch}
                   disabled={saving}
-                  className="py-5 rounded-[24px] bg-travesia-gold text-[#051A10] font-black text-xs tracking-[0.3em] uppercase hover:brightness-110 transition-all flex items-center justify-center gap-3"
+                  className="py-5 rounded-[24px] bg-[#111111] text-white border border-white/20 font-black text-xs tracking-[0.3em] uppercase hover:brightness-110 transition-all flex items-center justify-center gap-3"
                 >
                   <Zap size={16} /> {activeTab === 'mass' ? 'LANZAR MASIVO' : 'PROBAR'}
                 </button>
@@ -519,7 +519,7 @@ export default function MarketingPage() {
                 <div className="space-y-3">
                   <button 
                     onClick={handleWeeklyBirthdayBroadcast}
-                    className="w-full py-4 rounded-2xl bg-travesia-gold/10 border border-travesia-gold/20 text-travesia-gold font-black text-xs tracking-widest uppercase hover:bg-travesia-gold/20 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-4 rounded-2xl bg-white/10 border border-white/20 text-white font-black text-xs tracking-widest uppercase hover:bg-white text-black/20 transition-all flex items-center justify-center gap-2"
                   >
                     <Users size={14} /> LANZAR CAMPAÑA SEMANAL ({upcomingCount} SOCIOS)
                   </button>
@@ -536,7 +536,7 @@ export default function MarketingPage() {
                     <div className="mt-8 space-y-4 animate-in fade-in slide-in-from-top-4">
                       <div className="flex items-center justify-between px-2">
                         <p className="text-xs font-black uppercase tracking-widest text-white/30">Celebrados de la Semana</p>
-                        <span className="px-2 py-0.5 bg-travesia-gold/20 text-travesia-gold rounded text-xs font-black uppercase">{upcomingList.length}</span>
+                        <span className="px-2 py-0.5 bg-white text-black/20 text-white rounded text-xs font-black uppercase">{upcomingList.length}</span>
                       </div>
                       <div className="max-h-[250px] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                         {upcomingList.map(c => (
@@ -567,14 +567,14 @@ export default function MarketingPage() {
         {/* PREVIEW */}
         <div className="flex flex-col items-center">
           <div className="flex items-center gap-3 self-start px-4 mb-6">
-            <Eye className="text-travesia-gold" size={18} />
+            <Eye className="text-white" size={18} />
             <h3 className="text-sm font-black uppercase tracking-widest text-white/80">Vista Previa</h3>
           </div>
 
           <div className="relative w-[300px] aspect-[9/18.5] bg-white rounded-[3rem] border-[10px] border-[#1A1A1A] shadow-2xl overflow-hidden p-6 flex flex-col scale-110 origin-top">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-travesia-gold rounded-lg flex items-center justify-center text-[#051A10]"><Sparkles size={16} /></div>
+                <div className="w-8 h-8 bg-white text-black rounded-lg flex items-center justify-center text-[#000000]"><Sparkles size={16} /></div>
                 <p className="text-xs font-black text-gray-900 tracking-tighter uppercase">La Travesía</p>
               </div>
 
@@ -592,7 +592,7 @@ export default function MarketingPage() {
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-4">
                       <button 
                         onClick={handleRefreshPreview}
-                        className="p-3 bg-white rounded-full text-[#051A10] shadow-xl hover:scale-110 transition-transform"
+                        className="p-3 bg-white rounded-full text-[#000000] shadow-xl hover:scale-110 transition-transform"
                         title="Refrescar Previsualización"
                       >
                         <RefreshCw size={20} />
@@ -600,7 +600,7 @@ export default function MarketingPage() {
                       <a 
                         href={previewImage} 
                         target="_blank" 
-                        className="p-3 bg-white rounded-full text-[#051A10] shadow-xl hover:scale-110 transition-transform"
+                        className="p-3 bg-white rounded-full text-[#000000] shadow-xl hover:scale-110 transition-transform"
                         title="Ver Link Directo"
                       >
                         <ExternalLink size={20} />
@@ -627,7 +627,7 @@ export default function MarketingPage() {
                   const num = adminWhatsapp.replace(/\+/g, '').replace(/\s+/g, '');
                   window.open(`https://wa.me/${num}?text=${encodeURIComponent('Hola La Travesía, deseo consultar mis beneficios.')}`, '_blank');
                 }}
-                className="w-full py-4 bg-[#051A10] rounded-2xl text-white text-xs font-black uppercase tracking-[0.3em] mt-2 active:scale-95 transition-all"
+                className="w-full py-4 bg-[#000000] rounded-2xl text-white text-xs font-black uppercase tracking-[0.3em] mt-2 active:scale-95 transition-all"
               >
                 CONSULTAR BENEFICIOS 🎡
               </button>

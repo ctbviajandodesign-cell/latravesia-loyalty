@@ -86,7 +86,7 @@ export default function AdminOverview() {
 
   const statCards = [
     { name: 'Total Miembros', value: stats.totalClientes, icon: Users, color: 'from-blue-500/20 to-blue-500/5', border: 'border-blue-500/20', text: 'text-blue-400' },
-    { name: 'Visitas Registradas', value: stats.totalVisitas, icon: MapPin, color: 'from-travesia-gold/20 to-travesia-gold/5', border: 'border-travesia-gold/20', text: 'text-travesia-gold' },
+    { name: 'Visitas Registradas', value: stats.totalVisitas, icon: MapPin, color: 'from-[#333333]/20 to-travesia-gold/5', border: 'border-white/20', text: 'text-white' },
     { name: 'Cumpleaños Hoy', value: stats.cumplesHoy, icon: Cake, color: 'from-pink-500/20 to-pink-500/5', border: 'border-pink-500/20', text: 'text-pink-400' },
     { name: 'Score Fidelidad', value: '98%', icon: Star, color: 'from-emerald-500/20 to-emerald-500/5', border: 'border-emerald-500/20', text: 'text-emerald-400' },
   ];
@@ -97,17 +97,17 @@ export default function AdminOverview() {
     <div className="space-y-12">
 
       {/* CÓDIGO DEL DÍA */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-travesia-gold/15 via-travesia-gold/5 to-transparent border border-travesia-gold/30 rounded-[40px] p-8 md:p-10 shadow-2xl shadow-travesia-gold/5">
-        <div className="absolute -top-16 -right-16 w-64 h-64 bg-travesia-gold/10 blur-[80px] rounded-full pointer-events-none" />
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#333333]/15 via-travesia-gold/5 to-transparent border border-white/30 rounded-[40px] p-8 md:p-10 shadow-2xl shadow-travesia-gold/5">
+        <div className="absolute -top-16 -right-16 w-64 h-64 bg-white/10 blur-[80px] rounded-full pointer-events-none" />
         <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div className="flex items-center gap-6">
-            <div className="w-16 h-16 rounded-3xl bg-travesia-gold/20 border border-travesia-gold/30 flex items-center justify-center shrink-0">
-              <KeyRound className="w-8 h-8 text-travesia-gold" />
+            <div className="w-16 h-16 rounded-3xl bg-white text-black/20 border border-white/30 flex items-center justify-center shrink-0">
+              <KeyRound className="w-8 h-8 text-white" />
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.4em] font-black text-white/30 mb-1">Código de Visita • {today}</p>
               <div className="flex items-baseline gap-4">
-                <span className="text-7xl font-mono font-black text-travesia-gold tracking-[0.2em] leading-none select-all">
+                <span className="text-7xl font-mono font-black text-white tracking-[0.2em] leading-none select-all">
                   {dailyCode}
                 </span>
               </div>
@@ -120,7 +120,7 @@ export default function AdminOverview() {
             onClick={handleRotate}
             disabled={rotating}
             aria-label="Rotar código del día"
-            className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ${rotated ? 'bg-emerald-500 text-white border border-emerald-400' : 'bg-travesia-gold/10 border border-travesia-gold/30 text-travesia-gold hover:bg-travesia-gold hover:text-[#051A10]'}`}
+            className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap ${rotated ? 'bg-emerald-500 text-white border border-emerald-400' : 'bg-white/10 border border-white/30 text-white hover:bg-white text-black hover:text-[#000000]'}`}
           >
             <RefreshCw className={`w-4 h-4 ${rotating ? 'animate-spin' : ''}`} />
             {rotated ? '✓ Código rotado' : 'Rotar código'}
@@ -162,15 +162,15 @@ export default function AdminOverview() {
         <div className="xl:col-span-2 space-y-6">
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-3">
-              <div className="w-1.5 h-6 bg-travesia-gold rounded-full"></div>
+              <div className="w-1.5 h-6 bg-white text-black rounded-full"></div>
               <h3 className="text-2xl font-serif font-bold text-white tracking-tight">Nuevos Socios</h3>
             </div>
-            <button className="text-xs uppercase tracking-widest font-black text-travesia-gold hover:text-white transition-colors flex items-center gap-2">
+            <button className="text-xs uppercase tracking-widest font-black text-white hover:text-white transition-colors flex items-center gap-2">
               Ver todos <ChevronRight size={14} />
             </button>
           </div>
 
-          <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] overflow-hidden shadow-2xl">
+          <div className="bg-[#111111]/40 backdrop-blur-xl border border-white/5 rounded-[40px] overflow-hidden shadow-2xl">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -186,7 +186,7 @@ export default function AdminOverview() {
                     <tr key={cliente.id} className="group hover:bg-white/5 transition-colors">
                       <td className="p-4 md:p-6 lg:p-8">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-travesia-gold to-[#B8860B] flex items-center justify-center text-[#051A10] font-black text-lg shadow-lg">
+                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#333333] to-[#B8860B] flex items-center justify-center text-[#000000] font-black text-lg shadow-lg">
                             {cliente.nombre[0]}
                           </div>
                           <div>
@@ -207,7 +207,7 @@ export default function AdminOverview() {
                         </span>
                       </td>
                       <td className="p-4 md:p-6 lg:p-8">
-                        <button aria-label="Ver detalle del cliente" className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-travesia-gold hover:border-travesia-gold/40 transition-all">
+                        <button aria-label="Ver detalle del cliente" className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-white hover:border-white/40 transition-all">
                           <ChevronRight size={18} />
                         </button>
                       </td>
@@ -226,7 +226,7 @@ export default function AdminOverview() {
             <h3 className="text-2xl font-serif font-bold text-white tracking-tight">Próximos Cumples</h3>
           </div>
 
-          <div className="bg-[#0A2A18]/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 space-y-8 shadow-2xl">
+          <div className="bg-[#111111]/40 backdrop-blur-xl border border-white/5 rounded-[40px] p-8 space-y-8 shadow-2xl">
             <div className="space-y-6">
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 bg-pink-500/20 rounded-xl flex items-center justify-center text-pink-400 shrink-0">
@@ -252,10 +252,10 @@ export default function AdminOverview() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
                   <div className="flex items-center gap-3">
-                    <Zap size={16} className="text-travesia-gold" />
+                    <Zap size={16} className="text-white" />
                     <span className="text-xs font-medium">Supabase Latency</span>
                   </div>
-                  <span className="text-xs text-travesia-gold font-bold">12ms</span>
+                  <span className="text-xs text-white font-bold">12ms</span>
                 </div>
               </div>
             </div>

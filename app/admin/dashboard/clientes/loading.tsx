@@ -6,7 +6,7 @@ export default function ClientesLoading() {
         <div className="h-10 w-36 rounded-2xl bg-white/5" />
       </div>
       <div className="h-16 rounded-[32px] bg-white/5" />
-      <div className="rounded-[40px] bg-[#0A2A18]/40 border border-white/5 overflow-hidden">
+      <div className="rounded-[40px] bg-[#111111]/40 border border-white/5 overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b border-white/5">

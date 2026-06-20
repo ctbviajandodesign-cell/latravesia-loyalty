@@ -94,7 +94,7 @@ export default function AnalyticsPage() {
   if (loading) {
     return (
       <div className="p-12 flex flex-col items-center gap-4">
-        <Loader2 className="w-10 h-10 animate-spin text-[#4A5D4E]" />
+        <Loader2 className="w-10 h-10 animate-spin text-[#666666]" />
         <p className="text-gray-500">Generando reportes...</p>
       </div>
     );
@@ -103,7 +103,7 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-serif text-[#4A5D4E] flex items-center gap-2">
+        <h1 className="text-3xl font-serif text-[#666666] flex items-center gap-2">
           <BarChart3 className="w-8 h-8" />
           Panel de Analíticas
         </h1>
@@ -155,7 +155,7 @@ export default function AnalyticsPage() {
                   <div className="relative w-full flex justify-center items-end h-full">
                     <div 
                       style={{ height: `${height}%` }}
-                      className="w-full max-w-[40px] bg-[#4A5D4E]/10 group-hover:bg-[#4A5D4E]/30 transition-all rounded-t-lg relative"
+                      className="w-full max-w-[40px] bg-[#666666]/10 group-hover:bg-[#666666]/30 transition-all rounded-t-lg relative"
                     >
                       <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                         {dia.count} visitas
@@ -181,11 +181,11 @@ export default function AnalyticsPage() {
               <div key={i} className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="font-medium text-gray-700">{p.nombre}</span>
-                  <span className="font-bold text-[#4A5D4E]">{p.count}</span>
+                  <span className="font-bold text-[#666666]">{p.count}</span>
                 </div>
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-[#4A5D4E]" 
+                    className="h-full bg-[#666666]" 
                     style={{ width: `${(p.count / stats.premiosEntregados) * 100}%` }}
                   />
                 </div>
@@ -200,7 +200,7 @@ export default function AnalyticsPage() {
 
 function StatCard({ title, value, icon, trend, positive }: any) {
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group hover:border-[#4A5D4E]/30 transition-all">
+    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group hover:border-[#666666]/30 transition-all">
       <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
         {icon}
       </div>
