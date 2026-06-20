@@ -36,8 +36,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       
       {/* BACKGROUND EFFECTS */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-white text-black/5 blur-[150px] rounded-full"></div>
-        <div className="absolute bottom-0 left-0 w-[50%] h-[50%] bg-travesia-green-deep/20 blur-[150px] rounded-full"></div>
+        
+        
       </div>
 
       {/* MOBILE HEADER */}

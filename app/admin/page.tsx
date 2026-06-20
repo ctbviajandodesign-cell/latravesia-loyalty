@@ -28,16 +28,16 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-travesia-cream flex items-center justify-center px-4">
-      <div className="max-w-sm w-full bg-white p-8 rounded-3xl shadow-xl space-y-8 border border-white/20">
+    <main className="min-h-screen bg-[#F2F2F7] flex items-center justify-center px-4">
+      <div className="max-w-sm w-full bg-white p-8 rounded-3xl shadow-xl space-y-8 border border-[#E5E5EA]">
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 bg-travesia-green-dark rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-[#111111] rounded-full flex items-center justify-center mx-auto mb-4">
             <Lock className="text-white w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-bold text-travesia-green-deep tracking-tight">
+          <h1 className="text-2xl font-bold text-black tracking-tight">
             Dashboard Admin
           </h1>
-          <p className="text-travesia-green-dark/60 text-sm">
+          <p className="text-[#636366] text-sm">
             Ingresa la clave de acceso para continuar
           </p>
         </div>
@@ -61,7 +61,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-travesia-green-dark text-white font-bold py-4 rounded-xl hover:bg-travesia-green-deep transition-all shadow-lg disabled:opacity-50"
+            className="w-full bg-[#111111] text-white font-bold py-4 rounded-xl hover:bg-black transition-all shadow-lg disabled:opacity-50"
           >
             {loading ? 'ACCEDIENDO...' : 'ENTRAR AL PANEL'}
           </button>

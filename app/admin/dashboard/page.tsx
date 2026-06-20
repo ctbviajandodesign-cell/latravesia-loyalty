@@ -98,7 +98,7 @@ export default function AdminOverview() {
 
       {/* CÓDIGO DEL DÍA */}
       <div className="relative overflow-hidden bg-[#111111] border border-white/30 rounded-[40px] p-8 md:p-10 shadow-2xl shadow-black/20">
-        <div className="absolute -top-16 -right-16 w-64 h-64 bg-white/10 blur-[80px] rounded-full pointer-events-none" />
+        
         <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div className="flex items-center gap-6">
             <div className="w-16 h-16 rounded-3xl bg-white text-black/20 border border-white/30 flex items-center justify-center shrink-0">
@@ -150,7 +150,7 @@ export default function AdminOverview() {
               </div>
             </div>
             {/* DECORATIVE LIGHT */}
-            <div className={`absolute -bottom-10 -right-10 w-32 h-32 blur-[60px] rounded-full opacity-20 bg-current ${card.text}`}></div>
+            
           </div>
         ))}
       </div>
