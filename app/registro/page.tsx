@@ -310,7 +310,7 @@ export default function RegistroPage() {
               <div className="bg-white rounded-2xl border border-[#E5E5EA] p-4">
                 <label className="block text-[13px] font-semibold text-[#636366] mb-3">Género</label>
                 <div className="grid grid-cols-2 gap-2">
-                  {[{ id: 'Masculino', label: 'Hombre' }, { id: 'Femenino', label: 'Mujer' }].map(g => (
+                  {[{ id: 'Masculino', label: 'Masculino' }, { id: 'Femenino', label: 'Femenino' }].map(g => (
                     <button key={g.id} type="button"
                       onClick={() => setFormData({ ...formData, genero: g.id })}
                       className={`py-3 rounded-xl text-[15px] font-semibold transition-all border ${formData.genero === g.id
