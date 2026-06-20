@@ -105,7 +105,7 @@ export default function Ruleta({ onWin }: RuletaProps) {
         particleCount: 200,
         spread: 90,
         origin: { y: 0.7 },
-        colors: ['#dac88c', '#1e3320', '#ffffff', '#c5a96e'],
+        colors: ['#ffffff', '#cccccc', '#888888', '#111111'],
         ticks: 300
       });
 
@@ -117,8 +117,8 @@ export default function Ruleta({ onWin }: RuletaProps) {
 
   if (premios.length === 0) return (
     <div className="flex flex-col items-center gap-4">
-      <div className="w-12 h-12 border-4 border-travesia-gold/20 border-t-travesia-gold rounded-full animate-spin"></div>
-      <p className="text-travesia-gold text-[10px] font-black uppercase tracking-[0.3em]">Preparando Premios...</p>
+      <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+      <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.3em]">Preparando Premios...</p>
     </div>
   );
 
@@ -130,7 +130,7 @@ export default function Ruleta({ onWin }: RuletaProps) {
       {/* TÍTULO - Más minimalista para no empujar la ruleta */}
       <div className="mb-4 text-center space-y-1 animate-in fade-in duration-700">
         <h3 className="text-xl font-serif font-bold text-white tracking-tight">Tu Premio Especial</h3>
-        <div className="w-8 h-0.5 bg-travesia-gold mx-auto rounded-full opacity-30"></div>
+        <div className="w-8 h-0.5 bg-white mx-auto rounded-full opacity-30"></div>
       </div>
 
       {/* CONTENEDOR DE LA RULETA */}
@@ -138,13 +138,13 @@ export default function Ruleta({ onWin }: RuletaProps) {
         
         {/* PUNTERO */}
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-50">
-          <div className="w-6 h-9 bg-travesia-gold rounded-b-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] border border-white/20 flex items-center justify-center">
-             <div className="w-1.5 h-1.5 bg-[#051A10] rounded-full"></div>
+          <div className="w-6 h-9 bg-white rounded-b-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] border border-white/20 flex items-center justify-center">
+             <div className="w-1.5 h-1.5 bg-[#000000] rounded-full"></div>
           </div>
         </div>
 
         {/* CUERPO DE LA RULETA */}
-        <div className="relative w-full h-full rounded-full border-2 border-white/10 bg-[#051A10] p-1 shadow-[0_0_80px_rgba(0,0,0,0.8)] flex items-center justify-center overflow-hidden">
+        <div className="relative w-full h-full rounded-full border-2 border-white/10 bg-[#000000] p-1 shadow-[0_0_80px_rgba(0,0,0,0.8)] flex items-center justify-center overflow-hidden">
           
           <div 
             className="relative w-full h-full rounded-full transition-transform duration-[4500ms] cubic-bezier"
@@ -163,30 +163,31 @@ export default function Ruleta({ onWin }: RuletaProps) {
                 const pathData = `M 50 50 L ${x1} ${y1} A 50 50 0 ${largeArc} 1 ${x2} ${y2} Z`;
                 const isEven = i % 2 === 0;
 
-                // Texto dinámico — tamaños más grandes para legibilidad en móvil
+                // Texto dinámico — tamaños más pequeños (solicitado por usuario)
                 const textLength = premio.nombre.length;
-                const fontSize = textLength > 18 ? '3.8' : textLength > 12 ? '4.5' : '5.5';
+                const fontSize = textLength > 18 ? '2.5' : textLength > 12 ? '3.2' : '4.0';
 
                 return (
                   <g key={i}>
                     <path 
                       d={pathData} 
-                      fill={isEven ? "#142616" : "#051a10"}
-                      stroke="#dac88c22"
+                      fill={isEven ? "#1A1A1A" : "#0A0A0A"}
+                      stroke="#ffffff"
+                      strokeOpacity="0.1"
                       strokeWidth="0.2"
                     />
                     <g transform={`rotate(${startAngle + segmentSize / 2} 50 50)`}>
                       <text
                         x="50"
                         y="22"
-                        fill="#dac88c"
+                        fill="#ffffff"
                         fontSize={fontSize}
                         fontWeight="900"
                         textAnchor="middle"
                         dominantBaseline="middle"
                         style={{
-                          filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.9))',
-                          letterSpacing: '-0.02em',
+                          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.8))',
+                          letterSpacing: '-0.01em',
                           textTransform: 'uppercase',
                         }}
                       >
@@ -201,8 +202,8 @@ export default function Ruleta({ onWin }: RuletaProps) {
 
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 z-40">
             <div className="absolute inset-0 bg-white/5 backdrop-blur-xl rounded-full border border-white/10 shadow-2xl"></div>
-            <div className="absolute inset-2 bg-[#051A10] rounded-full flex items-center justify-center border border-travesia-gold/40">
-              <div className="w-2 h-2 bg-travesia-gold rounded-full animate-pulse shadow-[0_0_15px_rgba(218,200,140,1)]"></div>
+            <div className="absolute inset-2 bg-[#111111] rounded-full flex items-center justify-center border border-white/20">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
             </div>
           </div>
         </div>
@@ -216,7 +217,7 @@ export default function Ruleta({ onWin }: RuletaProps) {
             w-full group relative py-5 rounded-2xl font-black text-[11px] tracking-[0.4em] uppercase transition-all duration-500
             ${spinning 
               ? 'bg-white/5 text-white/20 cursor-not-allowed' 
-              : 'bg-travesia-gold text-[#051A10] shadow-[0_10px_40px_rgba(218,200,140,0.2)] hover:brightness-110 active:scale-95'
+              : 'bg-white text-black shadow-[0_10px_40px_rgba(255,255,255,0.2)] hover:bg-[#E5E5EA] active:scale-95'
             }
           `}
         >
