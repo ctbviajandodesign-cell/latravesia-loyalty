@@ -581,6 +581,7 @@ export default function MarketingPage() {
               <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center relative border border-gray-100 group">
                 {previewImage ? (
                   <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
                       key={previewImage}
                       src={previewImage} 
