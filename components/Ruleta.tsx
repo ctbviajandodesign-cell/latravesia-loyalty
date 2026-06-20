@@ -108,10 +108,6 @@ export default function Ruleta({ onWin }: RuletaProps) {
         colors: ['#ffffff', '#cccccc', '#888888', '#111111'],
         ticks: 300
       });
-
-      setTimeout(() => {
-        onWin(premioGanado.nombre);
-      }, 2000);
     }, 4000);
   };
 
@@ -226,15 +222,22 @@ export default function Ruleta({ onWin }: RuletaProps) {
       </div>
 
       {mustShowWin && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#051A10]/95 backdrop-blur-2xl animate-in fade-in">
-          <div className="text-center space-y-6 animate-in zoom-in duration-500">
-            <div className="w-24 h-24 bg-travesia-gold rounded-[32px] mx-auto flex items-center justify-center shadow-[0_0_50px_rgba(218,200,140,0.4)]">
-               <Trophy size={48} className="text-[#051A10]" />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#000000]/95 backdrop-blur-2xl animate-in fade-in">
+          <div className="text-center space-y-8 animate-in zoom-in duration-500 max-w-sm w-full">
+            <div className="w-24 h-24 bg-white rounded-[32px] mx-auto flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.2)]">
+               <Trophy size={48} className="text-black" />
             </div>
             <div className="space-y-2">
-              <p className="text-travesia-gold font-black uppercase tracking-[0.4em] text-[10px]">¡Felicidades!</p>
+              <p className="text-white/60 font-black uppercase tracking-[0.4em] text-[10px]">¡Felicidades!</p>
               <h4 className="text-4xl font-serif font-bold text-white uppercase leading-tight">{winningLabel}</h4>
             </div>
+            
+            <button 
+              onClick={() => onWin(winningLabel)}
+              className="w-full py-4 rounded-2xl font-black text-xs tracking-widest uppercase bg-white text-black hover:bg-[#E5E5EA] transition-all shadow-lg active:scale-95"
+            >
+              Continuar
+            </button>
           </div>
         </div>
       )}
