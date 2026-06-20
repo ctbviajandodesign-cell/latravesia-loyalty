@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabase';
 import { findClientByPhone, validateCheckin } from '@/app/actions/checkin';
 import Image from 'next/image';
 
-const BRAND = '#3c5b39';
+const BRAND = '#111111';
 
 const COUNTRY_CODES = [
   { code: '+593', name: 'EC' }, { code: '+57', name: 'CO' },

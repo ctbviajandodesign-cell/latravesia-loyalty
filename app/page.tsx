@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { UserPlus, QrCode, ChevronRight } from 'lucide-react';
 
-const BRAND = '#3c5b39';
+const BRAND = '#111111';
 
 export default function QRLanding() {
   const router = useRouter();
@@ -33,18 +33,18 @@ export default function QRLanding() {
         <div className="space-y-4">
           <button 
             onClick={() => router.push('/registro')}
-            className="w-full bg-[#1C1C1E] text-white py-4 px-5 rounded-2xl font-semibold text-[17px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-between group hover:bg-black"
+            className="w-full bg-white text-[#111111] border-2 border-[#111111] py-4 px-5 rounded-2xl font-semibold text-[17px] shadow-sm active:scale-[0.98] transition-all flex items-center justify-between group hover:bg-[#F8F8F8]"
           >
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                <UserPlus size={20} className="text-white" />
+              <div className="w-10 h-10 bg-[#111111]/5 rounded-xl flex items-center justify-center">
+                <UserPlus size={20} className="text-[#111111]" />
               </div>
               <span className="text-left">
-                <span className="block leading-tight">Registrarme</span>
-                <span className="block text-[13px] font-normal text-white/60 mt-0.5">Soy un cliente nuevo</span>
+                <span className="block leading-tight text-[#111111]">Registrarme</span>
+                <span className="block text-[13px] font-normal text-[#666666] mt-0.5">Soy un cliente nuevo</span>
               </span>
             </div>
-            <ChevronRight size={20} className="text-white/40 group-hover:text-white transition-colors" />
+            <ChevronRight size={20} className="text-[#111111]/40 group-hover:text-[#111111] transition-colors" />
           </button>
 
           <button 

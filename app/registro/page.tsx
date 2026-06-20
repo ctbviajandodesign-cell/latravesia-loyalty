@@ -87,8 +87,8 @@ function BirthdayPicker({
 type Step = 'form' | 'social' | 'game' | 'success';
 
 /* Color principal de marca */
-const BRAND = '#3c5b39';
-const BRAND_DARK = '#2e4529';  // hover más oscuro
+const BRAND = '#111111';
+const BRAND_DARK = '#000000';  // hover más oscuro
 
 export default function RegistroPage() {
   const [step, setStep] = useState<Step>('form');

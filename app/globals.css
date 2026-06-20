@@ -5,8 +5,8 @@
   --color-foreground: var(--foreground);
 
   /* Sistema de color de marca */
-  --color-brand:           #3c5b39;
-  --color-brand-dark:      #2e4529;
+  --color-brand:           #111111;
+  --color-brand-dark:      #000000;
 
   /* Grises Apple */
   --color-apple-bg:        #F2F2F7;
