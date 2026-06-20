@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 const SOCIAL_DEFS = [
-  { clave: 'instagram_link', label: 'Instagram',      bg: 'bg-gradient-to-br from-[#833ab4] via-[#fd1d1d] to-[#fcb045]', placeholder: 'https://www.instagram.com/tu_cuenta/' },
+  { clave: 'instagram_link', label: 'Instagram',      bg: 'bg-[#111111]', placeholder: 'https://www.instagram.com/tu_cuenta/' },
   { clave: 'facebook_link',  label: 'Facebook',       bg: 'bg-[#1877F2]',  placeholder: 'https://www.facebook.com/tu_pagina/' },
   { clave: 'tiktok_link',    label: 'TikTok',         bg: 'bg-black',      placeholder: 'https://www.tiktok.com/@tu_cuenta' },
   { clave: 'whatsapp_group_link', label: 'WhatsApp Grupo', bg: 'bg-[#25D366]', placeholder: 'https://chat.whatsapp.com/...' },

@@ -63,7 +63,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         `}>
           {/* LOGO */}
           <div className="mb-12 flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#333333] to-[#B8860B] rounded-xl flex items-center justify-center shadow-xl rotate-3">
+            <div className="w-10 h-10 bg-[#111111] rounded-xl flex items-center justify-center shadow-xl rotate-3">
               <Sparkles className="w-6 h-6 text-[#000000] -rotate-3" />
             </div>
             <div>
@@ -84,7 +84,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   className={`
                     flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-300 group
                     ${isActive 
-                      ? 'bg-[#111111] text-white border border-white/20 shadow-[0_10px_30px_rgba(212,175,55,0.2)]' 
+                      ? 'bg-[#111111] text-white border border-white/20 shadow-[0_10px_30px_rgba(0,0,0,0.5)]' 
                       : 'text-white/50 hover:bg-white/5 hover:text-white'
                     }
                   `}

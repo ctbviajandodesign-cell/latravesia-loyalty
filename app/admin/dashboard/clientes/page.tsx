@@ -187,7 +187,7 @@ export default function ClientesPage() {
                     <tr key={cliente.id} className="group hover:bg-white/5 transition-all duration-300">
                       <td className="p-8">
                         <div className="flex items-center gap-5">
-                          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#222222] to-[#000000] border border-white/10 flex items-center justify-center text-white font-serif text-2xl font-bold">
+                          <div className="w-14 h-14 rounded-2xl bg-[#111111] border border-white/10 flex items-center justify-center text-white font-serif text-2xl font-bold">
                             {cliente.nombre?.[0] || '?'}
                           </div>
                           <div>

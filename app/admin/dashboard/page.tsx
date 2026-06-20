@@ -97,7 +97,7 @@ export default function AdminOverview() {
     <div className="space-y-12">
 
       {/* CÓDIGO DEL DÍA */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#333333]/15 via-travesia-gold/5 to-transparent border border-white/30 rounded-[40px] p-8 md:p-10 shadow-2xl shadow-travesia-gold/5">
+      <div className="relative overflow-hidden bg-[#111111] border border-white/30 rounded-[40px] p-8 md:p-10 shadow-2xl shadow-black/20">
         <div className="absolute -top-16 -right-16 w-64 h-64 bg-white/10 blur-[80px] rounded-full pointer-events-none" />
         <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div className="flex items-center gap-6">
@@ -133,7 +133,7 @@ export default function AdminOverview() {
         {statCards.map((card, i) => (
           <div 
             key={card.name}
-            className={`relative group overflow-hidden bg-gradient-to-br ${card.color} ${card.border} border rounded-[32px] p-8 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40`}
+            className={`relative group overflow-hidden bg-[#111111] ${card.border} border rounded-[32px] p-8 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/40`}
           >
             <div className="relative z-10 flex flex-col h-full justify-between">
               <div className="mb-8">
@@ -186,7 +186,7 @@ export default function AdminOverview() {
                     <tr key={cliente.id} className="group hover:bg-white/5 transition-colors">
                       <td className="p-4 md:p-6 lg:p-8">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#333333] to-[#B8860B] flex items-center justify-center text-[#000000] font-black text-lg shadow-lg">
+                          <div className="w-12 h-12 rounded-2xl bg-[#111111] flex items-center justify-center text-[#000000] font-black text-lg shadow-lg">
                             {cliente.nombre[0]}
                           </div>
                           <div>
