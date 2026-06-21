@@ -104,9 +104,7 @@ export default function MarketingPage() {
       setPreviewImage('');
       return;
     }
-    
-    // Si es un link de unsplash.com pero no es del CDN directo, intentar resolverlo en el servidor
-    if (url.includes('unsplash.com') && !url.includes('images.unsplash.com')) {
+    if (url.includes('unsplash.com') || url.includes('pexels.com')) {
       try {
         const resolved = await resolveUnsplashUrl(url);
         setPreviewImage(resolved);
@@ -427,7 +425,7 @@ export default function MarketingPage() {
 
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
-                   <label className="text-xs font-black uppercase tracking-widest text-white/30 ml-2">Imagen (Link Unsplash)</label>
+                   <label className="text-xs font-black uppercase tracking-widest text-white/30 ml-2">Imagen (Link Unsplash / Pexels)</label>
                    <input 
                     type="text" 
                     value={marketingData.image_url}
