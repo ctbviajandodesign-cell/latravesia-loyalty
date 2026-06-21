@@ -50,3 +50,28 @@ export async function canjearPremio(clienteId: string) {
     return { success: false, error: 'Error interno al canjear premio' };
   }
 }
+
+export async function deleteCliente(clienteId: string) {
+  try {
+    // 1. Eliminar visitas asociadas (para evitar error de Foreign Key Constraint)
+    const { error: visitasError } = await supabaseAdmin
+      .from('visitas')
+      .delete()
+      .eq('cliente_id', clienteId);
+      
+    if (visitasError) throw visitasError;
+
+    // 2. Eliminar al cliente
+    const { error: clienteError } = await supabaseAdmin
+      .from('clientes')
+      .delete()
+      .eq('id', clienteId);
+
+    if (clienteError) throw clienteError;
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error en deleteCliente:', error);
+    return { success: false, error: error.message || 'Error interno al eliminar cliente' };
+  }
+}

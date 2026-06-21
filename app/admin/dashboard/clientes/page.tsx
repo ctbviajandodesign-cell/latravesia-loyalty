@@ -16,7 +16,7 @@ import {
   Eye,
   Award,
 } from 'lucide-react';
-import { canjearPremio } from '@/app/actions/clientes';
+import { canjearPremio, deleteCliente } from '@/app/actions/clientes';
 
 const PAGE_SIZE = 25;
 
@@ -133,13 +133,13 @@ export default function ClientesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar este socio? Esta acción es irreversible.')) return;
+    if (!confirm('¿Estás seguro de eliminar este socio? Esta acción es irreversible y eliminará también su historial de visitas.')) return;
     try {
-      const { error } = await supabase.from('clientes').delete().eq('id', id);
-      if (error) throw error;
+      const res = await deleteCliente(id);
+      if (!res.success) throw new Error(res.error);
       fetchClientes();
-    } catch {
-      alert('Error al eliminar');
+    } catch (e: any) {
+      alert('Error al eliminar: ' + e.message);
     }
   };
 
