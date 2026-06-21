@@ -101,8 +101,8 @@ export default function AdminOverview() {
         
         <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div className="flex items-center gap-6">
-            <div className="w-16 h-16 rounded-3xl bg-white text-black/20 border border-white/30 flex items-center justify-center shrink-0">
-              <KeyRound className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 rounded-3xl bg-white border border-white/30 flex items-center justify-center shrink-0">
+              <KeyRound className="w-8 h-8 text-black" />
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.4em] font-black text-white/30 mb-1">Código de Visita • {today}</p>
@@ -186,7 +186,7 @@ export default function AdminOverview() {
                     <tr key={cliente.id} className="group hover:bg-white/5 transition-colors">
                       <td className="p-4 md:p-6 lg:p-8">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-[#111111] flex items-center justify-center text-[#000000] font-black text-lg shadow-lg">
+                          <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white font-black text-lg shadow-lg">
                             {cliente.nombre[0]}
                           </div>
                           <div>

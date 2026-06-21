@@ -63,8 +63,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         `}>
           {/* LOGO */}
           <div className="mb-12 flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#111111] rounded-xl flex items-center justify-center shadow-xl rotate-3">
-              <Sparkles className="w-6 h-6 text-[#000000] -rotate-3" />
+            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-xl rotate-3">
+              <Sparkles className="w-6 h-6 text-black -rotate-3" />
             </div>
             <div>
               <h1 className="font-serif font-bold text-xl text-white tracking-tight leading-none">La Travesía</h1>
