@@ -23,12 +23,25 @@ export async function resolveUnsplashUrl(url: string): Promise<string> {
     return cleanUrl;
   }
 
-  // 2. No es de Unsplash → devolver tal cual
+  // 2. Es Pexels
+  if (cleanUrl.includes('pexels.com')) {
+    if (cleanUrl.includes('images.pexels.com')) return cleanUrl;
+    
+    // Extraer el ID numérico de la URL (ej: /foto/38214562/ o /photo/titulo-38214562)
+    const match = cleanUrl.match(/(?:photo|foto)\/(?:.*?[-])?(\d+)\/?(?:$|\?)/i);
+    if (match && match[1]) {
+      const id = match[1];
+      return `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=1200`;
+    }
+    return cleanUrl;
+  }
+
+  // 3. No es de Unsplash ni Pexels → devolver tal cual
   if (!cleanUrl.includes('unsplash.com')) {
     return cleanUrl;
   }
 
-  // 3. Extraer el photo-ID de la URL de página de Unsplash
+  // 4. Extraer el photo-ID de la URL de página de Unsplash
   //    El ID es la parte alfanumérica al final del path (después del último "-" en slugs)
   //    Ejemplos:
   //      /photos/e4kmTGIQFIw           → e4kmTGIQFIw
