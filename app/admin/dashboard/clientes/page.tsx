@@ -15,8 +15,9 @@ import {
   Edit2,
   Eye,
   Award,
+  PlusCircle,
 } from 'lucide-react';
-import { canjearPremio, deleteCliente } from '@/app/actions/clientes';
+import { canjearPremio, deleteCliente, createClienteAdmin } from '@/app/actions/clientes';
 
 const PAGE_SIZE = 25;
 
@@ -57,8 +58,12 @@ export default function ClientesPage() {
   const [isRedeeming, setIsRedeeming] = useState<string | null>(null);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+  const [newCliente, setNewCliente] = useState({
+    nombre: '', apellido: '', email: '', telefono: '', total_visitas: 0
+  });
   const [isSaving, setIsSaving] = useState(false);
 
   // Debounce search
@@ -161,6 +166,26 @@ export default function ClientesPage() {
     }
   };
 
+  const handleCreateCliente = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCliente.nombre || !newCliente.telefono) {
+      alert('Nombre y teléfono son obligatorios');
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const res = await createClienteAdmin(newCliente);
+      if (!res.success) throw new Error(res.error);
+      setIsCreateModalOpen(false);
+      setNewCliente({ nombre: '', apellido: '', email: '', telefono: '', total_visitas: 0 });
+      fetchClientes();
+    } catch (e: any) {
+      alert('Error al crear: ' + e.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-8 pb-20">
       {/* HEADER */}
@@ -176,9 +201,17 @@ export default function ClientesPage() {
             {totalCount > 0 ? `${totalCount} socios registrados` : 'Administra y segmenta a tus clientes frecuentes.'}
           </p>
         </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-2xl text-white/60 text-xs font-black uppercase tracking-widest hover:text-white hover:border-white/40 transition-all self-start lg:self-auto">
-          <Download size={16} /> Exportar CSV
-        </button>
+        <div className="flex items-center gap-3 self-start lg:self-auto">
+          <button className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-2xl text-white/60 text-xs font-black uppercase tracking-widest hover:text-white hover:border-white/40 transition-all">
+            <Download size={16} /> Exportar CSV
+          </button>
+          <button 
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-2xl text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all"
+          >
+            <PlusCircle size={16} /> Nuevo Cliente
+          </button>
+        </div>
       </div>
 
       {/* BÚSQUEDA */}
@@ -407,6 +440,84 @@ export default function ClientesPage() {
                   className="flex-1 py-4 bg-white text-black rounded-2xl text-xs font-black uppercase tracking-widest text-[#000000] hover:brightness-110 transition-all disabled:opacity-60"
                 >
                   {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL CREAR */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-[#000000]/90 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-md bg-[#111111] border border-white/10 rounded-[40px] p-8 shadow-2xl space-y-6">
+            <h3 className="text-2xl font-serif font-bold text-white">Nuevo Socio</h3>
+            <form onSubmit={handleCreateCliente} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs uppercase font-black text-white/40 ml-2">Nombre *</label>
+                  <input
+                    required
+                    value={newCliente.nombre}
+                    onChange={(e) => setNewCliente({ ...newCliente, nombre: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-white/20 transition-all text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs uppercase font-black text-white/40 ml-2">Apellido</label>
+                  <input
+                    value={newCliente.apellido}
+                    onChange={(e) => setNewCliente({ ...newCliente, apellido: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-white/20 transition-all text-sm"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs uppercase font-black text-white/40 ml-2">Correo</label>
+                <input
+                  type="email"
+                  value={newCliente.email}
+                  onChange={(e) => setNewCliente({ ...newCliente, email: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-white/20 transition-all text-sm"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs uppercase font-black text-white/40 ml-2">WhatsApp *</label>
+                  <input
+                    required
+                    placeholder="+59399..."
+                    value={newCliente.telefono}
+                    onChange={(e) => setNewCliente({ ...newCliente, telefono: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-white/20 transition-all text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs uppercase font-black text-white/40 ml-2">Visitas Iniciales</label>
+                  <input
+                    type="number"
+                    value={newCliente.total_visitas}
+                    onChange={(e) =>
+                      setNewCliente({ ...newCliente, total_visitas: parseInt(e.target.value) || 0 })
+                    }
+                    className="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-white/20 transition-all text-sm text-white font-bold"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="flex-1 py-4 bg-white/5 rounded-2xl text-xs font-black uppercase tracking-widest text-white/40 hover:text-white transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  disabled={isSaving}
+                  type="submit"
+                  className="flex-1 py-4 bg-white text-black rounded-2xl text-xs font-black uppercase tracking-widest text-[#000000] hover:brightness-110 transition-all disabled:opacity-60"
+                >
+                  {isSaving ? 'Creando...' : 'Crear Socio'}
                 </button>
               </div>
             </form>
