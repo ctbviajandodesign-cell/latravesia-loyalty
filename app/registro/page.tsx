@@ -448,10 +448,10 @@ export default function RegistroPage() {
             </div>
 
             <h1 className="text-[34px] font-bold text-[#1C1C1E] leading-tight tracking-tight">
-              ¡Bienvenido!
+              ¡Ganaste!
             </h1>
             <p className="text-[17px] text-[#636366] mt-2 mb-8">
-              Ya eres parte del club de La Travesía
+              ¡Bienvenido! Ya eres parte del club de La Travesía
             </p>
 
             <div className="w-full bg-white border border-[#E5E5EA] rounded-3xl p-6 mb-6 shadow-sm">

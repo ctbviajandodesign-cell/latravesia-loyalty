@@ -13,8 +13,6 @@ export default function Ruleta({ onWin }: RuletaProps) {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [premios, setPremios] = useState<any[]>([]);
-  const [mustShowWin, setMustShowWin] = useState(false);
-  const [winningLabel, setWinningLabel] = useState('');
   
   useEffect(() => {
     fetchPremios();
@@ -60,7 +58,6 @@ export default function Ruleta({ onWin }: RuletaProps) {
     if (spinning || premios.length === 0) return;
 
     setSpinning(true);
-    setMustShowWin(false);
 
     // 1. Selección ponderada por probabilidad
     const totalProbabilidad = premios.reduce((acc, p) => acc + (parseFloat(p.probabilidad) || 0), 0);
@@ -98,8 +95,6 @@ export default function Ruleta({ onWin }: RuletaProps) {
 
     setTimeout(() => {
       setSpinning(false);
-      setWinningLabel(premioGanado.nombre);
-      setMustShowWin(true);
 
       confetti({
         particleCount: 200,
@@ -108,6 +103,8 @@ export default function Ruleta({ onWin }: RuletaProps) {
         colors: ['#FFD700', '#FFFFFF', '#FFC107', '#E5E5EA', '#FFA000'], // Bright gold and white for dark background
         ticks: 300
       });
+      
+      onWin(premioGanado.nombre);
     }, 4000);
   };
 
@@ -121,7 +118,7 @@ export default function Ruleta({ onWin }: RuletaProps) {
   const segmentSize = 360 / premios.length;
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-[340px] mx-auto">
+    <div className="flex flex-col items-center justify-center w-full max-w-[300px] mx-auto">
       
       {/* TÍTULO - Más minimalista para no empujar la ruleta */}
       <div className="mb-4 text-center space-y-1 animate-in fade-in duration-700">
@@ -130,7 +127,7 @@ export default function Ruleta({ onWin }: RuletaProps) {
       </div>
 
       {/* CONTENEDOR DE LA RULETA */}
-      <div className="relative w-full aspect-square max-w-[300px] mx-auto select-none touch-none">
+      <div className="relative w-full aspect-square max-w-[260px] mx-auto select-none touch-none">
         
         {/* PUNTERO */}
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-50">
@@ -157,7 +154,9 @@ export default function Ruleta({ onWin }: RuletaProps) {
                 const largeArc = segmentSize > 180 ? 1 : 0;
                 
                 const pathData = `M 50 50 L ${x1} ${y1} A 50 50 0 ${largeArc} 1 ${x2} ${y2} Z`;
-                const isEven = i % 2 === 0;
+                
+                const vibrantColors = ['#FF3B30', '#007AFF', '#34C759', '#FF9500', '#AF52DE', '#FF2D55'];
+                const sliceColor = vibrantColors[i % vibrantColors.length];
 
                 // Texto dinámico — tamaños más pequeños (solicitado por usuario)
                 const textLength = premio.nombre.length;
@@ -167,7 +166,7 @@ export default function Ruleta({ onWin }: RuletaProps) {
                   <g key={i}>
                     <path 
                       d={pathData} 
-                      fill={isEven ? "#333333" : "#111111"}
+                      fill={sliceColor}
                       stroke="#ffffff"
                       strokeOpacity="0.1"
                       strokeWidth="0.2"
@@ -205,7 +204,7 @@ export default function Ruleta({ onWin }: RuletaProps) {
         </div>
       </div>
 
-      <div className="relative w-full mt-10 px-2">
+      <div className="relative w-full mt-4 px-2">
         <button 
           onClick={handleSpin}
           disabled={spinning}
@@ -220,30 +219,6 @@ export default function Ruleta({ onWin }: RuletaProps) {
           {spinning ? 'GIRANDO...' : 'GIRAR PARA GANAR'}
         </button>
       </div>
-
-      {mustShowWin && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#000000]/95 backdrop-blur-2xl animate-in fade-in">
-          <div className="text-center space-y-8 animate-in zoom-in duration-500 max-w-sm w-full">
-            <div className="w-24 h-24 bg-white rounded-[32px] mx-auto flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.2)]">
-               <Trophy size={48} className="text-black" />
-            </div>
-            <div className="space-y-2">
-              <p className="text-white/60 font-black uppercase tracking-[0.4em] text-[10px]">¡Felicidades!</p>
-              <h4 className="text-4xl font-serif font-bold text-white uppercase leading-tight">{winningLabel}</h4>
-            </div>
-            
-            <button 
-              onClick={() => {
-                setMustShowWin(false);
-                onWin(winningLabel);
-              }}
-              className="w-full py-4 rounded-2xl font-black text-xs tracking-widest uppercase bg-white text-black hover:bg-[#E5E5EA] transition-all shadow-lg active:scale-95"
-            >
-              Continuar
-            </button>
-          </div>
-        </div>
-      )}
 
       <style jsx>{`
         .cubic-bezier {

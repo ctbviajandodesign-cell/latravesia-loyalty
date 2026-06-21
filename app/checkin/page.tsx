@@ -39,7 +39,7 @@ function CheckInContent() {
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
   const [cliente, setCliente] = useState<any>(null);
-  const [visitData, setVisitData] = useState<{ nuevasVisitas: number; meta: number } | null>(null);
+  const [visitData, setVisitData] = useState<{ nuevasVisitas: number; meta: number; premio_ganado?: string } | null>(null);
   const [alreadyToday, setAlreadyToday] = useState(false);
   const [reviewOpened, setReviewOpened] = useState(false);
   const [googleReviewLink, setGoogleReviewLink] = useState('https://g.page/r/CSyFh_Ou1msUEBM/review');
@@ -214,7 +214,7 @@ function CheckInContent() {
             {step === 'phone' && 'Registrar visita'}
             {step === 'code' && 'Validar entrada'}
             {step === 'review' && 'Tu opinión'}
-            {step === 'success' && (alreadyToday ? '¡Hola de nuevo!' : '¡Visita registrada!')}
+            {step === 'success' && (alreadyToday ? '¡Hola de nuevo!' : visitData?.premio_ganado ? '¡Felicidades, ganaste!' : '¡Visita registrada!')}
           </h1>
           <p className="text-[17px] text-[#636366] mt-1">
             {step === 'phone' && 'Ingresa tu número de WhatsApp'}
