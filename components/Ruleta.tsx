@@ -105,7 +105,7 @@ export default function Ruleta({ onWin }: RuletaProps) {
         particleCount: 200,
         spread: 90,
         origin: { y: 0.7 },
-        colors: ['#ffffff', '#cccccc', '#888888', '#111111'],
+        colors: ['#FFD700', '#FFFFFF', '#FFC107', '#E5E5EA', '#FFA000'], // Bright gold and white for dark background
         ticks: 300
       });
     }, 4000);
@@ -125,8 +125,8 @@ export default function Ruleta({ onWin }: RuletaProps) {
       
       {/* TÍTULO - Más minimalista para no empujar la ruleta */}
       <div className="mb-4 text-center space-y-1 animate-in fade-in duration-700">
-        <h3 className="text-xl font-serif font-bold text-white tracking-tight">Tu Premio Especial</h3>
-        <div className="w-8 h-0.5 bg-white mx-auto rounded-full opacity-30"></div>
+        <h3 className="text-xl font-serif font-bold text-[#1C1C1E] tracking-tight">Tu Premio Especial</h3>
+        <div className="w-8 h-0.5 bg-[#1C1C1E] mx-auto rounded-full opacity-30"></div>
       </div>
 
       {/* CONTENEDOR DE LA RULETA */}
@@ -167,7 +167,7 @@ export default function Ruleta({ onWin }: RuletaProps) {
                   <g key={i}>
                     <path 
                       d={pathData} 
-                      fill={isEven ? "#1A1A1A" : "#0A0A0A"}
+                      fill={isEven ? "#333333" : "#111111"}
                       stroke="#ffffff"
                       strokeOpacity="0.1"
                       strokeWidth="0.2"
@@ -212,8 +212,8 @@ export default function Ruleta({ onWin }: RuletaProps) {
           className={`
             w-full group relative py-5 rounded-2xl font-black text-[11px] tracking-[0.4em] uppercase transition-all duration-500
             ${spinning 
-              ? 'bg-white/5 text-white/20 cursor-not-allowed' 
-              : 'bg-white text-black shadow-[0_10px_40px_rgba(255,255,255,0.2)] hover:bg-[#E5E5EA] active:scale-95'
+              ? 'bg-[#E5E5EA] text-[#AEAEB2] cursor-not-allowed' 
+              : 'bg-[#111111] text-white shadow-[0_10px_40px_rgba(0,0,0,0.15)] hover:bg-[#2C2C2E] active:scale-95'
             }
           `}
         >
