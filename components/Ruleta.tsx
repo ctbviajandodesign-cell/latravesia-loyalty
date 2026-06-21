@@ -161,7 +161,7 @@ export default function Ruleta({ onWin }: RuletaProps) {
 
                 // Texto dinámico — tamaños más pequeños (solicitado por usuario)
                 const textLength = premio.nombre.length;
-                const fontSize = textLength > 18 ? '2.5' : textLength > 12 ? '3.2' : '4.0';
+                const fontSize = textLength > 18 ? '2.2' : textLength > 12 ? '2.8' : '3.6';
 
                 return (
                   <g key={i}>
@@ -233,7 +233,10 @@ export default function Ruleta({ onWin }: RuletaProps) {
             </div>
             
             <button 
-              onClick={() => onWin(winningLabel)}
+              onClick={() => {
+                setMustShowWin(false);
+                onWin(winningLabel);
+              }}
               className="w-full py-4 rounded-2xl font-black text-xs tracking-widest uppercase bg-white text-black hover:bg-[#E5E5EA] transition-all shadow-lg active:scale-95"
             >
               Continuar

@@ -124,14 +124,16 @@ function CheckInContent() {
     if (isNew) {
       const savedId = localStorage.getItem('travesia_cliente_id');
       if (savedId) {
+        const hoy = new Date().toISOString().split('T')[0];
         Promise.all([
           supabase.from('clientes').select('nombre, apellido, total_visitas').eq('id', savedId).single(),
           supabase.from('config').select('valor').eq('clave', 'visitas_para_premio').single(),
-        ]).then(([{ data: c }, { data: m }]) => {
+          supabase.from('visitas').select('id').eq('cliente_id', savedId).eq('fecha', hoy)
+        ]).then(([{ data: c }, { data: m }, { data: v }]) => {
           if (c) {
             setCliente(c);
             setVisitData({ nuevasVisitas: c.total_visitas, meta: parseInt(m?.valor || '10') });
-            setAlreadyToday(false);
+            setAlreadyToday(v && v.length > 0 ? true : false);
             setStep('success');
           }
         });
