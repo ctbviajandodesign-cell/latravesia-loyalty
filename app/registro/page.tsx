@@ -9,7 +9,6 @@ import {
 import Ruleta from '@/components/Ruleta';
 import { useRouter } from 'next/navigation';
 import { sendNotification } from '@/app/actions/notifications';
-import { getCurrentDailyCode } from '@/app/actions/daily-code';
 import Image from 'next/image';
 
 const COUNTRY_CODES = [
@@ -100,7 +99,6 @@ export default function RegistroPage() {
     nombre: '', apellido: '', email: '', telefono: '',
     fecha_nacimiento: '', genero: 'Otro', joinWhatsApp: true,
   });
-  const [dailyCodeInput, setDailyCodeInput] = useState('');
   const [premioFinal, setPremioFinal] = useState<string | null>(null);
   const [telefonoFinal, setTelefonoFinal] = useState('');
   const [saveLoading, setSaveLoading] = useState(false);
@@ -163,21 +161,10 @@ export default function RegistroPage() {
       setFormError('Por favor ingresa tu fecha de cumpleaños.');
       return;
     }
-    if (!dailyCodeInput) {
-      setFormError('Por favor ingresa el código del local.');
-      return;
-    }
     setFormLoading(true);
     setFormError('');
 
     try {
-      const serverCode = await getCurrentDailyCode();
-      if (dailyCodeInput.trim() !== serverCode.trim()) {
-        setFormError('Código incorrecto. Pídelo al personal.');
-        setFormLoading(false);
-        return;
-      }
-
       const numLimpio = formData.telefono.replace(/^0/, '').replace(/\s+/g, '');
       const tel = `${countryCode}${numLimpio}`;
       const { data: existing } = await supabase
@@ -337,21 +324,6 @@ export default function RegistroPage() {
                     </button>
                   ))}
                 </div>
-              </div>
-
-              {/* Código del Local */}
-              <div className="bg-white rounded-2xl border border-[#E5E5EA] p-4 mt-2">
-                <label className="block text-[13px] font-semibold text-[#636366] mb-2">Código del local (Pídelo al personal)</label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={dailyCodeInput}
-                  onChange={e => setDailyCodeInput(e.target.value.replace(/[^0-9]/g, ''))}
-                  placeholder="****"
-                  maxLength={4}
-                  required
-                  className="w-full text-[17px] text-[#1C1C1E] bg-transparent outline-none placeholder:text-[#AEAEB2] tracking-[0.3em] font-medium"
-                />
               </div>
 
               {formError && (
