@@ -14,7 +14,9 @@ import {
   Trash2,
   Edit2,
   Eye,
+  Award,
 } from 'lucide-react';
+import { canjearPremio } from '@/app/actions/clientes';
 
 const PAGE_SIZE = 25;
 
@@ -51,6 +53,8 @@ export default function ClientesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(0);
+  const [metaPremio, setMetaPremio] = useState(10);
+  const [isRedeeming, setIsRedeeming] = useState<string | null>(null);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -69,6 +73,10 @@ export default function ClientesPage() {
   const fetchClientes = useCallback(async () => {
     setLoading(true);
     try {
+      // Obtener meta primero
+      const { data: metaData } = await supabase.from('config').select('valor').eq('clave', 'visitas_para_premio').single();
+      if (metaData?.valor) setMetaPremio(parseInt(metaData.valor));
+
       let query = supabase
         .from('clientes')
         .select('*', { count: 'exact' })
@@ -132,6 +140,24 @@ export default function ClientesPage() {
       fetchClientes();
     } catch {
       alert('Error al eliminar');
+    }
+  };
+
+  const handleRedeem = async (clienteId: string) => {
+    if (!confirm('¿Estás seguro de canjear el premio para este cliente? Esto restará sus visitas acumuladas y registrará la entrega del premio.')) return;
+    setIsRedeeming(clienteId);
+    try {
+      const res = await canjearPremio(clienteId);
+      if (res.success) {
+        // success alert or just refresh
+        fetchClientes();
+      } else {
+        alert(res.error || 'Error al canjear el premio');
+      }
+    } catch (e) {
+      alert('Error inesperado');
+    } finally {
+      setIsRedeeming(null);
     }
   };
 
@@ -207,13 +233,31 @@ export default function ClientesPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="p-8 text-center">
-                        <span className="text-2xl font-serif font-black text-white">
+                      <td className="p-8 text-center relative">
+                        {cliente.total_visitas >= metaPremio && (
+                          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full flex justify-center pointer-events-none">
+                            <div className="bg-[#D4AF37]/20 border border-[#D4AF37]/50 text-[#D4AF37] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-[0_0_15px_rgba(212,175,55,0.2)] -mt-8">
+                              <Award size={12} /> Premio Disponible
+                            </div>
+                          </div>
+                        )}
+                        <span className={`text-2xl font-serif font-black ${cliente.total_visitas >= metaPremio ? 'text-[#D4AF37]' : 'text-white'}`}>
                           {cliente.total_visitas || 0}
                         </span>
+                        <span className="text-white/30 text-xs ml-1">/ {metaPremio}</span>
                       </td>
                       <td className="p-8">
                         <div className="flex items-center justify-end gap-3">
+                          {cliente.total_visitas >= metaPremio && (
+                            <button
+                              onClick={() => handleRedeem(cliente.id)}
+                              disabled={isRedeeming === cliente.id}
+                              className="px-4 py-3 bg-[#D4AF37] text-black font-black uppercase text-xs tracking-widest rounded-xl hover:brightness-110 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+                              title="Canjear Premio"
+                            >
+                              {isRedeeming === cliente.id ? '...' : 'Canjear'}
+                            </button>
+                          )}
                           <button
                             onClick={() => { setSelectedCliente(cliente); setIsDetailsOpen(true); }}
                             className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-white transition-all"

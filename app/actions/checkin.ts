@@ -62,7 +62,7 @@ export async function validateCheckin(clienteId: string, code: string) {
     .insert({ cliente_id: clienteId, fecha: today })
     .then(() => null, () => null);
 
-  if (nuevasVisitas >= meta) {
+  if (nuevasVisitas === meta) {
     sendNotification('LOYALTY_REWARD', { ...cliente, total_visitas: nuevasVisitas }).catch(console.error);
   }
 
