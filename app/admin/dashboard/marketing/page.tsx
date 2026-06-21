@@ -104,7 +104,7 @@ export default function MarketingPage() {
       setPreviewImage('');
       return;
     }
-    if (url.includes('unsplash.com') || url.includes('pexels.com')) {
+    if (url.includes('unsplash.com')) {
       try {
         const resolved = await resolveUnsplashUrl(url);
         setPreviewImage(resolved);
@@ -425,7 +425,7 @@ export default function MarketingPage() {
 
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
-                   <label className="text-xs font-black uppercase tracking-widest text-white/30 ml-2">Imagen (Link Unsplash / Pexels)</label>
+                   <label className="text-xs font-black uppercase tracking-widest text-white/30 ml-2">Imagen (Link Unsplash / Directo)</label>
                    <input 
                     type="text" 
                     value={marketingData.image_url}
