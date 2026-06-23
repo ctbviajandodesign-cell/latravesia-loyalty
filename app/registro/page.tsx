@@ -210,13 +210,13 @@ export default function RegistroPage() {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-[#F2F2F7] flex items-center justify-center">
+    <div className="min-h-screen bg-transparent flex items-center justify-center">
       <Loader2 className="animate-spin w-8 h-8" style={{ color: BRAND }} />
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-[#F2F2F7] text-[#1C1C1E] overflow-x-hidden">
+    <main className="min-h-screen bg-transparent text-[#1C1C1E] overflow-x-hidden relative z-10">
       <div className="max-w-md mx-auto min-h-screen flex flex-col px-4 pt-10 pb-8">
 
         {/* ── Logo ── */}

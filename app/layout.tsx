@@ -19,6 +19,8 @@ export const viewport = {
   initialScale: 1,
 };
 
+import BackgroundEffects from "@/components/BackgroundEffects";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -26,7 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <BackgroundEffects />
+        {children}
+      </body>
     </html>
   );
 }

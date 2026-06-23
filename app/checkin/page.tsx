@@ -22,7 +22,7 @@ const COUNTRY_CODES = [
 export default function CheckInPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#F2F2F7] flex items-center justify-center">
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
         <Loader2 className="animate-spin w-8 h-8" style={{ color: BRAND }} />
       </div>
     }>
@@ -193,7 +193,7 @@ function CheckInContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F2F2F7] flex flex-col">
+    <div className="min-h-screen bg-transparent flex flex-col relative z-10">
       <div className="max-w-md mx-auto w-full flex flex-col flex-1 px-4 pt-10 pb-8">
 
         {/* Logo */}

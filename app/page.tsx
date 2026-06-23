@@ -10,8 +10,8 @@ export default function QRLanding() {
   const router = useRouter();
 
   return (
-    <main className="min-h-screen bg-[#F2F2F7] flex flex-col items-center justify-center px-4">
-      <div className="max-w-sm w-full bg-white p-6 sm:p-8 rounded-[2rem] shadow-xl border border-[#E5E5EA] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <main className="min-h-screen bg-transparent flex flex-col items-center justify-center px-4 relative z-10">
+      <div className="max-w-sm w-full bg-white/95 backdrop-blur-sm p-6 sm:p-8 rounded-[2rem] shadow-xl border border-white/20 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         
         <div className="flex flex-col items-center">
           <Image
