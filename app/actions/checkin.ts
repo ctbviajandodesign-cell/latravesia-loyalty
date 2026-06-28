@@ -5,13 +5,32 @@ import { getCurrentDailyCode } from './daily-code';
 import { sendNotification } from './notifications';
 
 export async function findClientByPhone(telefono: string) {
-  const { data, error } = await supabaseAdmin
+  const cleanPhone = telefono.replace(/\s+/g, '');
+
+  // 1. Try exact match
+  const response = await supabaseAdmin
     .from('clientes')
     .select('id, nombre, apellido, total_visitas, fecha_ultima_visita')
-    .eq('telefono', telefono)
-    .single();
+    .eq('telefono', cleanPhone)
+    .limit(1)
+    .maybeSingle();
+    
+  let data = response.data;
 
-  if (error || !data) {
+  // 2. If not found, try matching the local part (last 9 digits)
+  if (!data && cleanPhone.length >= 9) {
+    const localPart = cleanPhone.slice(-9);
+    const { data: fallbackData } = await supabaseAdmin
+      .from('clientes')
+      .select('id, nombre, apellido, total_visitas, fecha_ultima_visita')
+      .like('telefono', `%${localPart}%`)
+      .limit(1)
+      .maybeSingle();
+    
+    data = fallbackData;
+  }
+
+  if (!data) {
     return { error: 'Número no encontrado. Si eres nuevo, regístrate.' };
   }
 
@@ -30,13 +49,13 @@ export async function validateCheckin(clienteId: string, code: string) {
     .from('clientes')
     .select('*')
     .eq('id', clienteId)
-    .single();
+    .maybeSingle();
 
   if (!cliente) return { error: 'Cliente no encontrado.' };
 
   if (cliente.fecha_ultima_visita === today) {
     const { data: metaRowDup } = await supabaseAdmin
-      .from('config').select('valor').eq('clave', 'visitas_para_premio').single();
+      .from('config').select('valor').eq('clave', 'visitas_para_premio').maybeSingle();
     return {
       error: '¡Ya registraste tu visita de hoy!',
       alreadyToday: true,
@@ -47,7 +66,7 @@ export async function validateCheckin(clienteId: string, code: string) {
   }
 
   const { data: metaRow } = await supabaseAdmin
-    .from('config').select('valor').eq('clave', 'visitas_para_premio').single();
+    .from('config').select('valor').eq('clave', 'visitas_para_premio').maybeSingle();
   const meta = parseInt(metaRow?.valor || '10');
 
   const nuevasVisitas = (cliente.total_visitas || 0) + 1;

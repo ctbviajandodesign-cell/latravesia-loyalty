@@ -79,7 +79,7 @@ export default function ClientesPage() {
     setLoading(true);
     try {
       // Obtener meta primero
-      const { data: metaData } = await supabase.from('config').select('valor').eq('clave', 'visitas_para_premio').single();
+      const { data: metaData } = await supabase.from('config').select('valor').eq('clave', 'visitas_para_premio').maybeSingle();
       if (metaData?.valor) setMetaPremio(parseInt(metaData.valor));
 
       let query = supabase

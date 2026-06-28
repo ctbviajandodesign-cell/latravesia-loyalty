@@ -126,8 +126,8 @@ function CheckInContent() {
       if (savedId) {
         const hoy = new Date().toISOString().split('T')[0];
         Promise.all([
-          supabase.from('clientes').select('nombre, apellido, total_visitas').eq('id', savedId).single(),
-          supabase.from('config').select('valor').eq('clave', 'visitas_para_premio').single(),
+          supabase.from('clientes').select('nombre, apellido, total_visitas').eq('id', savedId).maybeSingle(),
+          supabase.from('config').select('valor').eq('clave', 'visitas_para_premio').maybeSingle(),
           supabase.from('visitas').select('id').eq('cliente_id', savedId).eq('fecha', hoy)
         ]).then(([{ data: c }, { data: m }, { data: v }]) => {
           if (c) {

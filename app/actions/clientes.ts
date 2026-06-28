@@ -9,7 +9,7 @@ export async function canjearPremio(clienteId: string) {
       .from('config')
       .select('valor')
       .eq('clave', 'visitas_para_premio')
-      .single();
+      .maybeSingle();
       
     const meta = parseInt(metaRow?.valor || '10');
 
@@ -18,7 +18,7 @@ export async function canjearPremio(clienteId: string) {
       .from('clientes')
       .select('id, total_visitas')
       .eq('id', clienteId)
-      .single();
+      .maybeSingle();
 
     if (!cliente) return { success: false, error: 'Cliente no encontrado' };
 
@@ -89,7 +89,7 @@ export async function createClienteAdmin(data: {
       .from('clientes')
       .select('id')
       .eq('telefono', data.telefono)
-      .single();
+      .maybeSingle();
 
     if (existente) {
       return { success: false, error: 'Ya existe un cliente con este teléfono.' };

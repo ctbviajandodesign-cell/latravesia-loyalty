@@ -116,7 +116,7 @@ export default function RegistroPage() {
     async function init() {
       const savedId = localStorage.getItem('travesia_cliente_id');
       if (savedId) {
-        const { data } = await supabase.from('clientes').select('id').eq('id', savedId).single();
+        const { data } = await supabase.from('clientes').select('id').eq('id', savedId).maybeSingle();
         if (data) { router.replace('/checkin'); return; }
         localStorage.removeItem('travesia_cliente_id');
       }
@@ -167,8 +167,17 @@ export default function RegistroPage() {
     try {
       const numLimpio = formData.telefono.replace(/^0/, '').replace(/\s+/g, '');
       const tel = `${countryCode}${numLimpio}`;
-      const { data: existing } = await supabase
-        .from('clientes').select('id').eq('telefono', tel).maybeSingle();
+      
+      let { data: existing } = await supabase
+        .from('clientes').select('id').eq('telefono', tel).limit(1).maybeSingle();
+
+      if (!existing && numLimpio.length >= 9) {
+        const localPart = numLimpio.slice(-9);
+        const { data: fallbackData } = await supabase
+          .from('clientes').select('id').like('telefono', `%${localPart}%`).limit(1).maybeSingle();
+        existing = fallbackData;
+      }
+      
       if (existing) {
         setFormError('Este número ya está registrado. Ve a Registrar Visita.');
         setFormLoading(false);

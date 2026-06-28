@@ -329,7 +329,7 @@ export default function MarketingPage() {
           return;
         }
       } else {
-        const { data: config } = await supabase.from('config').select('valor').eq('clave', 'admin_email').single();
+        const { data: config } = await supabase.from('config').select('valor').eq('clave', 'admin_email').maybeSingle();
         targetTo = config?.valor || '';
       }
 
