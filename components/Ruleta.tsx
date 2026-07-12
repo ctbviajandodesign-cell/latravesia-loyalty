@@ -118,16 +118,10 @@ export default function Ruleta({ onWin }: RuletaProps) {
   const segmentSize = 360 / premios.length;
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-[300px] mx-auto">
+    <div className="flex flex-col items-center justify-center w-full max-w-[360px] mx-auto">
       
-      {/* TÍTULO - Más minimalista para no empujar la ruleta */}
-      <div className="mb-4 text-center space-y-1 animate-in fade-in duration-700">
-        <h3 className="text-xl font-serif font-bold text-[#1C1C1E] tracking-tight">Tu Premio Especial</h3>
-        <div className="w-8 h-0.5 bg-[#1C1C1E] mx-auto rounded-full opacity-30"></div>
-      </div>
-
       {/* CONTENEDOR DE LA RULETA */}
-      <div className="relative w-full aspect-square max-w-[260px] mx-auto select-none touch-none">
+      <div className="relative w-full aspect-square max-w-[320px] mx-auto select-none touch-none">
         
         {/* PUNTERO */}
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-50">
@@ -158,9 +152,9 @@ export default function Ruleta({ onWin }: RuletaProps) {
                 const vibrantColors = ['#FF3B30', '#007AFF', '#34C759', '#FF9500', '#AF52DE', '#FF2D55'];
                 const sliceColor = vibrantColors[i % vibrantColors.length];
 
-                // Texto dinámico — tamaños más pequeños (solicitado por usuario)
+                // Texto dinámico — aumentado para mejor legibilidad en móviles
                 const textLength = premio.nombre.length;
-                const fontSize = textLength > 18 ? '2.2' : textLength > 12 ? '2.8' : '3.6';
+                const fontSize = textLength > 18 ? '3.5' : textLength > 12 ? '4.5' : '5.5';
 
                 return (
                   <g key={i}>
@@ -174,7 +168,7 @@ export default function Ruleta({ onWin }: RuletaProps) {
                     <g transform={`rotate(${startAngle + segmentSize / 2} 50 50)`}>
                       <text
                         x="50"
-                        y="22"
+                        y="24"
                         fill="#ffffff"
                         fontSize={fontSize}
                         fontWeight="900"

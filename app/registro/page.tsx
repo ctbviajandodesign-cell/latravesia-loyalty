@@ -227,7 +227,7 @@ export default function RegistroPage() {
       <div className="max-w-md mx-auto min-h-screen flex flex-col px-4 pt-10 pb-8">
 
         {/* ── Logo ── */}
-        <div className="flex flex-col items-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+        <div className={`flex flex-col items-center ${step === 'game' ? 'mb-2' : 'mb-8'} animate-in fade-in slide-in-from-top-4 duration-700`}>
           <Image
             src="/logo_travesia.png"
             alt="La Travesía"
@@ -426,7 +426,7 @@ export default function RegistroPage() {
 
         {/* ══════════════════════ RULETA ══════════════════════ */}
         {step === 'game' && (
-          <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in duration-500 select-none touch-none overflow-hidden">
+          <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in duration-500 select-none touch-none overflow-hidden pb-4">
             {saveLoading && (
               <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-50">
                 <Loader2 className="animate-spin w-10 h-10" style={{ color: BRAND }} />
@@ -437,10 +437,10 @@ export default function RegistroPage() {
                 {formError}
               </div>
             )}
-            <p className="text-[22px] font-semibold text-[#1C1C1E] mb-4 text-center">
+            <h2 className="text-[28px] font-bold text-[#1C1C1E] mb-6 text-center leading-tight tracking-tight">
               ¡Gira la ruleta!
-            </p>
-            <div className="w-full max-w-[320px] mx-auto">
+            </h2>
+            <div className="w-full max-w-[360px] mx-auto">
               <Ruleta onWin={handleRegistroFinal} />
             </div>
           </div>
