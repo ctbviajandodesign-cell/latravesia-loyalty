@@ -1,8 +1,12 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { getEcuadorMonthDay, getEcuadorDateStringDaysAgo } from '@/lib/date';
 import { getCurrentDailyCode, rotateDailyCode } from '@/app/actions/daily-code';
+import { triggerBirthdayEmails } from '@/app/actions/birthdays';
 import {
   Users,
   MapPin,
@@ -16,7 +20,8 @@ import {
   ShieldCheck,
   Calendar,
   KeyRound,
-  RefreshCw
+  RefreshCw,
+  Gift
 } from 'lucide-react';
 
 export default function AdminOverview() {
@@ -24,12 +29,16 @@ export default function AdminOverview() {
     totalClientes: 0,
     totalVisitas: 0,
     cumplesHoy: 0,
-    ultimosClientes: [] as any[]
+    ultimosClientes: [] as any[],
+    clientesEnRiesgo: [] as any[],
+    scoreFidelidad: '0%'
   });
+  const [activeTab, setActiveTab] = useState<'nuevos' | 'riesgo'>('nuevos');
   const [loading, setLoading] = useState(true);
   const [dailyCode, setDailyCode] = useState<string>('····');
   const [rotating, setRotating] = useState(false);
   const [rotated, setRotated] = useState(false);
+  const [sendingGifts, setSendingGifts] = useState(false);
 
   useEffect(() => {
     fetchStats();
@@ -68,14 +77,30 @@ export default function AdminOverview() {
       const { count: visitasCount } = await supabase.from('visitas').select('*', { count: 'exact', head: true });
       const visitasTotal = visitasCount || 0;
 
-      const hoy = new Date().toISOString().split('T')[0].slice(5); // MM-DD
+      const hoy = getEcuadorMonthDay();
       const { count: cumplesCount } = await supabase.from('clientes').select('*', { count: 'exact', head: true }).like('fecha_nacimiento', `%${hoy}`);
+
+      // Retención
+      const { count: returningCount } = await supabase.from('clientes').select('*', { count: 'exact', head: true }).gt('total_visitas', 1);
+      const retencion = clientesCount ? Math.round(((returningCount || 0) / clientesCount) * 100) : 0;
+
+      // Clientes en Riesgo (sin visita en 30 días, pero con >3 visitas)
+      const limitDate = getEcuadorDateStringDaysAgo(30);
+
+      const { data: riskData } = await supabase.from('clientes')
+        .select('*')
+        .gt('total_visitas', 3)
+        .lt('fecha_ultima_visita', limitDate)
+        .order('fecha_ultima_visita', { ascending: false })
+        .limit(5);
 
       setStats({
         totalClientes: clientesCount || 0,
         totalVisitas: visitasTotal,
         cumplesHoy: cumplesCount || 0,
-        ultimosClientes: clientesData || []
+        ultimosClientes: clientesData || [],
+        clientesEnRiesgo: riskData || [],
+        scoreFidelidad: `${retencion}%`
       });
     } catch (e) {
       console.error(e);
@@ -88,7 +113,7 @@ export default function AdminOverview() {
     { name: 'Total Miembros', value: stats.totalClientes, icon: Users, color: 'from-blue-500/20 to-blue-500/5', border: 'border-blue-500/20', text: 'text-blue-400' },
     { name: 'Visitas Registradas', value: stats.totalVisitas, icon: MapPin, color: 'from-[#333333]/20 to-travesia-gold/5', border: 'border-white/20', text: 'text-white' },
     { name: 'Cumpleaños Hoy', value: stats.cumplesHoy, icon: Cake, color: 'from-pink-500/20 to-pink-500/5', border: 'border-pink-500/20', text: 'text-pink-400' },
-    { name: 'Score Fidelidad', value: '98%', icon: Star, color: 'from-emerald-500/20 to-emerald-500/5', border: 'border-emerald-500/20', text: 'text-emerald-400' },
+    { name: 'Score Fidelidad', value: stats.scoreFidelidad, icon: Star, color: 'from-emerald-500/20 to-emerald-500/5', border: 'border-emerald-500/20', text: 'text-emerald-400' },
   ];
 
   const today = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -158,16 +183,22 @@ export default function AdminOverview() {
       {/* SECCIÓN INFERIOR: TABLA Y ACTIVIDAD */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         
-        {/* ÚLTIMOS REGISTROS (TABLA PRO) */}
+        {/* TABLAS PRO */}
         <div className="xl:col-span-2 space-y-6">
           <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-6 bg-white text-black rounded-full"></div>
-              <h3 className="text-2xl font-serif font-bold text-white tracking-tight">Nuevos Socios</h3>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('nuevos')}>
+                <div className={`w-1.5 h-6 rounded-full transition-colors ${activeTab === 'nuevos' ? 'bg-white' : 'bg-transparent'}`}></div>
+                <h3 className={`text-2xl font-serif font-bold tracking-tight transition-colors ${activeTab === 'nuevos' ? 'text-white' : 'text-white/40'}`}>Nuevos Socios</h3>
+              </div>
+              <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('riesgo')}>
+                <div className={`w-1.5 h-6 rounded-full transition-colors ${activeTab === 'riesgo' ? 'bg-red-500' : 'bg-transparent'}`}></div>
+                <h3 className={`text-2xl font-serif font-bold tracking-tight transition-colors ${activeTab === 'riesgo' ? 'text-red-400' : 'text-white/40'}`}>En Riesgo</h3>
+              </div>
             </div>
-            <button className="text-xs uppercase tracking-widest font-black text-white hover:text-white transition-colors flex items-center gap-2">
+            <Link href="/admin/dashboard/clientes" className="text-xs uppercase tracking-widest font-black text-white hover:text-white transition-colors flex items-center gap-2">
               Ver todos <ChevronRight size={14} />
-            </button>
+            </Link>
           </div>
 
           <div className="bg-[#111111]/40 backdrop-blur-xl border border-white/5 rounded-[40px] overflow-hidden shadow-2xl">
@@ -177,12 +208,12 @@ export default function AdminOverview() {
                   <tr className="border-b border-white/5">
                     <th className="p-4 md:p-6 lg:p-8 text-xs uppercase tracking-[0.3em] font-black text-white/30">Cliente</th>
                     <th className="p-4 md:p-6 lg:p-8 text-xs uppercase tracking-[0.3em] font-black text-white/30">Contacto</th>
-                    <th className="p-4 md:p-6 lg:p-8 text-xs uppercase tracking-[0.3em] font-black text-white/30">Estado</th>
+                    <th className="p-4 md:p-6 lg:p-8 text-xs uppercase tracking-[0.3em] font-black text-white/30">{activeTab === 'riesgo' ? 'Progreso' : 'Estado'}</th>
                     <th className="p-4 md:p-6 lg:p-8 text-xs uppercase tracking-[0.3em] font-black text-white/30">Acción</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {stats.ultimosClientes.map((cliente) => (
+                  {(activeTab === 'nuevos' ? stats.ultimosClientes : stats.clientesEnRiesgo).map((cliente) => (
                     <tr key={cliente.id} className="group hover:bg-white/5 transition-colors">
                       <td className="p-4 md:p-6 lg:p-8">
                         <div className="flex items-center gap-4">
@@ -197,19 +228,28 @@ export default function AdminOverview() {
                       </td>
                       <td className="p-4 md:p-6 lg:p-8">
                         <div className="space-y-1">
-                          <p className="text-sm font-medium text-white/80">{cliente.telefono}</p>
+                          <p className="text-sm font-medium text-white/80">({cliente.codigo_pais || '+593'}) {cliente.telefono}</p>
                           <p className="text-xs text-white/40">{cliente.email}</p>
                         </div>
                       </td>
                       <td className="p-4 md:p-6 lg:p-8">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black uppercase tracking-widest">
-                          <ShieldCheck size={12} /> Activo
-                        </span>
+                        {activeTab === 'nuevos' ? (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black uppercase tracking-widest">
+                            <ShieldCheck size={12} /> Activo
+                          </span>
+                        ) : (
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-black uppercase tracking-widest">
+                              <ShieldCheck size={12} /> {cliente.total_visitas} visitas
+                            </span>
+                            <p className="text-xs text-white/40">Inactivo desde {cliente.fecha_ultima_visita}</p>
+                          </div>
+                        )}
                       </td>
                       <td className="p-4 md:p-6 lg:p-8">
-                        <button aria-label="Ver detalle del cliente" className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-white hover:border-white/40 transition-all">
+                        <Link href="/admin/dashboard/clientes" aria-label="Ver detalle del cliente" className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-white hover:border-white/40 transition-all inline-block">
                           <ChevronRight size={18} />
-                        </button>
+                        </Link>
                       </td>
                     </tr>
                   ))}
@@ -233,14 +273,31 @@ export default function AdminOverview() {
                   <Calendar size={20} />
                 </div>
                 <div>
-                  <p className="font-bold text-white">Campaña de Mayo</p>
+                  <p className="font-bold text-white">Automatización Activa</p>
                   <p className="text-sm text-white/40 leading-relaxed mt-1">
-                    Tienes {stats.cumplesHoy} clientes cumpliendo años hoy. Recuerda enviarles su regalo digital.
+                    Hay {stats.cumplesHoy} clientes cumpliendo años hoy. El cron de Vercel enviará sus regalos digitales automáticamente.
                   </p>
                 </div>
               </div>
-              <button className="w-full py-4 bg-pink-500/10 border border-pink-500/20 text-pink-400 rounded-2xl font-black text-xs tracking-widest uppercase hover:bg-pink-500 hover:text-white transition-all">
-                Lanzar Notificaciones
+              <button 
+                onClick={async () => {
+                  setSendingGifts(true);
+                  const res = await triggerBirthdayEmails();
+                  alert(res.message);
+                  setSendingGifts(false);
+                }}
+                disabled={sendingGifts || stats.cumplesHoy === 0}
+                className={`w-full py-4 border rounded-2xl font-black text-xs tracking-widest uppercase flex items-center justify-center gap-2 transition-all
+                  ${stats.cumplesHoy === 0 
+                    ? 'bg-white/5 border-white/10 text-white/20 cursor-not-allowed' 
+                    : 'bg-pink-500/10 border-pink-500/20 text-pink-400 hover:bg-pink-500/20 hover:scale-[1.02] cursor-pointer shadow-[0_0_15px_rgba(236,72,153,0.1)]'
+                  }`}
+              >
+                {sendingGifts ? (
+                  <><RefreshCw size={14} className="animate-spin" /> ENVIANDO...</>
+                ) : (
+                  <><Gift size={16} /> ENVIAR REGALOS AHORA</>
+                )}
               </button>
             </div>
 

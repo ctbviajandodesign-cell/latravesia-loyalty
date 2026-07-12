@@ -1,9 +1,10 @@
 'use server';
 
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getEcuadorDateString } from '@/lib/date';
 
 export async function getCurrentDailyCode(): Promise<string> {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getEcuadorDateString();
 
   const { data } = await supabaseAdmin
     .from('config')
@@ -19,7 +20,7 @@ export async function getCurrentDailyCode(): Promise<string> {
 }
 
 export async function rotateDailyCode(): Promise<string> {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getEcuadorDateString();
   const newPin = String(Math.floor(1000 + Math.random() * 9000));
 
   await supabaseAdmin.from('config').upsert([

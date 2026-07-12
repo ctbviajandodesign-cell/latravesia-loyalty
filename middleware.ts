@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { verifySession } from '@/lib/session';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Solo protegemos las rutas que empiezan con /admin/dashboard
   if (path.startsWith('/admin/dashboard')) {
-    const session = request.cookies.get('admin_session');
+    const sessionCookie = request.cookies.get('admin_session')?.value;
+    const session = await verifySession(sessionCookie);
 
-    if (!session || session.value !== 'true') {
+    if (!session || session.role !== 'admin') {
       const url = request.nextUrl.clone();
       url.pathname = '/admin';
       return NextResponse.redirect(url);

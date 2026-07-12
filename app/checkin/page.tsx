@@ -6,8 +6,8 @@ import {
   Trophy, Star, AlertCircle, ArrowLeft, RefreshCw,
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import { findClientByPhone, validateCheckin } from '@/app/actions/checkin';
+import { getConfig, getCheckinInitialData } from '@/app/actions/public';
 import Image from 'next/image';
 
 const BRAND = '#111111';
@@ -112,28 +112,19 @@ function CheckInContent() {
       if (match) { setCountryCode(match[1]); setPhone(match[2]); }
     }
 
-    supabase.from('config').select('clave, valor').in('clave', ['google_review_link', 'google_maps_link'])
-      .then(({ data }) => {
-        if (!data) return;
-        const m: Record<string, string> = {};
-        data.forEach(({ clave, valor }) => { if (valor) m[clave] = valor; });
-        const link = m['google_review_link'] || m['google_maps_link'] || '';
-        if (link) setGoogleReviewLink(link);
-      });
+    getConfig(['google_review_link', 'google_maps_link']).then((m) => {
+      const link = m['google_review_link'] || m['google_maps_link'] || '';
+      if (link) setGoogleReviewLink(link);
+    });
 
     if (isNew) {
       const savedId = localStorage.getItem('travesia_cliente_id');
       if (savedId) {
-        const hoy = new Date().toISOString().split('T')[0];
-        Promise.all([
-          supabase.from('clientes').select('nombre, apellido, total_visitas').eq('id', savedId).maybeSingle(),
-          supabase.from('config').select('valor').eq('clave', 'visitas_para_premio').maybeSingle(),
-          supabase.from('visitas').select('id').eq('cliente_id', savedId).eq('fecha', hoy)
-        ]).then(([{ data: c }, { data: m }, { data: v }]) => {
-          if (c) {
-            setCliente(c);
-            setVisitData({ nuevasVisitas: c.total_visitas, meta: parseInt(m?.valor || '10') });
-            setAlreadyToday(v && v.length > 0 ? true : false);
+        getCheckinInitialData(savedId).then((res) => {
+          if (res.cliente) {
+            setCliente(res.cliente);
+            setVisitData({ nuevasVisitas: res.cliente.total_visitas, meta: res.meta });
+            setAlreadyToday(res.alreadyToday);
             setStep('success');
           }
         });
@@ -146,8 +137,11 @@ function CheckInContent() {
     setError('');
     setProcessing(true);
     try {
-      const fullPhone = `${countryCode}${phone.replace(/^0/, '').replace(/\s+/g, '')}`;
-      const result = await findClientByPhone(fullPhone);
+      const numLimpio = phone.replace(/^0/, '').replace(/\s+/g, '');
+      const localPhone = countryCode === '+593' ? `0${numLimpio}` : numLimpio;
+      const fullPhone = `${countryCode}${localPhone}`;
+
+      const result = await findClientByPhone(countryCode, localPhone);
       if (result.error) throw new Error(result.error);
       setCliente(result.cliente);
       setStep('code');
@@ -176,7 +170,14 @@ function CheckInContent() {
       setVisitData({ nuevasVisitas: result.nuevasVisitas!, meta: result.meta! });
       localStorage.setItem('travesia_cliente_id', result.cliente!.id);
       localStorage.setItem('travesia_phone', `${countryCode}${phone.replace(/^0/, '')}`);
-      setStep(result.showReview ? 'review' : 'success');
+      if (result.showReview && googleReviewLink) {
+        sessionStorage.setItem('chk_step', 'success');
+        sessionStorage.setItem('chk_cliente', JSON.stringify(result.cliente));
+        sessionStorage.setItem('chk_visit_data', JSON.stringify({ nuevasVisitas: result.nuevasVisitas!, meta: result.meta! }));
+        window.location.href = googleReviewLink;
+      } else {
+        setStep('success');
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {

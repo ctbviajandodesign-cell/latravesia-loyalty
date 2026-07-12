@@ -2,18 +2,13 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { createSession } from '@/lib/session';
 
 export async function login(password: string) {
   const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (password === adminPassword) {
-    const cookieStore = await cookies();
-    cookieStore.set('admin_session', 'true', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24, // 24 horas
-    });
+    await createSession();
     return { success: true };
   }
 

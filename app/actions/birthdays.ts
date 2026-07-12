@@ -1,19 +1,13 @@
-import { Resend } from 'resend';
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+'use server';
 
-import { formatUnsplashUrl } from '@/lib/unsplash';
+import { supabaseAdmin } from '@/lib/supabase-admin';
+import { Resend } from 'resend';
 import { resolveUnsplashUrl } from '@/app/actions/unsplash';
 import { getEcuadorMonthDay } from '@/lib/date';
 
-export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization');
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return new Response('No autorizado', { status: 401 });
-  }
-
+export async function triggerBirthdayEmails() {
   try {
-    const { data: configRows } = await supabase.from('config').select('*');
+    const { data: configRows } = await supabaseAdmin.from('config').select('*');
     const config = configRows?.reduce((acc: any, item: any) => {
       acc[item.clave] = item.valor;
       return acc;
@@ -24,22 +18,19 @@ export async function GET(request: Request) {
 
     const target = getEcuadorMonthDay();
 
-    const { data: clientes } = await supabase.from('clientes').select('nombre, email, fecha_nacimiento');
-    
-    // Filtrar solo los que cumplen años HOY
+    const { data: clientes } = await supabaseAdmin.from('clientes').select('nombre, email, fecha_nacimiento');
     const cumpleaneros = clientes?.filter(c => c.fecha_nacimiento?.endsWith(target)) || [];
 
     if (cumpleaneros.length === 0) {
-      return NextResponse.json({ message: 'No hay cumpleaños hoy' });
+      return { success: false, message: 'No hay cumpleaños hoy para enviar.' };
     }
 
-    // Usar las nuevas llaves de configuración del Marketing Hub
     const subject = config.birthday_email_subject || '¡Feliz Cumpleaños! 🥂';
     const body = config.birthday_email_body || 'Hola {nombre}, te deseamos lo mejor en tu día.';
     const rawImageUrl = config.birthday_image_url || '';
     const imageUrl = await resolveUnsplashUrl(rawImageUrl);
 
-    const results = await Promise.all(cumpleaneros.map(cliente => 
+    await Promise.all(cumpleaneros.map(cliente => 
       resend.emails.send({
         from: 'La Travesía <onboarding@resend.dev>',
         to: [cliente.email],
@@ -67,8 +58,8 @@ export async function GET(request: Request) {
       })
     ));
 
-    return NextResponse.json({ success: true, sent_to: cumpleaneros.length });
+    return { success: true, message: `Regalos enviados a ${cumpleaneros.length} cumpleañeros.` };
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return { success: false, message: error.message };
   }
 }

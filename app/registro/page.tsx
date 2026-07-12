@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getAllConfig } from '@/app/actions/public';
+import { checkPhoneExists, checkEmailExists, registerNewClient } from '@/app/actions/registro';
+import { useRouter } from 'next/navigation';
 import {
   CheckCircle2, ChevronRight, Loader2, ArrowRight,
   Smartphone, Instagram, Facebook, Music2,
 } from 'lucide-react';
 import Ruleta from '@/components/Ruleta';
-import { useRouter } from 'next/navigation';
 import { sendNotification } from '@/app/actions/notifications';
 import Image from 'next/image';
 
@@ -116,9 +117,8 @@ export default function RegistroPage() {
     async function init() {
       const savedId = localStorage.getItem('travesia_cliente_id');
       if (savedId) {
-        const { data } = await supabase.from('clientes').select('id').eq('id', savedId).maybeSingle();
-        if (data) { router.replace('/checkin'); return; }
-        localStorage.removeItem('travesia_cliente_id');
+        // If there's an ID, just redirect to checkin, checking existence isn't strictly needed for UI routing.
+        router.replace('/checkin'); return;
       }
       await fetchConfig();
       setLoading(false);
@@ -127,10 +127,7 @@ export default function RegistroPage() {
   }, [router]);
 
   async function fetchConfig() {
-    const { data } = await supabase.from('config').select('clave, valor');
-    if (!data) return;
-    const m: Record<string, string> = {};
-    data.forEach(({ clave, valor }) => { if (valor) m[clave] = valor; });
+    const m = await getAllConfig();
     setSocialLinks({
       instagram: m['instagram_link'] || m['link_instagram'] || '',
       facebook: m['facebook_link'] || m['link_facebook'] || '',
@@ -166,25 +163,26 @@ export default function RegistroPage() {
 
     try {
       const numLimpio = formData.telefono.replace(/^0/, '').replace(/\s+/g, '');
-      const tel = `${countryCode}${numLimpio}`;
+      const localPhone = countryCode === '+593' ? `0${numLimpio}` : numLimpio;
+      const fullPhone = `${countryCode}${localPhone}`;
       
-      let { data: existing } = await supabase
-        .from('clientes').select('id').eq('telefono', tel).limit(1).maybeSingle();
-
-      if (!existing && numLimpio.length >= 9) {
-        const localPart = numLimpio.slice(-9);
-        const { data: fallbackData } = await supabase
-          .from('clientes').select('id').like('telefono', `%${localPart}%`).limit(1).maybeSingle();
-        existing = fallbackData;
-      }
+      const { exists: phoneExists } = await checkPhoneExists(countryCode, localPhone);
       
-      if (existing) {
-        setFormError('Este número ya está registrado. Ve a Registrar Visita.');
+      if (phoneExists) {
+        setFormError('Este número de teléfono ya está registrado. Ve a Registrar Visita.');
         setFormLoading(false);
         return;
       }
-      setTelefonoFinal(tel);
-      setStep('social');
+
+      const { exists: emailExists } = await checkEmailExists(formData.email);
+      if (emailExists) {
+        setFormError('Este correo electrónico ya está registrado. Ve a Registrar Visita o usa otro correo.');
+        setFormLoading(false);
+        return;
+      }
+
+      setTelefonoFinal(fullPhone);
+      setStep('game');
     } catch (error: any) {
       setFormError(error?.message || 'Error al verificar. Intenta de nuevo.');
     } finally {
@@ -196,16 +194,16 @@ export default function RegistroPage() {
     setSaveLoading(true);
     try {
       const { joinWhatsApp, ...dbData } = formData;
-      const hoy = new Date().toISOString().split('T')[0];
-      const { data, error } = await supabase
-        .from('clientes')
-        .insert([{ ...dbData, telefono: telefonoFinal, total_visitas: 1, visitas: 1, fecha_ultima_visita: hoy }])
-        .select().single();
-      if (error) throw error;
-      await supabase.from('visitas').insert([{ cliente_id: data.id, fecha: hoy, premio_ganado: premio }]);
-      localStorage.setItem('travesia_cliente_id', data.id);
-      localStorage.setItem('travesia_phone', telefonoFinal);
-      sendNotification('BIRTHDAY_WELCOME', data).catch(console.error);
+      const numLimpio = formData.telefono.replace(/^0/, '').replace(/\s+/g, '');
+      const localPhone = countryCode === '+593' ? `0${numLimpio}` : numLimpio;
+      const fullPhone = `${countryCode}${localPhone}`;
+
+      const res = await registerNewClient(dbData, countryCode, localPhone, premio);
+      
+      if (!res.success) throw new Error(res.error);
+      
+      localStorage.setItem('travesia_cliente_id', res.data.id);
+      localStorage.setItem('travesia_phone', fullPhone);
       setPremioFinal(premio);
       setStep('success');
     } catch (err: any) {
@@ -460,7 +458,7 @@ export default function RegistroPage() {
               ¡Ganaste!
             </h1>
             <p className="text-[17px] text-[#636366] mt-2 mb-8">
-              ¡Bienvenido! Ya eres parte del club de La Travesía
+              ¡Bienvenido! Para reclamar tu premio debes unirte a nuestro grupo de WhatsApp
             </p>
 
             <div className="w-full bg-white border border-[#E5E5EA] rounded-3xl p-6 mb-6 shadow-sm">

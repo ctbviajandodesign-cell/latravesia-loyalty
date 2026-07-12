@@ -15,8 +15,9 @@ async function loadConfig(): Promise<ConfigMap> {
 }
 
 export async function sendNotification(
-  type: 'BIRTHDAY_WELCOME' | 'LOYALTY_REWARD',
-  cliente: Partial<Cliente>
+  type: 'BIRTHDAY_WELCOME' | 'LOYALTY_REWARD' | 'VISIT_PROGRESS',
+  cliente: Partial<Cliente>,
+  meta?: number
 ) {
   try {
     const config = await loadConfig();
@@ -95,6 +96,40 @@ export async function sendNotification(
           `,
         });
       }
+    }
+
+    if (type === 'VISIT_PROGRESS') {
+      // Usamos la misma foto de bienvenida o una por defecto
+      const rawImage = config.welcome_image_url || config.email_foto_url || '';
+      const resolvedImage = await resolveUnsplashUrl(rawImage);
+      const faltan = (meta || 10) - (cliente.total_visitas || 0);
+
+      await resend.emails.send({
+        from: 'La Travesía <onboarding@resend.dev>',
+        to: [cliente.email!],
+        subject: `¡Sigue así! Llevas ${cliente.total_visitas} visitas`,
+        html: `
+          <div style="font-family: serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 20px; overflow: hidden; text-align: center; background-color: #ffffff;">
+            ${resolvedImage ? `<img src="${resolvedImage}" style="width: 100%; height: auto; display: block;" />` : ''}
+            <div style="padding: 40px;">
+              <h1 style="color: #4A5D4E; font-size: 26px;">¡Hola ${cliente.nombre}!</h1>
+              <p style="font-size: 18px; color: #666; line-height: 1.6;">
+                Gracias por visitarnos. Llevas <b>${cliente.total_visitas} de ${meta || 10}</b> visitas en tu tarjeta de fidelidad.
+              </p>
+              <p style="font-size: 18px; color: #D4AF37; font-weight: bold; margin-top: 15px;">
+                ¡Solo te faltan ${faltan} visitas para tu premio gratis!
+              </p>
+              <div style="margin-top: 40px;">
+                <a href="${waBase}?text=Hola, acabo de registrar mi visita y deseo consultar el premio final"
+                   style="background-color: #D4AF37; color: #ffffff; padding: 18px 35px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 14px; letter-spacing: 2px;">
+                  VER PREMIO FINAL
+                </a>
+              </div>
+              <p style="margin-top: 30px; font-size: 12px; color: #999;">Hostería La Travesía</p>
+            </div>
+          </div>
+        `,
+      });
     }
   } catch {
     // Silencia errores de email para no bloquear el flujo del cliente

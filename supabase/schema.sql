@@ -88,3 +88,21 @@ insert into config (clave, valor) values
   ('loyalty_email_body', 'Hola {nombre}, has completado tus visitas. ¡Ven a reclamar tu premio exclusivo!'),
   ('loyalty_image_url', ''),
   ('premio_visitas', 'Menú completo gratis');
+
+-- ============================================================
+-- SEGURIDAD (RLS)
+-- ============================================================
+alter table config enable row level security;
+alter table clientes enable row level security;
+alter table ruletas enable row level security;
+alter table premios enable row level security;
+alter table visitas enable row level security;
+
+-- Politicas Públicas de Lectura (Configuración y Ruletas)
+create policy "Config es publica para leer" on config for select using (true);
+create policy "Ruletas son publicas para leer" on ruletas for select using (true);
+create policy "Premios son publicos para leer" on premios for select using (true);
+
+-- Nota: clientes y visitas no tienen políticas públicas, 
+-- todo el acceso desde el frontend debe realizarse mediante Server Actions 
+-- (que usan Service Role Key y bypassean el RLS).

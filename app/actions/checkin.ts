@@ -3,27 +3,27 @@
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { getCurrentDailyCode } from './daily-code';
 import { sendNotification } from './notifications';
+import { getEcuadorDateString } from '@/lib/date';
 
-export async function findClientByPhone(telefono: string) {
-  const cleanPhone = telefono.replace(/\s+/g, '');
-
+export async function findClientByPhone(countryCode: string, localPhone: string) {
   // 1. Try exact match
   const response = await supabaseAdmin
     .from('clientes')
     .select('id, nombre, apellido, total_visitas, fecha_ultima_visita')
-    .eq('telefono', cleanPhone)
+    .eq('codigo_pais', countryCode)
+    .eq('telefono', localPhone)
     .limit(1)
     .maybeSingle();
     
   let data = response.data;
 
   // 2. If not found, try matching the local part (last 9 digits)
-  if (!data && cleanPhone.length >= 9) {
-    const localPart = cleanPhone.slice(-9);
+  if (!data && localPhone.length >= 9) {
+    const fallbackLocal = localPhone.slice(-9);
     const { data: fallbackData } = await supabaseAdmin
       .from('clientes')
       .select('id, nombre, apellido, total_visitas, fecha_ultima_visita')
-      .like('telefono', `%${localPart}%`)
+      .like('telefono', `%${fallbackLocal}%`)
       .limit(1)
       .maybeSingle();
     
@@ -38,7 +38,7 @@ export async function findClientByPhone(telefono: string) {
 }
 
 export async function validateCheckin(clienteId: string, code: string) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getEcuadorDateString();
 
   const currentCode = await getCurrentDailyCode();
   if (code.trim() !== currentCode.trim()) {
@@ -83,9 +83,11 @@ export async function validateCheckin(clienteId: string, code: string) {
 
   if (nuevasVisitas === meta) {
     sendNotification('LOYALTY_REWARD', { ...cliente, total_visitas: nuevasVisitas }).catch(console.error);
+  } else if (nuevasVisitas > 1 && nuevasVisitas < meta) {
+    sendNotification('VISIT_PROGRESS', { ...cliente, total_visitas: nuevasVisitas }, meta).catch(console.error);
   }
 
-  const showReview = nuevasVisitas === 1 || nuevasVisitas === 5 || nuevasVisitas === meta;
+  const showReview = nuevasVisitas === 3;
 
   return {
     success: true,
